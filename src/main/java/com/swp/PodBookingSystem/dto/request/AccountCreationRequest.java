@@ -1,4 +1,6 @@
 package com.swp.PodBookingSystem.dto.request;
+
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -8,6 +10,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AccountCreationRequest {
+    @Size(min = 5, message = "NAME_INVALID")
     String name;
     String email;
     String password;

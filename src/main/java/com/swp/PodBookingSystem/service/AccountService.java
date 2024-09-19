@@ -1,6 +1,7 @@
 package com.swp.PodBookingSystem.service;
 
 import com.swp.PodBookingSystem.dto.request.AccountCreationRequest;
+import com.swp.PodBookingSystem.dto.respone.AccountResponse;
 import com.swp.PodBookingSystem.entity.Account;
 import com.swp.PodBookingSystem.mapper.AccountMapper;
 import com.swp.PodBookingSystem.repository.AccountRepository;
@@ -15,15 +16,15 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AccountService {
-    private AccountRepository accountRepository;
+    AccountRepository accountRepository;
     AccountMapper accountMapper;
 
-    public Account createAccount(AccountCreationRequest request) {
+    public AccountResponse createAccount(AccountCreationRequest request) {
         Account account = accountMapper.toAccount(request);
-        return accountRepository.save(account);
+        return accountMapper.toAccountResponse(accountRepository.save(account));
     }
 
-    public List<Account> getAccounts(){
+    public List<Account> getAccounts() {
         return accountRepository.findAll();
     }
 }
