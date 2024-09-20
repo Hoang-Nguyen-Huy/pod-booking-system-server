@@ -28,7 +28,7 @@ public class Account {
     int point;
     AccountRole role;
     double balance;
-
+  
     @Column(name = "buildingNumber")
     int buildingNumber;
 
@@ -36,6 +36,7 @@ public class Account {
     String rankingName;
 
     @Column(name = "createdAt")
+
     LocalDate createdAt;
 
 }
