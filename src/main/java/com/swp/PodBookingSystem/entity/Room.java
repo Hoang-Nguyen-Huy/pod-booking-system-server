@@ -1,5 +1,6 @@
 package com.swp.PodBookingSystem.entity;
 
+import com.swp.PodBookingSystem.enums.RoomStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -23,10 +24,12 @@ public class Room {
     String name;
     int price;
     String description;
+
+    @Column(nullable = true)
     String image;
 
     @Value("${status:Available}")
-    String status;
+    RoomStatus status;
 
     @Column(name = "createdAt")
     LocalDate createdAt;

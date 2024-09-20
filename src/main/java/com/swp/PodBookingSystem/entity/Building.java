@@ -1,6 +1,6 @@
 package com.swp.PodBookingSystem.entity;
 
-import com.swp.PodBookingSystem.enums.Building.BuildingStatus;
+import com.swp.PodBookingSystem.enums.BuildingStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;

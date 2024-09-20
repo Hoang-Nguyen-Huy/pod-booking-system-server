@@ -1,4 +1,4 @@
-package com.swp.PodBookingSystem.enums.Building;
+package com.swp.PodBookingSystem.enums;
 
 public enum BuildingStatus {
     Active,
