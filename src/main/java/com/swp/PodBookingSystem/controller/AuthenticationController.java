@@ -6,6 +6,7 @@ import com.swp.PodBookingSystem.dto.request.AuthenticationRequest;
 import com.swp.PodBookingSystem.dto.request.IntrospectRequest;
 import com.swp.PodBookingSystem.dto.respone.AuthenticationResponse;
 import com.swp.PodBookingSystem.dto.respone.IntrospectResponse;
+
 import com.swp.PodBookingSystem.service.AuthenticationService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import java.text.ParseException;
 
 @RestController
@@ -36,6 +36,11 @@ public class AuthenticationController {
         var result = authenticationService.introspect(request);
         return ApiResponse.<IntrospectResponse>builder()
                 .data(result)
+        boolean result = authenticationService.authenticate(request);
+        return ApiResponse.<AuthenticationResponse>builder()
+                .data(AuthenticationResponse.builder()
+                        .authenticated(result)
+                        .build())
                 .build();
     }
 }

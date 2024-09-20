@@ -16,4 +16,3 @@ public class AccountCreationRequest {
     String password;
 }
 
-

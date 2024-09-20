@@ -1,6 +1,5 @@
 package com.swp.PodBookingSystem.service;
 
-
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -23,7 +22,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -94,5 +92,6 @@ public class AuthenticationService {
             log.error("Cannot create token", e);
             throw new RuntimeException(e);
         }
+
     }
 }
