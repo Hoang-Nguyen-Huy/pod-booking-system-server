@@ -34,4 +34,5 @@ public class Room {
     @Column(name = "updatedAt")
     LocalDate updatedAt;
     int typeId;
+
 }
