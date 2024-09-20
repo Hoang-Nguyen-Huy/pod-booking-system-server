@@ -8,6 +8,8 @@ import com.swp.PodBookingSystem.repository.AccountRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,6 +23,8 @@ public class AccountService {
 
     public AccountResponse createAccount(AccountCreationRequest request) {
         Account account = accountMapper.toAccount(request);
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+        account.setPassword(passwordEncoder.encode(account.getPassword()));
         return accountMapper.toAccountResponse(accountRepository.save(account));
     }
 
