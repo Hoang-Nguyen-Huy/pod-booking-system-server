@@ -22,13 +22,15 @@ public class AccountController {
 
     @PostMapping
     ApiResponse<AccountResponse> createAccount(@RequestBody @Valid AccountCreationRequest request) {
-        ApiResponse<AccountResponse> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(accountService.createAccount(request));
-        return apiResponse;
+        return ApiResponse.<AccountResponse>builder()
+                .data(accountService.createAccount(request))
+                .build();
     }
 
     @GetMapping
-    List<Account> getAccounts() {
-        return accountService.getAccounts();
+    ApiResponse<List<Account>> getAccounts() {
+        return ApiResponse.<List<Account>>builder()
+                .data(accountService.getAccounts())
+                .build();
     }
 }
