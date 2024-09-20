@@ -15,3 +15,4 @@ public class AccountCreationRequest {
     String email;
     String password;
 }
+

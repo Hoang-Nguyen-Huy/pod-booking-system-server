@@ -15,6 +15,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
+@Table(name = "account")
 public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -27,8 +28,15 @@ public class Account {
     int point;
     AccountRole role;
     double balance;
+  
+    @Column(name = "buildingNumber")
     int buildingNumber;
+
+    @Column(name = "rankingName")
     String rankingName;
+
+    @Column(name = "createdAt")
+
     LocalDate createdAt;
 
 }
