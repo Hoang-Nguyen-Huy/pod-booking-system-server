@@ -1,11 +1,12 @@
 package com.swp.PodBookingSystem.entity;
 
+import com.swp.PodBookingSystem.enums.Building.BuildingStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,19 +15,18 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "room")
-public class Room {
+@Table(name = "building")
+public class Building {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
-    String name;
-    int price;
+    BuildingStatus status;
+    String address;
     String description;
-    String image;
 
-    @Value("${status:Available}")
-    String status;
+    @Column(name = "hotlineNumber")
+    String hotlineNumber;
 
     @Column(name = "createdAt")
     LocalDate createdAt;
@@ -34,7 +34,6 @@ public class Room {
     @Column(name = "updatedAt")
     LocalDate updatedAt;
 
-    @ManyToOne
-    @JoinColumn(name = "typeId", nullable = true)
-    RoomType roomType;
+    @OneToMany(mappedBy = "building", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    List<RoomType> roomTypes;
 }
