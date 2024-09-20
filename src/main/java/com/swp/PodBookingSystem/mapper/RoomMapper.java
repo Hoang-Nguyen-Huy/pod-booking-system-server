@@ -14,17 +14,5 @@ import java.util.Optional;
 public interface RoomMapper {
     RoomResponse toRoomResponse(Room room);
 
-    @Named("mapOptionalStringToString")
-    default String mapString(Optional<String> value) {
-        return value.orElse(null);
-    }
-
-    @Named("mapOptionalStringToRoomStatus")
-    default RoomStatus mapRoomStatus(Optional<String> value) {
-        return value.map(RoomStatus::valueOf).orElse(null);
-    }
-
-    @Mapping(source = "image", target = "image", qualifiedByName = "mapOptionalStringToString")
-    @Mapping(source = "status", target = "status", qualifiedByName = "mapOptionalStringToRoomStatus")
     Room toRoom(RoomCreationRequest request);
 }

@@ -14,7 +14,7 @@ public class RoomCreationRequest {
     String name;
     int price;
     String description;
-    Optional<String> image;
-    Optional<String> status;
-    Optional<Integer> roomTypeId;
+    String image;
+    String status;
+    Integer roomTypeId;
 }

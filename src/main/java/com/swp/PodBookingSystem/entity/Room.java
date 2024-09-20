@@ -28,7 +28,6 @@ public class Room {
     @Column(nullable = true)
     String image;
 
-    @Value("${status:Available}")
     RoomStatus status;
 
     @Column(name = "createdAt")
@@ -40,4 +39,18 @@ public class Room {
     @ManyToOne
     @JoinColumn(name = "typeId", nullable = true)
     RoomType roomType;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDate.now();
+        this.updatedAt = LocalDate.now();
+        if (this.status == null) {
+            this.status = RoomStatus.Available;
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDate.now();
+    }
 }
