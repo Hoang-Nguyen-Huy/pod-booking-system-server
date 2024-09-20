@@ -27,6 +27,7 @@ public class RoomService {
         return roomMapper.toRoomResponse(roomRepository.save(newRoom));
     }
 
+    // Just for test
     public List<Room> getRooms () {
         return roomRepository.findAll();
     }
