@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.text.ParseException;
 
 @RestController
@@ -35,12 +36,6 @@ public class AuthenticationController {
             throws ParseException, JOSEException {
         var result = authenticationService.introspect(request);
         return ApiResponse.<IntrospectResponse>builder()
-                .data(result)
-        boolean result = authenticationService.authenticate(request);
-        return ApiResponse.<AuthenticationResponse>builder()
-                .data(AuthenticationResponse.builder()
-                        .authenticated(result)
-                        .build())
-                .build();
+                .data(result).build();
     }
 }
