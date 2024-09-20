@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${PORT}
   servlet:
     context-path: /pod
 
@@ -11,4 +11,12 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     show-sql: true
+
+jwt:
+  JWT_SECRET_ACCESS_TOKEN: "1TjXchw5FloESb63Kc+DFhTARvpWL4jUGCwfGWxuG5SIf/1y/LgJxHnMqaF6A/ij"
+  JWT_SECRET_REFRESH_TOKEN: "gtg4iEntJvIJyGwAPAtXOjldMKr22N282r45QuvT6CCKLIgCI5ObnlYagT/VFE2K"
+
