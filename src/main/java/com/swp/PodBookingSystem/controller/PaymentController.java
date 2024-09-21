@@ -80,7 +80,7 @@ public class PaymentController {
         return ResponseEntity.status(HttpStatus.OK).body(paymentResDTO);
     }
 
-    @GetMapping("/infor")
+    @GetMapping("/info")
     public ResponseEntity<?> transaction(
         @RequestParam(value = "vnp_Amount") String amount,
         @RequestParam(value = "vnp_BankCode") String bankCode,

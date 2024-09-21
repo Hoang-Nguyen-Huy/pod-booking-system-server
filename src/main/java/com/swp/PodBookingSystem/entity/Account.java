@@ -29,6 +29,7 @@ public class Account {
 
     @Enumerated(EnumType.STRING)
     AccountRole role;
+    
     double balance;
 
     @Column(name = "buildingNumber")
