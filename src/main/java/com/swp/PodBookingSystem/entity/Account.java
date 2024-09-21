@@ -26,9 +26,11 @@ public class Account {
     String password;
     String avatar;
     int point;
+
+    @Enumerated(EnumType.STRING)
     AccountRole role;
     double balance;
-  
+
     @Column(name = "buildingNumber")
     int buildingNumber;
 
