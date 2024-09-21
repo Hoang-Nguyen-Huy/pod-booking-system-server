@@ -1,5 +1,6 @@
 package com.swp.PodBookingSystem.dto.request.Room;
 
+import com.swp.PodBookingSystem.enums.RoomStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -15,6 +16,6 @@ public class RoomCreationRequest {
     int price;
     String description;
     String image;
-    String status;
+    RoomStatus status;
     Integer roomTypeId;
 }

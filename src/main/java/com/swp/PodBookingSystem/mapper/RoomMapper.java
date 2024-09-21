@@ -14,5 +14,11 @@ import java.util.Optional;
 public interface RoomMapper {
     RoomResponse toRoomResponse(Room room);
 
+    @Mapping(source = "status", target = "status", qualifiedByName = "stringToRoomStatus")
     Room toRoom(RoomCreationRequest request);
+
+    @Named("stringToRoomStatus")
+    default RoomStatus stringToRoomStatus(String status) {
+        return RoomStatus.valueOf(status);
+    }
 }

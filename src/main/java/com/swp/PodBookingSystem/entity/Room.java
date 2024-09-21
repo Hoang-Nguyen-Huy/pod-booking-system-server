@@ -28,6 +28,7 @@ public class Room {
     @Column(nullable = true)
     String image;
 
+    @Enumerated(EnumType.STRING)
     RoomStatus status;
 
     @Column(name = "createdAt")
