@@ -11,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,5 +31,9 @@ public class RoomService {
     // Just for test
     public List<Room> getRooms () {
         return roomRepository.findAll();
+    }
+
+    public Optional<RoomResponse> getRoomById(int roomId) {
+        return roomMapper.toRoomResponse(roomRepository.findById(roomId));
     }
 }
