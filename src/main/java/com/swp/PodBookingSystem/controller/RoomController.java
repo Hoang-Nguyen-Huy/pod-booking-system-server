@@ -11,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/rooms")
@@ -27,5 +28,10 @@ public class RoomController {
     @GetMapping
     ApiResponse<List<Room>> getRooms() {
         return ApiResponse.<List<Room>>builder().data(roomService.getRooms()).build();
+    }
+
+    @GetMapping("/{roomId}")
+    ApiResponse<Optional<RoomResponse>> getRoomById(@PathVariable("roomId") int roomId) {
+        return ApiResponse.<Optional<RoomResponse>>builder().data(roomService.getRoomById(roomId)).build();
     }
 }

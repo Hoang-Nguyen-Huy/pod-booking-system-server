@@ -12,7 +12,16 @@ import java.util.Optional;
 
 @Mapper(componentModel = "spring")
 public interface RoomMapper {
+    default Optional<RoomResponse> toRoomResponse(Optional<Room> roomOptional) {
+        return roomOptional.map(this::toRoomResponse);
+    }
     RoomResponse toRoomResponse(Room room);
 
+    @Mapping(source = "status", target = "status", qualifiedByName = "stringToRoomStatus")
     Room toRoom(RoomCreationRequest request);
+
+    @Named("stringToRoomStatus")
+    default RoomStatus stringToRoomStatus(String status) {
+        return RoomStatus.valueOf(status);
+    }
 }
