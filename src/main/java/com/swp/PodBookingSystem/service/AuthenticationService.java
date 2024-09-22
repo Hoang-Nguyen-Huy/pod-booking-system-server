@@ -91,6 +91,6 @@ public class AuthenticationService {
             log.error("Cannot create token", e);
             throw new RuntimeException(e);
         }
-
     }
+
 }
