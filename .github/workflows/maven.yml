@@ -27,15 +27,7 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
-        
-    - name: Set up secret file
-      env:
-        DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-        DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
-      run: |
-        echo "Database Password Length: ${#DATABASE_PASSWORD}"
-        echo "Database Username Length: ${#DATABASE_USERNAME}"
-
+      
     - name: Build with Maven
       run: mvn -B package --file pom.xml
     - name: Display surefire test report
@@ -54,7 +46,7 @@ jobs:
           echo "" >> src/main/resources/application.yaml
           echo "spring:" >> src/main/resources/application.yaml
           echo "  datasource:" >> src/main/resources/application.yaml
-          echo "    url: \"${{ secrets.ATABASE_URL }}\"" >> src/main/resources/application.yaml
+          echo "    url: \"${{ secrets.DATABASE_URL }}\"" >> src/main/resources/application.yaml
           echo "    username: \"${{ secrets.DATABASE_USERNAME }}\"" >> src/main/resources/application.yaml
           echo "    password: \"${{ secrets.DATABASE_PASSWORD }}\"" >> src/main/resources/application.yaml
           echo "    driver-class-name: com.mysql.cj.jdbc.Driver" >> src/main/resources/application.yaml
