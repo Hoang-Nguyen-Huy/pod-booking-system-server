@@ -27,11 +27,21 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
-    - name: Print environment variables
+
+    - name: Set environment variables
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+        DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+        JWT_SECRET_ACCESS_TOKEN: ${{secrets.JWT_SECRET_ACCESS_TOKEN}}
+        JWT_SECRET_REFRESH_TOKEN: ${{secrets.JWT_SECRET_REFRESH_TOKEN}}
       run: |
-        echo "DATABASE_URL: ${secrets.DATABASE_URL}"
-        echo "DATABASE_USERNAME: ${secrets.DATABASE_USERNAME}"
-        echo "DATABASE_PASSWORD: ${secrets.DATABASE_PASSWORD}"
+        echo "DATABASE_URL: ${DATABASE_URL}"
+        echo "DATABASE_USERNAME: ${DATABASE_USERNAME}"
+        echo "DATABASE_PASSWORD: ${DATABASE_PASSWORD}"
+        echo "JWT_SECRET_ACCESS_TOKEN": ${{JWT_SECRET_ACCESS_TOKEN}}
+        echo "JWT_SECRET_REFRESH_TOKEN": ${{JWT_SECRET_REFRESH_TOKEN}}
+        
     - name: Build with Maven
       run: mvn -B package --file pom.xml
     - name: Display surefire test report
