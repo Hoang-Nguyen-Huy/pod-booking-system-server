@@ -6,6 +6,7 @@ import com.swp.PodBookingSystem.entity.Room;
 import com.swp.PodBookingSystem.enums.RoomStatus;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 
 import java.util.Optional;
@@ -19,6 +20,9 @@ public interface RoomMapper {
 
     @Mapping(source = "status", target = "status", qualifiedByName = "stringToRoomStatus")
     Room toRoom(RoomCreationRequest request);
+
+    @Mapping(target = "id", ignore = true)
+    Room toUpdatedRoom(RoomCreationRequest request, @MappingTarget Room room);
 
     @Named("stringToRoomStatus")
     default RoomStatus stringToRoomStatus(String status) {

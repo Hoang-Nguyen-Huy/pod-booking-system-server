@@ -13,7 +13,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -31,13 +30,35 @@ public class RoomService {
         return roomMapper.toRoomResponse(roomRepository.save(newRoom));
     }
 
-    // Just for test
+    /*
+    [GET]: /rooms/page&take
+     */
     public Page<Room> getRooms(int page, int take) {
         Pageable pageable = PageRequest.of(page - 1, take);
         return roomRepository.findAll(pageable);
     }
 
+    /*
+    [GET]: /rooms/roomId
+     */
     public Optional<RoomResponse> getRoomById(int roomId) {
         return roomMapper.toRoomResponse(roomRepository.findById(roomId));
+    }
+
+    /*
+    [PUT]: /rooms/roomId
+     */
+    public RoomResponse updateRoom(int roomId, RoomCreationRequest request) {
+        Optional<Room> existingRoom = roomRepository.findById((roomId));
+        Room updatedRoom = roomMapper.toUpdatedRoom(request, existingRoom.orElse(null));
+        return roomMapper.toRoomResponse(roomRepository.save(updatedRoom));
+    }
+
+    /*
+    [DELETE]: /rooms/roomId
+     */
+    public String deleteRoom(int roomId) {
+        roomRepository.deleteById(roomId);
+        return "Delete room " + roomId + " successfully";
     }
 }
