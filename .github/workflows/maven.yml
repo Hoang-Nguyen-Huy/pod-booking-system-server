@@ -27,15 +27,8 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
-      
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
-    - name: Display surefire test report
-      run: cat target/surefire-reports/*.txt
-    - name: Build with Maven (debug)
-      run: ./mvnw clean install -X
-
-     # Generate application.yml from environment variables
+        
+    # Generate application.yml from environment variables
     - name: Generate application.yml
       run: |
           mkdir -p src/main/resources
@@ -61,6 +54,13 @@ jobs:
           echo "jwt:" >> src/main/resources/application.yaml
           echo "  JWT_SECRET_ACCESS_TOKEN: \"${{ secrets.JWT_SECRET_ACCESS_TOKEN }}\"" >> src/main/resources/application.yaml
           echo "  JWT_SECRET_REFRESH_TOKEN: \"${{ secrets.JWT_SECRET_REFRESH_TOKEN }}\"" >> src/main/resources/application.yaml
+      
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+    - name: Display surefire test report
+      run: cat target/surefire-reports/*.txt
+    - name: Build with Maven (debug)
+      run: ./mvnw clean install -X
           
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: Update dependency graph
