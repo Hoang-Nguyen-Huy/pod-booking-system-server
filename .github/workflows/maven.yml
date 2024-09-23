@@ -35,13 +35,6 @@ jobs:
         DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
         JWT_SECRET_ACCESS_TOKEN: ${{secrets.JWT_SECRET_ACCESS_TOKEN}}
         JWT_SECRET_REFRESH_TOKEN: ${{secrets.JWT_SECRET_REFRESH_TOKEN}}
-      run: |
-        echo "DATABASE_URL: ${DATABASE_URL}"
-        echo "DATABASE_USERNAME: ${DATABASE_USERNAME}"
-        echo "DATABASE_PASSWORD: ${DATABASE_PASSWORD}"
-        echo "JWT_SECRET_ACCESS_TOKEN": ${{JWT_SECRET_ACCESS_TOKEN}}
-        echo "JWT_SECRET_REFRESH_TOKEN": ${{JWT_SECRET_REFRESH_TOKEN}}
-        
     - name: Build with Maven
       run: mvn -B package --file pom.xml
     - name: Display surefire test report
@@ -60,9 +53,9 @@ jobs:
           echo "" >> src/main/resources/application.yml
           echo "spring:" >> src/main/resources/application.yml
           echo "  datasource:" >> src/main/resources/application.yml
-          echo "    url: \"${{ secrets.DATABASE_URL }}\"" >> src/main/resources/application.yml
-          echo "    username: \"${{ secrets.DATABASE_USERNAME }}\"" >> src/main/resources/application.yml
-          echo "    password: \"${{ secrets.DATABASE_PASSWORD }}\"" >> src/main/resources/application.yml
+          echo "    url: \"${{ DATABASE_URL }}\"" >> src/main/resources/application.yml
+          echo "    username: \"${{ DATABASE_USERNAME }}\"" >> src/main/resources/application.yml
+          echo "    password: \"${{ DATABASE_PASSWORD }}\"" >> src/main/resources/application.yml
           echo "  jpa:" >> src/main/resources/application.yml
           echo "    hibernate:" >> src/main/resources/application.yml
           echo "      ddl-auto: update" >> src/main/resources/application.yml
@@ -72,8 +65,8 @@ jobs:
           echo "    show-sql: true" >> src/main/resources/application.yml
           echo "" >> src/main/resources/application.yml
           echo "jwt:" >> src/main/resources/application.yml
-          echo "  JWT_SECRET_ACCESS_TOKEN: \"${{ secrets.JWT_SECRET_ACCESS_TOKEN }}\"" >> src/main/resources/application.yml
-          echo "  JWT_SECRET_REFRESH_TOKEN: \"${{ secrets.JWT_SECRET_REFRESH_TOKEN }}\"" >> src/main/resources/application.yml
+          echo "  JWT_SECRET_ACCESS_TOKEN: \"${{ JWT_SECRET_ACCESS_TOKEN }}\"" >> src/main/resources/application.yml
+          echo "  JWT_SECRET_REFRESH_TOKEN: \"${{ JWT_SECRET_REFRESH_TOKEN }}\"" >> src/main/resources/application.yml
           
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: Update dependency graph
