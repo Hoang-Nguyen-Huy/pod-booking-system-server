@@ -16,6 +16,7 @@ public enum ErrorCode {
     USER_NOT_EXIST(404, "User not exist", HttpStatus.NOT_FOUND),
     UNAUTHENTICATED(401, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(403, "You do not have permission", HttpStatus.FORBIDDEN),
+    REFRESH_TOKEN_NOT_EXIST(404, "Refresh token not exist", HttpStatus.NOT_FOUND),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
