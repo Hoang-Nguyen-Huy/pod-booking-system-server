@@ -6,6 +6,7 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.swp.PodBookingSystem.dto.request.Authentication.AuthenticationRequest;
+import com.swp.PodBookingSystem.dto.request.Authentication.LogoutRequest;
 import com.swp.PodBookingSystem.dto.request.Authentication.RefreshTokenRequest;
 import com.swp.PodBookingSystem.dto.request.IntrospectRequest;
 import com.swp.PodBookingSystem.dto.respone.AuthenticationResponse;
@@ -88,12 +89,17 @@ public class AuthenticationService {
     }
 
     @Transactional
+    public void logout(LogoutRequest request) throws ParseException {
+        refreshTokenRepository.deleteByToken(request.getRefreshToken());
+    }
+
+    @Transactional
     public RefreshTokenResponse refreshToken(RefreshTokenRequest request) throws JOSEException, ParseException {
         // Kiem tra token co hieu luc khong
         JWSVerifier verifier = new MACVerifier(REFRESH_TOKEN_KEY.getBytes());
-        SignedJWT signedJWT = SignedJWT.parse(request.getRefreshToken());
-        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-        var verified = signedJWT.verify(verifier);
+        SignedJWT decodeRefreshToken = SignedJWT.parse(request.getRefreshToken());
+        Date expiryTime = decodeRefreshToken.getJWTClaimsSet().getExpirationTime();
+        var verified = decodeRefreshToken.verify(verifier);
         if (!(verified && expiryTime.after(new Date()))) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
@@ -104,6 +110,7 @@ public class AuthenticationService {
         // Sign access token và refresh token mới đồng thời xóa refresh token cũ trong db
         var accessToken = generateAccessToken(refreshToken.getAccount());
         var newRefreshToken = generateRefreshToken(refreshToken.getAccount());
+        refreshTokenRepository.save(new RefreshToken(null, newRefreshToken, refreshToken.getAccount(), decodeRefreshToken.getJWTClaimsSet().getIssueTime(), decodeRefreshToken.getJWTClaimsSet().getExpirationTime()));
         refreshTokenRepository.deleteByToken(request.getRefreshToken());
         return RefreshTokenResponse.builder()
                 .accessToken(accessToken)
