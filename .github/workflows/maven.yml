@@ -27,6 +27,15 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
+        
+    - name: Set up secret file
+      env:
+        DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+        DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+      run: |
+        echo "Database Password Length: ${#DATABASE_PASSWORD}"
+        echo "Database Username Length: ${#DATABASE_USERNAME}"
+
     - name: Build with Maven
       run: mvn -B package --file pom.xml
     - name: Display surefire test report
