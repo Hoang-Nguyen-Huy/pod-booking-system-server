@@ -1,9 +1,8 @@
 package com.swp.PodBookingSystem.service;
 
-import com.swp.PodBookingSystem.dto.respone.OrderResponse;
-import com.swp.PodBookingSystem.entity.Account;
+import com.swp.PodBookingSystem.dto.respone.OrderDetailResponse;
 import com.swp.PodBookingSystem.entity.OrderDetail;
-import com.swp.PodBookingSystem.repository.AccountRepository;
+import com.swp.PodBookingSystem.mapper.OrderDetailMapper;
 import com.swp.PodBookingSystem.repository.OrderDetailRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,45 +16,41 @@ public class OrderDetailService {
     private OrderDetailRepository orderDetailRepository;
 
     @Autowired
-    private AccountRepository accountRepository;
+    private OrderDetailMapper orderDetailMapper;
 
-    public List<OrderResponse> getAllOrders() {
+    public List<OrderDetailResponse> getAllOrders() {
         List<OrderDetail> orders = orderDetailRepository.findAll();
         return orders.stream()
-                .map(this::convertToResponse)
+                .map(orderDetailMapper::toOrderDetailResponse)
                 .collect(Collectors.toList());
     }
 
-    public OrderResponse getOrderDetailById(String id) {
-        OrderDetail orderDetail = orderDetailRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("OrderDetail not found"));
-        return convertToResponse(orderDetail);
-    }
 
-    public List<OrderResponse> getOrdersByCustomerId(String customerId) {
+    public List<OrderDetailResponse> getOrdersByCustomerId(String customerId) {
         List<OrderDetail> orderDetails = orderDetailRepository.findByCustomer_Id(customerId);
 
         System.out.println("Orders found for customer " + customerId + ": " + orderDetails.size());
+        for (OrderDetail orderDetail : orderDetails) {
+            System.out.println("Order Detail ID: " + orderDetail.getId());
+            System.out.println("Created At: " + orderDetail.getCreatedAt());
+            System.out.println("Discount Percentage: " + orderDetail.getDiscountPercentage());
+            System.out.println("End Time: " + orderDetail.getEndTime());
+            System.out.println("Price Room: " + orderDetail.getPriceRoom());
+            System.out.println("Start Time: " + orderDetail.getStartTime());
+            System.out.println("Status: " + orderDetail.getStatus());
+            System.out.println("Updated At: " + orderDetail.getUpdatedAt());
+            System.out.println("Building Number: " + orderDetail.getBuilding().getId());
+            System.out.println("Customer ID: " + orderDetail.getCustomerId());
+            System.out.println("Order ID: " + orderDetail.getOrder().getId());
+            System.out.println("Order Handler ID: " + orderDetail.getOrderHandler().getId());
+            System.out.println("Room ID: " + orderDetail.getRoom().getId());
+            System.out.println("Service Package ID: " + orderDetail.getServicePackage().getId());
+            System.out.println("-------------------------------"); // Separator for better readability
+        }
 
         return orderDetails.stream()
-                .map(this::convertToResponse)
+                .map(orderDetailMapper::toOrderDetailResponse) // Use the mapper for conversion
                 .collect(Collectors.toList());
     }
 
-    private OrderResponse convertToResponse(OrderDetail orderDetail) {
-        OrderResponse response = new OrderResponse();
-        response.setId(orderDetail.getId());
-        response.setCustomerId(orderDetail.getCustomer().getId());
-        response.setBuildingId(orderDetail.getBuilding().getId());
-        response.setRoomId(orderDetail.getRoom().getId());
-        response.setOrderId(orderDetail.getOrder().getId());
-        response.setServicePackageId(orderDetail.getServicePackage().getId());
-        response.setOrderHandledId(orderDetail.getOrderHandler().getId());
-        response.setPriceRoom(orderDetail.getPriceRoom());
-        response.setStatus(orderDetail.getStatus());
-        response.setStartTime(orderDetail.getStartTime());
-        response.setEndTime(orderDetail.getEndTime());
-        response.setCreatedAt(orderDetail.getCreatedAt());
-        return response;
-    }
 }

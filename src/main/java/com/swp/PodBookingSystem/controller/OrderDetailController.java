@@ -1,6 +1,6 @@
 package com.swp.PodBookingSystem.controller;
 
-import com.swp.PodBookingSystem.dto.respone.OrderResponse;
+import com.swp.PodBookingSystem.dto.respone.OrderDetailResponse;
 import com.swp.PodBookingSystem.service.OrderDetailService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -25,24 +25,24 @@ public class OrderDetailController {
     private OrderDetailService orderDetailService;
 
     @GetMapping
-    public ApiResponse<List<OrderResponse>> getAllOrders() {
-        List<OrderResponse> orders = orderDetailService.getAllOrders();
+    public ApiResponse<List<OrderDetailResponse>> getAllOrders() {
+        List<OrderDetailResponse> orders = orderDetailService.getAllOrders();
         logOrders(orders);
-        return ApiResponse.<List<OrderResponse>>builder()
+        return ApiResponse.<List<OrderDetailResponse>>builder()
                 .data(orders)
                 .build();
     }
 
     @GetMapping("/{customerId}")
-    public ApiResponse<List<OrderResponse>> getOrdersByCustomerId(@PathVariable String customerId) {
-        List<OrderResponse> orders = orderDetailService.getOrdersByCustomerId(customerId);
+    public ApiResponse<List<OrderDetailResponse>> getOrdersByCustomerId(@PathVariable String customerId) {
+        List<OrderDetailResponse> orders = orderDetailService.getOrdersByCustomerId(customerId);
         logOrders(orders);
-        return ApiResponse.<List<OrderResponse>>builder()
+        return ApiResponse.<List<OrderDetailResponse>>builder()
                 .data(orders)
                 .build();
     }
 
-    private void logOrders(List<OrderResponse> orders) {
+    private void logOrders(List<OrderDetailResponse> orders) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         log.info("Username: {}", authentication.getName());
         log.info("Number of orders retrieved: {}", orders.size());
