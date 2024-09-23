@@ -1,8 +1,5 @@
-package com.swp.PodBookingSystem.dto.request;
+package com.swp.PodBookingSystem.dto.request.Account;
 
-import com.swp.PodBookingSystem.enums.AccountRole;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;

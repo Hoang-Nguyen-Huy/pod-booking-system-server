@@ -1,4 +1,4 @@
-package com.swp.PodBookingSystem.dto.request;
+package com.swp.PodBookingSystem.dto.respone;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AuthenticationRequest {
-    String email;
-    String password;
+public class RefreshTokenResponse {
+    String accessToken;
+    String refreshToken;
 }

@@ -4,8 +4,6 @@ import com.swp.PodBookingSystem.enums.RoomStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.Optional;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

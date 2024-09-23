@@ -1,6 +1,6 @@
 package com.swp.PodBookingSystem.service;
 
-import com.swp.PodBookingSystem.dto.request.AccountCreationRequest;
+import com.swp.PodBookingSystem.dto.request.Account.AccountCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.AccountResponse;
 import com.swp.PodBookingSystem.entity.Account;
 import com.swp.PodBookingSystem.mapper.AccountMapper;
