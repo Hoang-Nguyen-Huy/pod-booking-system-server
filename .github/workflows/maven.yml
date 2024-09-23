@@ -29,6 +29,10 @@ jobs:
         cache: maven
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+    - name: Display surefire test report
+      run: cat target/surefire-reports/*.txt
+    - name: Build with Maven (debug)
+      run: ./mvnw clean install -X
 
      # Generate application.yml from environment variables
     - name: Generate application.yml
