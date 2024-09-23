@@ -8,6 +8,9 @@ import com.swp.PodBookingSystem.repository.RoomRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,8 +32,9 @@ public class RoomService {
     }
 
     // Just for test
-    public List<Room> getRooms () {
-        return roomRepository.findAll();
+    public Page<Room> getRooms(int page, int take) {
+        Pageable pageable = PageRequest.of(page - 1, take);
+        return roomRepository.findAll(pageable);
     }
 
     public Optional<RoomResponse> getRoomById(int roomId) {
