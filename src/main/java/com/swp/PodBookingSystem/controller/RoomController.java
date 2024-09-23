@@ -29,8 +29,8 @@ public class RoomController {
     }
 
     @GetMapping
-    PaginationResponse<List<Room>> getRooms(@RequestParam(defaultValue = "1") int page,
-                                            @RequestParam(defaultValue = "10") int take) {
+    PaginationResponse<List<Room>> getRooms(@RequestParam(defaultValue = "1", name = "page") int page,
+                                            @RequestParam(defaultValue = "10", name = "take") int take) {
         RoomPaginationDTO dto = new RoomPaginationDTO(page, take);
         Page<Room> roomPage = roomService.getRooms(dto.page, dto.take);
 
@@ -46,5 +46,16 @@ public class RoomController {
     @GetMapping("/{roomId}")
     ApiResponse<Optional<RoomResponse>> getRoomById(@PathVariable("roomId") int roomId) {
         return ApiResponse.<Optional<RoomResponse>>builder().data(roomService.getRoomById(roomId)).build();
+    }
+
+    @PutMapping("/{roomId}")
+    ApiResponse<RoomResponse> updateRoom(@PathVariable("roomId") int roomId,
+                                         @RequestBody RoomCreationRequest request) {
+        return ApiResponse.<RoomResponse>builder().data(roomService.updateRoom(roomId, request)).build();
+    }
+
+    @DeleteMapping("/{roomId}")
+    ApiResponse<RoomResponse> deleteRoom(@PathVariable("roomId") int roomId) {
+        return ApiResponse.<RoomResponse>builder().message(roomService.deleteRoom(roomId)).build();
     }
 }
