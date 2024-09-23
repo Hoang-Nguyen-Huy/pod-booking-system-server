@@ -1,6 +1,6 @@
 package com.swp.PodBookingSystem.controller;
 
-import com.swp.PodBookingSystem.dto.request.ApiResponse;
+import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.request.Room.RoomCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.Room.RoomResponse;
 import com.swp.PodBookingSystem.entity.Room;
