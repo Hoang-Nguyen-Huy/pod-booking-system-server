@@ -1,6 +1,6 @@
 package com.swp.PodBookingSystem.exception;
 
-import com.swp.PodBookingSystem.dto.request.ApiResponse;
+import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
