@@ -38,27 +38,28 @@ jobs:
     - name: Generate application.yml
       run: |
           mkdir -p src/main/resources
-          echo "server:" >> src/main/resources/application.yml
-          echo "  port: 8080" >> src/main/resources/application.yml
-          echo "  servlet:" >> src/main/resources/application.yml
-          echo "    context-path: /pod" >> src/main/resources/application.yml
-          echo "" >> src/main/resources/application.yml
-          echo "spring:" >> src/main/resources/application.yml
-          echo "  datasource:" >> src/main/resources/application.yml
-          echo "    url: \"${{ secrets.ATABASE_URL }}\"" >> src/main/resources/application.yml
-          echo "    username: \"${{ secrets.DATABASE_USERNAME }}\"" >> src/main/resources/application.yml
-          echo "    password: \"${{ secrets.DATABASE_PASSWORD }}\"" >> src/main/resources/application.yml
-          echo "  jpa:" >> src/main/resources/application.yml
-          echo "    hibernate:" >> src/main/resources/application.yml
-          echo "      ddl-auto: update" >> src/main/resources/application.yml
-          echo "      naming:" >> src/main/resources/application.yml
-          echo "        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl" >> src/main/resources/application.yml
-          echo "        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl" >> src/main/resources/application.yml
-          echo "    show-sql: true" >> src/main/resources/application.yml
-          echo "" >> src/main/resources/application.yml
-          echo "jwt:" >> src/main/resources/application.yml
-          echo "  JWT_SECRET_ACCESS_TOKEN: \"${{ secrets.JWT_SECRET_ACCESS_TOKEN }}\"" >> src/main/resources/application.yml
-          echo "  JWT_SECRET_REFRESH_TOKEN: \"${{ secrets.JWT_SECRET_REFRESH_TOKEN }}\"" >> src/main/resources/application.yml
+          echo "server:" >> src/main/resources/application.yaml
+          echo "  port: 8080" >> src/main/resources/application.yaml
+          echo "  servlet:" >> src/main/resources/application.yaml
+          echo "    context-path: /pod" >> src/main/resources/application.yaml
+          echo "" >> src/main/resources/application.yaml
+          echo "spring:" >> src/main/resources/application.yaml
+          echo "  datasource:" >> src/main/resources/application.yaml
+          echo "    url: \"${{ secrets.ATABASE_URL }}\"" >> src/main/resources/application.yaml
+          echo "    username: \"${{ secrets.DATABASE_USERNAME }}\"" >> src/main/resources/application.yaml
+          echo "    password: \"${{ secrets.DATABASE_PASSWORD }}\"" >> src/main/resources/application.yaml
+          echo "    driver-class-name: com.mysql.cj.jdbc.Driver" >> src/main/resources/application.yaml
+          echo "  jpa:" >> src/main/resources/application.yaml
+          echo "    hibernate:" >> src/main/resources/application.yaml
+          echo "      ddl-auto: update" >> src/main/resources/application.yaml
+          echo "      naming:" >> src/main/resources/application.yaml
+          echo "        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl" >> src/main/resources/application.yaml
+          echo "        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl" >> src/main/resources/application.yaml
+          echo "    show-sql: true" >> src/main/resources/application.yaml
+          echo "" >> src/main/resources/application.yaml
+          echo "jwt:" >> src/main/resources/application.yaml
+          echo "  JWT_SECRET_ACCESS_TOKEN: \"${{ secrets.JWT_SECRET_ACCESS_TOKEN }}\"" >> src/main/resources/application.yaml
+          echo "  JWT_SECRET_REFRESH_TOKEN: \"${{ secrets.JWT_SECRET_REFRESH_TOKEN }}\"" >> src/main/resources/application.yaml
           
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: Update dependency graph
