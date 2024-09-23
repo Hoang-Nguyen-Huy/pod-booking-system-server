@@ -18,7 +18,8 @@ public class ServicePackage {
 
     @Id
     @Column(name = "id", nullable = false)
-    String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Integer id;
 
     @Column(name = "name")
     String name;
