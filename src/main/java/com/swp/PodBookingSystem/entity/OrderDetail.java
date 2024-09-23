@@ -79,4 +79,9 @@ public class OrderDetail {
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+    public String getCustomerId() {
+        return customer != null ? customer.getId() : null;
+    }
+
 }

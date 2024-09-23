@@ -14,8 +14,8 @@ import lombok.experimental.FieldDefaults;
 @Table(name = "orderDetailAmentity")
 public class OrderDetailAmenity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    String id;
 
     int quantity;
 

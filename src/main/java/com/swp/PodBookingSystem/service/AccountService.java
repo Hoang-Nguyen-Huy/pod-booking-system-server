@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -34,5 +35,10 @@ public class AccountService {
     @PreAuthorize("hasRole('Admin')")
     public List<Account> getAccounts() {
         return accountRepository.findAll();
+    }
+
+    public Account getAccountById(String id) {
+        return accountRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Account not found"));
     }
 }
