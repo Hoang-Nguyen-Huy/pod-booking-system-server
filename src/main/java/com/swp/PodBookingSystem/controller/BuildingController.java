@@ -61,4 +61,11 @@ public class BuildingController {
                 .message("Update building successfully")
                 .build();
     }
+
+    @DeleteMapping("/{buildingId}")
+    ApiResponse<BuildingResponse> deleteBuilding(@PathVariable("buildingId") int buildingId) {
+        return ApiResponse.<BuildingResponse>builder()
+                .message(buildingService.deleteBuilding(buildingId))
+                .build();
+    }
 }

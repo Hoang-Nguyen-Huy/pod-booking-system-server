@@ -53,4 +53,12 @@ public class BuildingService {
         Building updatedBuilding = buildingMapper.toUpdatedBuilding(request, existingBuilding.orElse(null));
         return buildingMapper.toBuildingResponse(buildingRepository.save(updatedBuilding));
     }
+
+    /*
+    [DELETE]: /buildings/buildingId
+     */
+    public String deleteBuilding(int buildingId) {
+        buildingRepository.deleteById(buildingId);
+        return "Delete building " + buildingId + " successfully";
+    }
 }
