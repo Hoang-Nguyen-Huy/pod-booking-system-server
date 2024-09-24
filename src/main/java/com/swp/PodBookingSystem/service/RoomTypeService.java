@@ -10,6 +10,9 @@ import com.swp.PodBookingSystem.repository.RoomTypeRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -30,6 +33,14 @@ public class RoomTypeService {
         RoomType newRoomType = roomTypeMapper.toRoomType(request);
         newRoomType.setBuilding(building.orElse(null));
         return roomTypeMapper.toRoomTypeResponse(roomTypeRepository.save(newRoomType));
+    }
+
+    /*
+    [GET]: /room-types/page&take
+     */
+    public Page<RoomType> getRoomTypes(int page, int take) {
+        Pageable pageable = PageRequest.of(page - 1, take);
+        return roomTypeRepository.findAll(pageable);
     }
 
     /*
