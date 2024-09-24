@@ -21,7 +21,9 @@ public class Building {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
+    @Enumerated(EnumType.STRING)
     BuildingStatus status;
+
     String address;
     String description;
 
@@ -36,4 +38,18 @@ public class Building {
 
     @OneToMany(mappedBy = "building", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     List<RoomType> roomTypes;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDate.now();
+        this.updatedAt = LocalDate.now();
+        if (this.status == null) {
+            this.status = BuildingStatus.Active;
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDate.now();
+    }
 }
