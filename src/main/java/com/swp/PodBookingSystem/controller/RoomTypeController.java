@@ -59,6 +59,14 @@ public class RoomTypeController {
                                                   @RequestBody RoomTypeCreationRequest request) {
         return ApiResponse.<RoomTypeResponse>builder()
                 .data(roomTypeService.updateRoomType(roomTypeId, request))
+                .message("Update room type successfully")
+                .build();
+    }
+
+    @DeleteMapping("/{roomTypeId}")
+    ApiResponse<RoomTypeResponse> deleteRoomType(@PathVariable("roomTypeId") int roomTypeId) {
+        return ApiResponse.<RoomTypeResponse>builder()
+                .message(roomTypeService.deleteRoomType(roomTypeId))
                 .build();
     }
 }

@@ -69,4 +69,12 @@ public class RoomTypeService {
         RoomType updatedRoomType = roomTypeMapper.toUpdatedRoomType(request, existingRoomType);
         return roomTypeMapper.toRoomTypeResponse(roomTypeRepository.save(updatedRoomType));
     }
+
+    /*
+    [DELETE]: /room-types/roomTypeId
+     */
+    public String deleteRoomType(int roomTypeId) {
+        roomTypeRepository.deleteById(roomTypeId);
+        return "Delete room type " + roomTypeId + " successfully";
+    }
 }
