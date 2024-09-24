@@ -54,6 +54,12 @@ jobs:
           echo "jwt:" >> src/main/resources/application.yaml
           echo "  JWT_SECRET_ACCESS_TOKEN: \"${{ secrets.JWT_SECRET_ACCESS_TOKEN }}\"" >> src/main/resources/application.yaml
           echo "  JWT_SECRET_REFRESH_TOKEN: \"${{ secrets.JWT_SECRET_REFRESH_TOKEN }}\"" >> src/main/resources/application.yaml
+          echo "" >> src/main/resources/application.yaml
+          echo "vnpay:" >> src/main/resources/application.yaml
+          echo " tmn-code: \"${{ secrets.VNPAY_TMN_CODE }}\"" >> src/main/resources/application.yaml
+          echo " hash-secret: \"${{ secrets.VNPAY_HASH_SECRET }}\"" >> src/main/resources/application.yaml
+          echo " return-url: \"${{ secrets.VNPAY_RETURN_URL }}\"" >> src/main/resources/application.yaml
+          echo " url: \"${{ secrets.VNPAY_URL }}\"" >> src/main/resources/application.yaml
       
     - name: Build with Maven
       run: mvn -B package --file pom.xml
