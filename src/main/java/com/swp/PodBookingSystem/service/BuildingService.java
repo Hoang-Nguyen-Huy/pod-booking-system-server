@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -23,5 +25,12 @@ public class BuildingService {
     public BuildingResponse createBuilding(BuildingCreationRequest request) {
         Building newBuilding = buildingMapper.toBuilding(request);
         return buildingMapper.toBuildingResponse(buildingRepository.save(newBuilding));
+    }
+
+    /*
+    [GET]: /buildings/buildingId
+     */
+    public Optional<BuildingResponse> getBuildingById(int buildingId) {
+        return buildingMapper.toBuildingResponse(buildingRepository.findById(buildingId));
     }
 }

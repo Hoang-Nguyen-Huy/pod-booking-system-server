@@ -8,6 +8,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
+import java.util.Optional;
+
 @Mapper(componentModel = "spring")
 public interface BuildingMapper {
     @Mapping(source = "status", target = "status", qualifiedByName = "stringToBuildingStatus")
@@ -15,6 +17,10 @@ public interface BuildingMapper {
     Building toBuilding(BuildingCreationRequest request);
 
     BuildingResponse toBuildingResponse(Building building);
+
+    default Optional<BuildingResponse> toBuildingResponse(Optional<Building> buildingOptional) {
+        return buildingOptional.map(this::toBuildingResponse);
+    }
 
     @Named("stringToBuildingStatus")
     default BuildingStatus stringToBuildingStatus(String status) {
