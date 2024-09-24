@@ -53,4 +53,12 @@ public class RoomTypeController {
                 .message("Get room type by Id successfully")
                 .build();
     }
+
+    @PutMapping("/{roomTypeId}")
+    ApiResponse<RoomTypeResponse> updatedRoomType(@PathVariable("roomTypeId") int roomTypeId,
+                                                  @RequestBody RoomTypeCreationRequest request) {
+        return ApiResponse.<RoomTypeResponse>builder()
+                .data(roomTypeService.updateRoomType(roomTypeId, request))
+                .build();
+    }
 }

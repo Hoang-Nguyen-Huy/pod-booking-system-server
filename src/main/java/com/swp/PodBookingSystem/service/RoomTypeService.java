@@ -49,4 +49,24 @@ public class RoomTypeService {
     public Optional<RoomTypeResponse> getRoomTypeById(int roomTypeId) {
         return roomTypeMapper.toRoomTypeResponse(roomTypeRepository.findById(roomTypeId));
     }
+
+    /*
+    [PUT]: /room-types/roomTypeId
+     */
+    public RoomTypeResponse updateRoomType(int roomTypeId, RoomTypeCreationRequest request) {
+        Optional<RoomType> existingRoomTypeOpt = roomTypeRepository.findById(roomTypeId);
+
+        RoomType existingRoomType = existingRoomTypeOpt.orElseThrow(() -> new RuntimeException("RoomType not found"));
+
+        Integer newBuildingId = request.getBuildingId();
+        Optional<Building> newBuilding = buildingRepository.findById(newBuildingId);
+        if (existingRoomType.getBuilding() == null ||
+                !existingRoomType.getBuilding().getId().equals(newBuildingId)) {
+
+            existingRoomType.setBuilding(newBuilding.orElse(null));
+        }
+
+        RoomType updatedRoomType = roomTypeMapper.toUpdatedRoomType(request, existingRoomType);
+        return roomTypeMapper.toRoomTypeResponse(roomTypeRepository.save(updatedRoomType));
+    }
 }
