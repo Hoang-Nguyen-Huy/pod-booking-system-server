@@ -7,10 +7,9 @@ import com.swp.PodBookingSystem.service.RoomTypeService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/room-types")
@@ -23,6 +22,15 @@ public class RoomTypeController {
     ApiResponse<RoomTypeResponse> createRoomType(@RequestBody RoomTypeCreationRequest request) {
         return ApiResponse.<RoomTypeResponse>builder()
                 .data(roomTypeService.createRoomType(request))
+                .message("Create room type successfully")
+                .build();
+    }
+
+    @GetMapping("/{roomTypeId}")
+    ApiResponse<Optional<RoomTypeResponse>> getRoomTypeById(@PathVariable("roomTypeId") int roomTypeId) {
+        return ApiResponse.<Optional<RoomTypeResponse>>builder()
+                .data(roomTypeService.getRoomTypeById(roomTypeId))
+                .message("Get room type by Id successfully")
                 .build();
     }
 }

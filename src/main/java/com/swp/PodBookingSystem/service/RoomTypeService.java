@@ -31,4 +31,11 @@ public class RoomTypeService {
         newRoomType.setBuilding(building.orElse(null));
         return roomTypeMapper.toRoomTypeResponse(roomTypeRepository.save(newRoomType));
     }
+
+    /*
+    [GET]: /room-types/roomTypeId
+     */
+    public Optional<RoomTypeResponse> getRoomTypeById(int roomTypeId) {
+        return roomTypeMapper.toRoomTypeResponse(roomTypeRepository.findById(roomTypeId));
+    }
 }
