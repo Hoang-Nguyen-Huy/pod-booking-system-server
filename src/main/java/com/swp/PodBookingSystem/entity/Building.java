@@ -1,5 +1,6 @@
 package com.swp.PodBookingSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.swp.PodBookingSystem.enums.BuildingStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -36,6 +37,7 @@ public class Building {
     @Column(name = "updatedAt")
     LocalDate updatedAt;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "building", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     List<RoomType> roomTypes;
 

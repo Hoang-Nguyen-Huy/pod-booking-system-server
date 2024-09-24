@@ -8,6 +8,9 @@ import com.swp.PodBookingSystem.repository.BuildingRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -25,6 +28,14 @@ public class BuildingService {
     public BuildingResponse createBuilding(BuildingCreationRequest request) {
         Building newBuilding = buildingMapper.toBuilding(request);
         return buildingMapper.toBuildingResponse(buildingRepository.save(newBuilding));
+    }
+
+    /*
+    [GET]: /buildings/page&take
+     */
+    public Page<Building> getBuildings(int page, int take) {
+        Pageable pageable = PageRequest.of(page - 1, take);
+        return buildingRepository.findAll(pageable);
     }
 
     /*

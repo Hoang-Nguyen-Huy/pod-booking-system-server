@@ -1,5 +1,6 @@
 package com.swp.PodBookingSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -23,6 +24,7 @@ public class RoomType {
     int quantity;
     int capacity;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "roomType", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     List<Room> rooms;
 
