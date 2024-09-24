@@ -6,6 +6,7 @@ import com.swp.PodBookingSystem.entity.Building;
 import com.swp.PodBookingSystem.enums.BuildingStatus;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 
 import java.util.Optional;
@@ -21,6 +22,9 @@ public interface BuildingMapper {
     default Optional<BuildingResponse> toBuildingResponse(Optional<Building> buildingOptional) {
         return buildingOptional.map(this::toBuildingResponse);
     }
+
+    @Mapping(target = "id", ignore = true)
+    Building toUpdatedBuilding(BuildingCreationRequest request, @MappingTarget Building building);
 
     @Named("stringToBuildingStatus")
     default BuildingStatus stringToBuildingStatus(String status) {

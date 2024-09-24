@@ -44,4 +44,13 @@ public class BuildingService {
     public Optional<BuildingResponse> getBuildingById(int buildingId) {
         return buildingMapper.toBuildingResponse(buildingRepository.findById(buildingId));
     }
+
+    /*
+    [PUT]: /buildings/buildingId
+     */
+    public BuildingResponse updateBuilding(int buildingId, BuildingCreationRequest request) {
+        Optional<Building> existingBuilding = buildingRepository.findById(buildingId);
+        Building updatedBuilding = buildingMapper.toUpdatedBuilding(request, existingBuilding.orElse(null));
+        return buildingMapper.toBuildingResponse(buildingRepository.save(updatedBuilding));
+    }
 }

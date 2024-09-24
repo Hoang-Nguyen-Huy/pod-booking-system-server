@@ -52,4 +52,13 @@ public class BuildingController {
                 .message("Get building by Id successfully")
                 .build();
     }
+
+    @PutMapping("/{buildingId}")
+    ApiResponse<BuildingResponse> updateBuilding(@PathVariable("buildingId") int buildingId,
+                                                 @RequestBody BuildingCreationRequest request) {
+        return ApiResponse.<BuildingResponse>builder()
+                .data(buildingService.updateBuilding(buildingId, request))
+                .message("Update building successfully")
+                .build();
+    }
 }
