@@ -1,4 +1,4 @@
-package com.swp.PodBookingSystem.dto.respone;
+package com.swp.PodBookingSystem.dto.respone.Payment;
 
 import lombok.AccessLevel;
 import lombok.Data;
