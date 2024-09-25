@@ -47,6 +47,8 @@ public class Account {
     @OneToMany(mappedBy = "account")
     List<RefreshToken> refreshTokens;
 
+
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDate.now();

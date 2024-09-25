@@ -22,10 +22,10 @@ public class OrderDetailAmenity {
     double price;
 
     @ManyToOne
-    @JoinColumn(name = "OrderDetailId", nullable = false)
+    @JoinColumn(name = "orderDetailId", nullable = false)
     OrderDetail orderDetail;
 
     @ManyToOne
-    @JoinColumn(name = "AmentityId", nullable = false)
+    @JoinColumn(name = "amentityId", nullable = false)
     Amenity amenity;
 }
