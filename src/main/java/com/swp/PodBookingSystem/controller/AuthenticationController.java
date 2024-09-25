@@ -11,12 +11,14 @@ import com.swp.PodBookingSystem.dto.respone.IntrospectResponse;
 
 import com.swp.PodBookingSystem.dto.respone.RefreshTokenResponse;
 import com.swp.PodBookingSystem.service.AuthenticationService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.text.ParseException;
 import java.util.Map;
@@ -30,8 +32,12 @@ public class AuthenticationController {
     AuthenticationService authenticationService;
 
     @GetMapping("/login/google")
-    public Map<String, Object> currentUser(OAuth2AuthenticationToken token) {
-        return token.getPrincipal().getAttributes();
+    public RedirectView loginGoogle(OAuth2AuthenticationToken token) throws ParseException {
+        var result = authenticationService.loginGoogle(token.getPrincipal().getAttribute("email"),
+                token.getPrincipal().getAttribute("name"),
+                token.getPrincipal().getAttribute("picture"));
+        return new RedirectView("http://localhost:3000/login/oauth?accessToken=" + result.getAccessToken()
+                + "&refreshToken=" + result.getRefreshToken() + "&status=" + 200);
     }
 
     @PostMapping("/login")
