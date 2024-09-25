@@ -34,8 +34,6 @@ jobs:
           mkdir -p src/main/resources
           echo "server:" >> src/main/resources/application.yaml
           echo "  port: 8080" >> src/main/resources/application.yaml
-          echo "  servlet:" >> src/main/resources/application.yaml
-          echo "    context-path: /pod" >> src/main/resources/application.yaml
           echo "" >> src/main/resources/application.yaml
           echo "spring:" >> src/main/resources/application.yaml
           echo "  datasource:" >> src/main/resources/application.yaml
@@ -50,6 +48,16 @@ jobs:
           echo "        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl" >> src/main/resources/application.yaml
           echo "        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl" >> src/main/resources/application.yaml
           echo "    show-sql: true" >> src/main/resources/application.yaml
+          echo "  security:" >> src/main/resources/application.yaml
+          echo "    oauth2:" >> src/main/resources/application.yaml
+          echo "      client:" >> src/main/resources/application.yaml
+          echo "        registration:" >> src/main/resources/application.yaml
+          echo "          google:" >> src/main/resources/application.yaml
+          echo "            client-id: \"${{ secrets.GOOGLE_CLIENT_ID }}\"" >> src/main/resources/application.yaml
+          echo "            client-secret: \"${{ secrets.GOOGLE_CLIENT_SECRET }}\"" >> src/main/resources/application.yaml
+          echo "            scope:" >> src/main/resources/application.yaml
+          echo "              - email" >> src/main/resources/application.yaml
+          echo "              - profile" >> src/main/resources/application.yaml
           echo "" >> src/main/resources/application.yaml
           echo "jwt:" >> src/main/resources/application.yaml
           echo "  JWT_SECRET_ACCESS_TOKEN: \"${{ secrets.JWT_SECRET_ACCESS_TOKEN }}\"" >> src/main/resources/application.yaml

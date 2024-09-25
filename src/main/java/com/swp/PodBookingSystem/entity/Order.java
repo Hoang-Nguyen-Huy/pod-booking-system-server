@@ -4,8 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDate;
-import java.util.List;
+import java.time.LocalDateTime;
 
 
 @Getter
@@ -21,23 +20,24 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
-    @OneToMany(mappedBy = "id", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    List<Account> accounts;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "accountId", referencedColumnName = "id")
+    Account account;
 
     @Column(name = "createdAt")
-    LocalDate createdAt;
+    LocalDateTime createdAt;
 
     @Column(name = "updatedAt")
-    LocalDate updatedAt;
+    LocalDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDate.now();
-        this.updatedAt = LocalDate.now();
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        this.updatedAt = LocalDate.now();
+        this.updatedAt = LocalDateTime.now();
     }
 }

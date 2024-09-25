@@ -10,9 +10,11 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface OrderDetailMapper {
-    @Mapping(target = "buildingId", source = "orderDetail.building.id")
-    @Mapping(target = "roomId", source = "orderDetail.room.id")
-    @Mapping(target = "servicePackageId", source = "orderDetail.servicePackage.id")
+    @Mapping(target = "buildingId", source = "building.id") // Assuming building is a ManyToOne relation
+    @Mapping(target = "roomId", source = "room.id") // Assuming room is a OneToOne relation
+    @Mapping(target = "servicePackageId", source = "servicePackage.id") // Assuming servicePackage is a ManyToOne relation
+    @Mapping(target = "orderId", source = "order.id") // Assuming order is a ManyToOne relation
+    @Mapping(target = "orderHandledId", source = "orderHandler.id") // Corrected mapping for orderHandledId
     OrderDetailResponse toOrderDetailResponse(OrderDetail orderDetail);
 
     @Named("stringToOrderStatus")
