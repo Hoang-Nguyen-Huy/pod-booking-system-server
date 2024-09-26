@@ -79,7 +79,7 @@ public class AuthenticationService {
         boolean authenticated = passwordEncoder.matches(request.getPassword(),
                 account.getPassword());
         if (!authenticated)
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+            throw new AppException(ErrorCode.INCORRECT_PASSWORD);
 
         var accessToken = generateAccessToken(account);
         var refreshToken = generateRefreshToken(account);
