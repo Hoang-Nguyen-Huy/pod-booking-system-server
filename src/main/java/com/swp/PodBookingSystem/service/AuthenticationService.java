@@ -74,7 +74,7 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse login(AuthenticationRequest request) throws ParseException {
-        var account = accountRepository.findByEmail(request.getEmail()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+        var account = accountRepository.findByEmail(request.getEmail()).orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXIST));
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean authenticated = passwordEncoder.matches(request.getPassword(),
                 account.getPassword());
