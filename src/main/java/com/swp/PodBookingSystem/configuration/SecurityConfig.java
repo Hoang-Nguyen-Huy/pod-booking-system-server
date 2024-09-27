@@ -47,8 +47,9 @@ public class SecurityConfig {
                 authorizeHttpRequests(request ->
                         request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
                                 .anyRequest().authenticated())
-                .oauth2Login(Customizer.withDefaults())
-                .formLogin(Customizer.withDefaults())
+                .oauth2Login(oauth2login -> oauth2login.loginPage("http://localhost:3000/login")
+                        .successHandler(((request, response, authentication) ->
+                                response.sendRedirect("/auth/login/google"))))
         ;
         httpSecurity.oauth2ResourceServer(oauth2 ->
                 oauth2.jwt(jwtConfigurer ->

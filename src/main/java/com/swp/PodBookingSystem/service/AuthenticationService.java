@@ -5,6 +5,7 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import com.swp.PodBookingSystem.dto.request.Account.AccountCreationRequest;
 import com.swp.PodBookingSystem.dto.request.Authentication.AuthenticationRequest;
 import com.swp.PodBookingSystem.dto.request.Authentication.LogoutRequest;
 import com.swp.PodBookingSystem.dto.request.Authentication.RefreshTokenRequest;
@@ -16,6 +17,7 @@ import com.swp.PodBookingSystem.entity.Account;
 import com.swp.PodBookingSystem.entity.RefreshToken;
 import com.swp.PodBookingSystem.exception.AppException;
 import com.swp.PodBookingSystem.exception.ErrorCode;
+import com.swp.PodBookingSystem.mapper.AccountMapper;
 import com.swp.PodBookingSystem.repository.AccountRepository;
 import com.swp.PodBookingSystem.repository.RefreshTokenRepository;
 import jakarta.transaction.Transactional;
@@ -33,6 +35,7 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +44,7 @@ import java.util.Date;
 public class AuthenticationService {
     AccountRepository accountRepository;
     RefreshTokenRepository refreshTokenRepository;
+    AccountMapper accountMapper;
     @NonFinal
     @Value("${jwt.JWT_SECRET_ACCESS_TOKEN}")
     protected String ACCESS_TOKEN_KEY;
@@ -70,12 +74,12 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse login(AuthenticationRequest request) throws ParseException {
-        var account = accountRepository.findByEmail(request.getEmail()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+        var account = accountRepository.findByEmail(request.getEmail()).orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXIST));
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean authenticated = passwordEncoder.matches(request.getPassword(),
                 account.getPassword());
         if (!authenticated)
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+            throw new AppException(ErrorCode.INCORRECT_PASSWORD);
 
         var accessToken = generateAccessToken(account);
         var refreshToken = generateRefreshToken(account);
@@ -158,6 +162,41 @@ public class AuthenticationService {
             log.error("Cannot create token", e);
             throw new RuntimeException(e);
         }
+    }
+
+    public AuthenticationResponse loginGoogle(String email, String name, String avatar) throws ParseException {
+        Optional<Account> accountOptional = accountRepository.findByEmail(email);
+        Account account;
+
+        // Nếu khách chưa có tài khoản trong db thì mình sẽ tạo tạm thời cho khách
+        if (accountOptional.isEmpty()) {
+            PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+            AccountCreationRequest request = new AccountCreationRequest(name, email, passwordEncoder.encode("123123"), "Customer");
+            account = accountMapper.toAccount(request);
+            accountRepository.save(account);
+        } else {
+            account = accountOptional.get(); // Lấy tài khoản từ Optional
+        }
+
+        // Tạo access token và refresh token
+        var accessToken = generateAccessToken(account);
+        var refreshToken = generateRefreshToken(account);
+        SignedJWT decodeRefreshToken = SignedJWT.parse(refreshToken);
+
+        // Lưu refresh token vào cơ sở dữ liệu
+        refreshTokenRepository.save(new RefreshToken(
+                null,
+                refreshToken,
+                account,
+                decodeRefreshToken.getJWTClaimsSet().getIssueTime(),
+                decodeRefreshToken.getJWTClaimsSet().getExpirationTime()
+        ));
+
+        // Trả về response
+        return AuthenticationResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
 
 }
