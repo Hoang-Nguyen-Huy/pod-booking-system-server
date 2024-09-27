@@ -129,7 +129,7 @@ public class AuthenticationService {
                 .claim("scope", account.getRole()) // ở đây thằng Spring hiểu role là scope để map vào authorization header
                 .issueTime(new Date())
                 .expirationTime(new Date(
-                        Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
+                        Instant.now().plus(3, ChronoUnit.MINUTES).toEpochMilli()
                 ))
                 .build();
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
