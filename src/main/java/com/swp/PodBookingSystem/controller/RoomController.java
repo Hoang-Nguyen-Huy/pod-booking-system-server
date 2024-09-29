@@ -11,8 +11,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,6 +35,25 @@ public class RoomController {
                                             @RequestParam(defaultValue = "10", name = "take") int take) {
         RoomPaginationDTO dto = new RoomPaginationDTO(page, take);
         Page<Room> roomPage = roomService.getRooms(dto.page, dto.take);
+
+        return PaginationResponse.<List<Room>>builder()
+                .data(roomPage.getContent())
+                .currentPage(roomPage.getNumber() + 1)
+                .totalPage(roomPage.getTotalPages())
+                .recordPerPage(roomPage.getNumberOfElements())
+                .totalRecord((int) roomPage.getTotalElements())
+                .build();
+    }
+
+    @GetMapping("/filtered-room")
+    PaginationResponse<List<Room>> getFilteredRoom(@RequestParam(required = false) String address,
+                                                   @RequestParam(required = false) Integer capacity,
+                                                   @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
+                                                   @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime,
+                                                   @RequestParam(defaultValue = "1") int page,
+                                                   @RequestParam(defaultValue = "10") int take) {
+        RoomPaginationDTO dto = new RoomPaginationDTO(page, take);
+        Page<Room> roomPage = roomService.getFilteredRoomsOnLandingPage(address, capacity, startTime, endTime, dto.page, dto.take);
 
         return PaginationResponse.<List<Room>>builder()
                 .data(roomPage.getContent())
