@@ -1,5 +1,6 @@
 package com.swp.PodBookingSystem.dto.respone;
 
+import com.swp.PodBookingSystem.dto.request.Account.AccountResponseClient;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -11,4 +12,5 @@ import lombok.experimental.FieldDefaults;
 public class AuthenticationResponse {
     String accessToken;
     String refreshToken;
+    AccountResponseClient account;
 }
