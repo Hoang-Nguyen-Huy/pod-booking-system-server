@@ -7,6 +7,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.swp.PodBookingSystem.dto.request.Account.AccountCreationRequest;
 import com.swp.PodBookingSystem.dto.request.Authentication.AuthenticationRequest;
+import com.swp.PodBookingSystem.dto.request.Authentication.ForgotPasswordRequest;
 import com.swp.PodBookingSystem.dto.request.Authentication.LogoutRequest;
 import com.swp.PodBookingSystem.dto.request.Authentication.RefreshTokenRequest;
 import com.swp.PodBookingSystem.dto.request.IntrospectRequest;
@@ -20,6 +21,7 @@ import com.swp.PodBookingSystem.exception.ErrorCode;
 import com.swp.PodBookingSystem.mapper.AccountMapper;
 import com.swp.PodBookingSystem.repository.AccountRepository;
 import com.swp.PodBookingSystem.repository.RefreshTokenRepository;
+import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +47,7 @@ public class AuthenticationService {
     AccountRepository accountRepository;
     RefreshTokenRepository refreshTokenRepository;
     AccountMapper accountMapper;
+    SendEmailService sendEmailService;
     @NonFinal
     @Value("${jwt.JWT_SECRET_ACCESS_TOKEN}")
     protected String ACCESS_TOKEN_KEY;
@@ -85,10 +88,11 @@ public class AuthenticationService {
         var refreshToken = generateRefreshToken(account);
         SignedJWT decodeRefreshToken = SignedJWT.parse(refreshToken);
         refreshTokenRepository.save(new RefreshToken(null, refreshToken, account, decodeRefreshToken.getJWTClaimsSet().getIssueTime(), decodeRefreshToken.getJWTClaimsSet().getExpirationTime()));
-
+        var accountResponse = accountMapper.toAccountResponseClient(account);
         return AuthenticationResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
+                .account(accountResponse)
                 .build();
     }
 
@@ -129,7 +133,7 @@ public class AuthenticationService {
                 .claim("scope", account.getRole()) // ở đây thằng Spring hiểu role là scope để map vào authorization header
                 .issueTime(new Date())
                 .expirationTime(new Date(
-                        Instant.now().plus(3, ChronoUnit.MINUTES).toEpochMilli()
+                        Instant.now().plus(30, ChronoUnit.MINUTES).toEpochMilli()
                 ))
                 .build();
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
@@ -197,6 +201,12 @@ public class AuthenticationService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    public void forgotPassword(ForgotPasswordRequest request) throws MessagingException {
+        var account = accountRepository.findByEmail(request.getEmail()).orElseThrow(()
+                -> new AppException(ErrorCode.EMAIL_NOT_EXIST));
+        sendEmailService.sendEmail(account.getEmail(), "Mật khẩu xác nhận là: <b>123123</b>", "Xác nhận mật khẩu");
     }
 
 }
