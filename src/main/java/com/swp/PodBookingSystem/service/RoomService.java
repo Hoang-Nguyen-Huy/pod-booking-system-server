@@ -3,8 +3,10 @@ package com.swp.PodBookingSystem.service;
 import com.swp.PodBookingSystem.dto.request.Room.RoomCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.Room.RoomResponse;
 import com.swp.PodBookingSystem.entity.Room;
+import com.swp.PodBookingSystem.entity.RoomType;
 import com.swp.PodBookingSystem.mapper.RoomMapper;
 import com.swp.PodBookingSystem.repository.RoomRepository;
+import com.swp.PodBookingSystem.repository.RoomTypeRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -21,6 +23,7 @@ import java.util.Optional;
 public class RoomService {
     RoomRepository roomRepository;
     RoomMapper roomMapper;
+    RoomTypeRepository roomTypeRepository;
 
     /*
     [POST]: /rooms
@@ -49,8 +52,18 @@ public class RoomService {
     [PUT]: /rooms/roomId
      */
     public RoomResponse updateRoom(int roomId, RoomCreationRequest request) {
-        Optional<Room> existingRoom = roomRepository.findById((roomId));
-        Room updatedRoom = roomMapper.toUpdatedRoom(request, existingRoom.orElse(null));
+        Optional<Room> existingRoomOpt = roomRepository.findById((roomId));
+
+        Room existingRoom = existingRoomOpt.orElseThrow(() -> new RuntimeException("Room not found"));
+
+        Integer newRoomTypeId = request.getRoomTypeId();
+        Optional<RoomType> newRoomType = roomTypeRepository.findById(newRoomTypeId);
+        if (existingRoom.getRoomType() == null ||
+                !existingRoom.getRoomType().getId().equals(newRoomTypeId)) {
+            existingRoom.setRoomType(newRoomType.orElse(null));
+        }
+
+        Room updatedRoom = roomMapper.toUpdatedRoom(request, existingRoom);
         return roomMapper.toRoomResponse(roomRepository.save(updatedRoom));
     }
 
