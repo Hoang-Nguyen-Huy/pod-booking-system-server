@@ -29,7 +29,9 @@ public class RoomService {
     [POST]: /rooms
      */
     public RoomResponse createRoom(RoomCreationRequest request) {
+        Optional<RoomType> roomType = roomTypeRepository.findById(request.getRoomTypeId());
         Room newRoom = roomMapper.toRoom(request);
+        newRoom.setRoomType(roomType.orElse(null));
         return roomMapper.toRoomResponse(roomRepository.save(newRoom));
     }
 
