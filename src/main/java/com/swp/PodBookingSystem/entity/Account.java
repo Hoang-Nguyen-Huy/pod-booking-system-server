@@ -1,5 +1,6 @@
 package com.swp.PodBookingSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.swp.PodBookingSystem.enums.AccountRole;
 import jakarta.persistence.*;
 
@@ -44,9 +45,9 @@ public class Account {
     @Column(name = "createdAt")
     LocalDate createdAt;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "account")
     List<RefreshToken> refreshTokens;
-
 
 
     @PrePersist
