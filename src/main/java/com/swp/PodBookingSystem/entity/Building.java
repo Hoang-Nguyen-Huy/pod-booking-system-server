@@ -1,5 +1,6 @@
 package com.swp.PodBookingSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.swp.PodBookingSystem.enums.BuildingStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,7 +22,9 @@ public class Building {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
+    @Enumerated(EnumType.STRING)
     BuildingStatus status;
+
     String address;
     String description;
 
@@ -34,6 +37,21 @@ public class Building {
     @Column(name = "updatedAt")
     LocalDate updatedAt;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "building", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     List<RoomType> roomTypes;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDate.now();
+        this.updatedAt = LocalDate.now();
+        if (this.status == null) {
+            this.status = BuildingStatus.Active;
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDate.now();
+    }
 }

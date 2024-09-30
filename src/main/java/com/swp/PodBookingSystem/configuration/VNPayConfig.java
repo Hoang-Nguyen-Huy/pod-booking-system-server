@@ -1,5 +1,6 @@
 package com.swp.PodBookingSystem.configuration;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,54 +22,26 @@ import javax.crypto.spec.SecretKeySpec;
 @Configuration
 public class VNPayConfig {
     @Value("${vnpay.tmn-code}")
-    public static String vnp_TmnCode;
+    public String vnp_TmnCode_private;
 
     @Value("${vnpay.hash-secret}")
-    public static String vnp_HashSecret;
+    public String vnp_HashSecret_private;
 
     @Value("${vnpay.return-url}")
+    public String vnp_ReturnUrl_private;
+
+    public static String vnp_TmnCode;
+    public static String vnp_HashSecret;
     public static String vnp_ReturnUrl;
+
+    @PostConstruct
+    public void init() {
+        vnp_TmnCode = vnp_TmnCode_private;
+        vnp_HashSecret = vnp_HashSecret_private;
+        vnp_ReturnUrl = vnp_ReturnUrl_private;
+    }
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    public static String secretKey = "";
-    public static String vnp_ApiUrl = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
 
-    public static String md5(String message) {
-        String digest = null;
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            byte[] hash = md.digest(message.getBytes("UTF-8"));
-            StringBuilder sb = new StringBuilder(2 * hash.length);
-            for (byte b : hash) {
-                sb.append(String.format("%02x", b & 0xff));
-            }
-            digest = sb.toString();
-        } catch (UnsupportedEncodingException ex) {
-            digest = "";
-        }
-        catch (NoSuchAlgorithmException ex) {
-            digest = "";
-        }
-        return digest;
-    }
-
-    public static String Sha256(String message) {
-        String digest = null;
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hash = md.digest(message.getBytes("UTF-8"));
-            StringBuilder sb = new StringBuilder(2 * hash.length);
-            for (byte b : hash) {
-                sb.append(String.format("%02x", b & 0xff));
-            }
-            digest = sb.toString();
-        } catch (UnsupportedEncodingException ex) {
-            digest = "";
-        } catch (NoSuchAlgorithmException ex) {
-            digest = "";
-        }
-        return digest;
-    }
-    
     public static String hashAllFields(Map fields) {
         List fieldNames = new ArrayList(fields.keySet());
         Collections.sort(fieldNames);

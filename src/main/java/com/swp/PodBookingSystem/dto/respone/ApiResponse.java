@@ -1,4 +1,4 @@
-package com.swp.PodBookingSystem.dto.request;
+package com.swp.PodBookingSystem.dto.respone;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -16,3 +16,4 @@ public class ApiResponse<T> {
     private String message;
     private T data;
 }
+

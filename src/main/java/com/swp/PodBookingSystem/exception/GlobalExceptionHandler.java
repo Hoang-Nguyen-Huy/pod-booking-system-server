@@ -1,11 +1,14 @@
 package com.swp.PodBookingSystem.exception;
 
-import com.swp.PodBookingSystem.dto.request.ApiResponse;
+import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -34,6 +37,9 @@ public class GlobalExceptionHandler {
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.setCode(errorCode.getCode());
         apiResponse.setMessage(errorCode.getMessage());
+        Map<String, String> data = new HashMap<>();
+        data.put(errorCode.getField(), errorCode.getMessage());
+        apiResponse.setData(data);
         return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
     }
 
