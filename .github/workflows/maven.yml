@@ -48,6 +48,17 @@ jobs:
           echo "        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl" >> src/main/resources/application.yaml
           echo "        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl" >> src/main/resources/application.yaml
           echo "    show-sql: true" >> src/main/resources/application.yaml
+          echo "  mail:" >> src/main/resources/application.yaml
+          echo "    host: \"${{ secrets.MAIL_HOST }}\"" >> src/main/resources/application.yaml
+          echo "    port: \"${{ secrets.MAIL_PORT }}\"" >> src/main/resources/application.yaml
+          echo "    username: \"${{ secrets.MAIL_USERNAME }}\"" >> src/main/resources/application.yaml
+          echo "    password: \"${{ secrets.MAIL_PASSWORD }}\"" >> src/main/resources/application.yaml
+          echo "    properties:" >> src/main/resources/application.yaml
+          echo "      mail:" >> src/main/resources/application.yaml
+          echo "        smtp:" >> src/main/resources/application.yaml
+          echo "          auth: true" >> src/main/resources/application.yaml
+          echo "          starttls:" >> src/main/resources/application.yaml
+          echo "            enable: true" >> src/main/resources/application.yaml
           echo "  security:" >> src/main/resources/application.yaml
           echo "    oauth2:" >> src/main/resources/application.yaml
           echo "      client:" >> src/main/resources/application.yaml

@@ -1,6 +1,7 @@
 package com.swp.PodBookingSystem.controller;
 
 import com.nimbusds.jose.JOSEException;
+import com.swp.PodBookingSystem.dto.request.Authentication.ForgotPasswordRequest;
 import com.swp.PodBookingSystem.dto.request.Authentication.LogoutRequest;
 import com.swp.PodBookingSystem.dto.request.Authentication.RefreshTokenRequest;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
@@ -44,7 +45,7 @@ public class AuthenticationController {
     ApiResponse<AuthenticationResponse> login(@RequestBody AuthenticationRequest request) throws ParseException {
         var result = authenticationService.login(request);
         return ApiResponse.<AuthenticationResponse>builder()
-                .message("Login successfully")
+                .message("Đăng nhập thành công")
                 .data(result)
                 .build();
     }
@@ -62,7 +63,7 @@ public class AuthenticationController {
             throws ParseException, JOSEException {
         var result = authenticationService.refreshToken(request);
         return ApiResponse.<RefreshTokenResponse>builder()
-                .message("Refresh token successfully")
+                .message("Refresh token thành công")
                 .data(result).build();
     }
 
@@ -71,7 +72,14 @@ public class AuthenticationController {
             throws ParseException, JOSEException {
         authenticationService.logout(request);
         return ApiResponse.builder()
-                .message("Logout successfully")
+                .message("Đăng xuất thành công")
+                .build();
+    }
+
+    @PostMapping("/forgot-password")
+    ApiResponse forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        return ApiResponse.builder()
+                .message("Gửi mail xác nhận thành công")
                 .build();
     }
 
