@@ -177,6 +177,7 @@ public class AuthenticationService {
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
             AccountCreationRequest request = new AccountCreationRequest(name, email, passwordEncoder.encode("123123"), "Customer");
             account = accountMapper.toAccount(request);
+            account.setAvatar(avatar);
             accountRepository.save(account);
         } else {
             account = accountOptional.get(); // Lấy tài khoản từ Optional
@@ -200,6 +201,7 @@ public class AuthenticationService {
         return AuthenticationResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
+                .account(accountMapper.toAccountResponseClient(account))
                 .build();
     }
 
