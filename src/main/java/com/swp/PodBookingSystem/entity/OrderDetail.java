@@ -81,7 +81,7 @@ public class OrderDetail {
     }
 
     public String getCustomerId() {
-        return customer != null ? customer.getId() : null;
+        return customer != null ? customer.getId().toString() : null;
     }
 
 }
