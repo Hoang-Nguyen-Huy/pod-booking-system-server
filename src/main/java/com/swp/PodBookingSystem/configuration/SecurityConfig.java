@@ -27,7 +27,7 @@ import javax.crypto.spec.SecretKeySpec;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-    private final String[] PUBLIC_ENDPOINTS = {"/accounts",
+    private final String[] PUBLIC_ENDPOINTS = {"/accounts", "/accounts/me",
             "/auth/login", "/auth/introspect", "/auth/refresh-token", "/auth/logout", "/auth/login/google"
     };
 
@@ -46,7 +46,7 @@ public class SecurityConfig {
         httpSecurity.
                 authorizeHttpRequests(request ->
                         request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
-                                .anyRequest().authenticated())
+                                .anyRequest().permitAll())
                 .oauth2Login(oauth2login -> oauth2login.loginPage("http://localhost:3000/login")
                         .successHandler(((request, response, authentication) ->
                                 response.sendRedirect("/auth/login/google"))))

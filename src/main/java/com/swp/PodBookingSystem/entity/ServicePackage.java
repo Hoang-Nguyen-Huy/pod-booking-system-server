@@ -3,6 +3,8 @@ package com.swp.PodBookingSystem.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 import java.util.List;
 
@@ -28,5 +30,6 @@ public class ServicePackage {
     int discountPercentage;
 
     @OneToMany(mappedBy = "servicePackage", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     List<OrderDetail> orderDetails;
 }
