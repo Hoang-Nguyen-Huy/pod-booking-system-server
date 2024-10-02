@@ -45,7 +45,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.
                 authorizeHttpRequests(request ->
-                        request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
+                        request.requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                                 .anyRequest().permitAll())
                 .oauth2Login(oauth2login -> oauth2login.loginPage("http://localhost:3000/login")
                         .successHandler(((request, response, authentication) ->

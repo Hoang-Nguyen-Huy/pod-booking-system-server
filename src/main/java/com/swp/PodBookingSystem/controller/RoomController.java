@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -67,15 +68,16 @@ public class RoomController {
     }
 
     @GetMapping("/available-rooms")
-    ApiResponse<List<Room>> getAvailableRoomsByRoomTypeId(@RequestParam(required = false)  Integer typeId,
+    ApiResponse<List<Room>> getAvailableRoomsByRoomTypeId(@RequestParam  Integer typeId,
                                                           @RequestParam(required = false)  List<String> slots) {
         List<SlotCreationRequest> slotList = new ArrayList<>();
-        System.out.println(slots.toString());
-        for(String slot: slots) {
-            String[] parts = slot.split(",");
-            LocalDateTime startTime = LocalDateTime.parse(parts[0]);
-            LocalDateTime endTime = LocalDateTime.parse(parts[1]);
-            slotList.add(new SlotCreationRequest(startTime,endTime));
+        if(slots!=null) {
+            for(String slot: slots) {
+                String[] parts = slot.split("_");
+                LocalDateTime startTime = LocalDateTime.parse(parts[0]);
+                LocalDateTime endTime = LocalDateTime.parse(parts[1]);
+                slotList.add(new SlotCreationRequest(startTime,endTime));
+            }
         }
         return ApiResponse.<List<Room>>builder()
                 .data(roomService.getRoomByTypeAndSlot(typeId,slotList))
