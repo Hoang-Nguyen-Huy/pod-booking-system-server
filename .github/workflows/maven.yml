@@ -35,6 +35,12 @@ jobs:
           echo "server:" >> src/main/resources/application.yaml
           echo "  port: 8080" >> src/main/resources/application.yaml
           echo "" >> src/main/resources/application.yaml
+          echo "openapi:" >> src/main/resources/application.yaml
+          echo "  service: " >> src/main/resources/application.yaml
+          echo "    api-docs: api-service" >> src/main/resources/application.yaml
+          echo "    server: \"${{ secrets.SERVER_API_URL }}\"" >> src/main/resources/application.yaml
+          echo "    title: API Service" >> src/main/resources/application.yaml
+          echo "    version: 1.0.0" >> src/main/resources/application.yaml
           echo "spring:" >> src/main/resources/application.yaml
           echo "  datasource:" >> src/main/resources/application.yaml
           echo "    url: \"${{ secrets.DATABASE_URL }}\"" >> src/main/resources/application.yaml
