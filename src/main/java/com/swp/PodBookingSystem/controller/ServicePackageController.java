@@ -25,8 +25,6 @@ public class ServicePackageController {
 
     @GetMapping
     ApiResponse<List<ServicePackage>> getServicePackages(){
-//        List<ServicePackage> servicePackageList = servicePackageService.findAll();
-//        servicePackageList.forEach(servicePackage -> servicePackage.setOrderDetails(null));
         return ApiResponse.<List<ServicePackage>>builder()
                 .data(servicePackageService.findAll())
                 .build();

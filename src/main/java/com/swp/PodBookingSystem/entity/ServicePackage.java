@@ -30,7 +30,7 @@ public class ServicePackage {
     @Column(name = "discountPercentage")
     int discountPercentage;
 
-    @JsonIgnore
+
     @OneToMany(mappedBy = "servicePackage", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     List<OrderDetail> orderDetails;
