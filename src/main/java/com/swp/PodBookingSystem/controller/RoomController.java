@@ -81,7 +81,7 @@ public class RoomController {
         }
         return ApiResponse.<List<Room>>builder()
                 .data(roomService.getRoomByTypeAndSlot(typeId,slotList))
-                .message("Get rooms by typeId and Slots successfully")
+                .message("Get rooms by typeId and slots successfully")
                 .build();
     }
 
