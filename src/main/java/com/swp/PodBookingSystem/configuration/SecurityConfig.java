@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -46,7 +45,7 @@ public class SecurityConfig {
         httpSecurity.
                 authorizeHttpRequests(request ->
                         request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
-                                .anyRequest().authenticated())
+                                .anyRequest().permitAll())
                 .oauth2Login(oauth2login -> oauth2login.loginPage("http://localhost:3000/login")
                         .successHandler(((request, response, authentication) ->
                                 response.sendRedirect("/auth/login/google"))))
