@@ -1,6 +1,5 @@
 package com.swp.PodBookingSystem.controller;
 
-import com.swp.PodBookingSystem.dto.request.Payment.PaymentReqDTO;
 import com.swp.PodBookingSystem.dto.respone.Payment.PaymentResDTO;
 import com.swp.PodBookingSystem.dto.respone.Payment.TransactionStatusDTO;
 import com.swp.PodBookingSystem.service.PaymentService;
@@ -20,9 +19,10 @@ public class PaymentController {
     private PaymentService paymentService;
 
     @GetMapping("/url")
-    public ResponseEntity<?> generatePaymentUrl(@Valid @RequestBody PaymentReqDTO paymentRequestDTO, HttpServletRequest request) {
+    public ResponseEntity<?> generatePaymentUrl( @RequestParam("amount") long amount,
+                                                 @RequestParam("orderId") String orderId, HttpServletRequest request) {
         String clientIp = request.getRemoteAddr();
-        PaymentResDTO paymentResDTO = paymentService.generatePaymentUrl(paymentRequestDTO.getAmount(), paymentRequestDTO.getOrderId(), clientIp);
+        PaymentResDTO paymentResDTO = paymentService.generatePaymentUrl(amount, orderId, clientIp);
         return ResponseEntity.status(HttpStatus.OK).body(paymentResDTO);
     }
 
