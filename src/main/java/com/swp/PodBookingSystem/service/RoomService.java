@@ -1,9 +1,12 @@
 package com.swp.PodBookingSystem.service;
 
 import com.swp.PodBookingSystem.dto.request.Room.RoomCreationRequest;
+import com.swp.PodBookingSystem.dto.request.Slot.SlotCreationRequest;
+import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.respone.Room.RoomResponse;
 import com.swp.PodBookingSystem.entity.Room;
 import com.swp.PodBookingSystem.entity.RoomType;
+import com.swp.PodBookingSystem.entity.ServicePackage;
 import com.swp.PodBookingSystem.mapper.RoomMapper;
 import com.swp.PodBookingSystem.repository.RoomRepository;
 import com.swp.PodBookingSystem.repository.RoomTypeRepository;
@@ -16,7 +19,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +36,10 @@ public class RoomService {
     [POST]: /rooms
      */
     public RoomResponse createRoom(RoomCreationRequest request) {
-        Optional<RoomType> roomType = roomTypeRepository.findById(request.getRoomTypeId());
+        Optional<RoomType> roomType = Optional.empty();
+        if (request.getRoomTypeId() != null) {
+            roomType = roomTypeRepository.findById(request.getRoomTypeId());
+        }
         Room newRoom = roomMapper.toRoom(request);
         newRoom.setRoomType(roomType.orElse(null));
         return roomMapper.toRoomResponse(roomRepository.save(newRoom));
@@ -51,6 +60,31 @@ public class RoomService {
         return roomMapper.toRoomResponse(roomRepository.findById(roomId));
     }
 
+    public boolean isRoomAvailable(Integer roomId, LocalDateTime startTime, LocalDateTime endTime) {
+        return roomRepository.isRoomAvailable(roomId, startTime, endTime);
+    }
+
+    public List<Room> getRoomByTypeAndSlot(Integer typeId,List<SlotCreationRequest> slots ) {
+        List<Room> roomList = roomRepository.findRoomsByTypeId(typeId);
+        List<Room> availableRooms = new ArrayList<>();
+        for (Room room : roomList) {
+            boolean isAvailableForAllSlots = true;
+
+            for (SlotCreationRequest slot : slots) {
+
+                if (!isRoomAvailable(room.getId(), slot.getStartTime(), slot.getEndTime())) {
+                    isAvailableForAllSlots = false;
+                    break;
+                }
+            }
+            if (isAvailableForAllSlots) {
+                availableRooms.add(room);
+            }
+        }
+
+        return availableRooms;
+    }
+
     /*
     [GET]: /rooms/address&capacity&startTime&endTime&page&take
      */
@@ -58,6 +92,8 @@ public class RoomService {
         Pageable pageable = PageRequest.of(page - 1, take);
         return roomRepository.findFilteredRoomsOnLandingPage(address, capacity, startTime, endTime, pageable);
     }
+
+
 
     /*
     [PUT]: /rooms/roomId
@@ -85,4 +121,6 @@ public class RoomService {
         roomRepository.deleteById(roomId);
         return "Delete room " + roomId + " successfully";
     }
+
+
 }

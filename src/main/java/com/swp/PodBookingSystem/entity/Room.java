@@ -1,5 +1,6 @@
 package com.swp.PodBookingSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.swp.PodBookingSystem.enums.RoomStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -37,6 +38,7 @@ public class Room {
     LocalDate updatedAt;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "typeId", nullable = true)
     RoomType roomType;
 

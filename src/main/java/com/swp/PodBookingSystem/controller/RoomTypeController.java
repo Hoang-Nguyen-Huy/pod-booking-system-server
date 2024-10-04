@@ -22,7 +22,6 @@ import java.util.Optional;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RoomTypeController {
     RoomTypeService roomTypeService;
-
     @PostMapping
     ApiResponse<RoomTypeResponse> createRoomType(@RequestBody RoomTypeCreationRequest request) {
         return ApiResponse.<RoomTypeResponse>builder()
