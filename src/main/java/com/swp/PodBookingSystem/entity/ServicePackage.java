@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 import java.util.List;
 
@@ -28,7 +30,8 @@ public class ServicePackage {
     @Column(name = "discountPercentage")
     int discountPercentage;
 
-    @JsonIgnore
+
     @OneToMany(mappedBy = "servicePackage", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     List<OrderDetail> orderDetails;
 }
