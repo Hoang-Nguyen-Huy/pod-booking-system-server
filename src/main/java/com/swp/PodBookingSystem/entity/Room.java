@@ -38,7 +38,6 @@ public class Room {
     LocalDate updatedAt;
 
     @ManyToOne
-    @JsonIgnore
     @JoinColumn(name = "typeId", nullable = true)
     RoomType roomType;
 
