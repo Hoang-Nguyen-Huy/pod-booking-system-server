@@ -1,11 +1,13 @@
 package com.swp.PodBookingSystem.service;
 
+import com.swp.PodBookingSystem.dto.request.Room.RoomAvailabilityDTO;
 import com.swp.PodBookingSystem.dto.request.Room.RoomCreationRequest;
 import com.swp.PodBookingSystem.dto.request.Slot.SlotCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.Calendar.DateResponse;
 import com.swp.PodBookingSystem.dto.respone.Calendar.RoomDTO;
 import com.swp.PodBookingSystem.dto.respone.Calendar.SlotDTO;
 import com.swp.PodBookingSystem.dto.respone.Room.RoomResponse;
+import com.swp.PodBookingSystem.entity.OrderDetail;
 import com.swp.PodBookingSystem.entity.Room;
 import com.swp.PodBookingSystem.entity.RoomType;
 import com.swp.PodBookingSystem.mapper.RoomMapper;
@@ -124,7 +126,8 @@ public class RoomService {
         return "Delete room " + roomId + " successfully";
     }
 
-    public List<DateResponse> getCalendar(List<Integer> roomIds, Integer servicePackageId, LocalDate selectedDate, List<String> slots) {
+    public List<DateResponse> getCalendar(List<Integer> roomIds, Integer servicePackageId, LocalDate selectedDate, List<String> slots)
+    {
         List<DateResponse> response = new ArrayList<>();
         List<LocalDate> dates = new ArrayList<>();
 
@@ -168,4 +171,20 @@ public class RoomService {
         }
         return response;
     }
+
+
+    public List<RoomAvailabilityDTO> getUnavailableRooms(LocalDateTime startTime, LocalDateTime endTime) {
+        List<OrderDetail> orders = roomRepository.findRoomAvailabilityWithinDateRange(startTime, endTime);
+        System.out.println(orders.toString());
+        return orders.stream()
+                .map(order -> RoomAvailabilityDTO.builder()
+                        .roomId(order.getRoom().getId()) // Assuming Room has an 'id' field
+                        .name(order.getRoom().getName()) // Assuming Room has a 'name' field
+                        .startTime(order.getStartTime())
+                        .endTime(order.getEndTime())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+
 }
