@@ -2,11 +2,12 @@ package com.swp.PodBookingSystem.service;
 
 import com.swp.PodBookingSystem.dto.request.Room.RoomCreationRequest;
 import com.swp.PodBookingSystem.dto.request.Slot.SlotCreationRequest;
-import com.swp.PodBookingSystem.dto.respone.ApiResponse;
+import com.swp.PodBookingSystem.dto.respone.Calendar.DateResponse;
+import com.swp.PodBookingSystem.dto.respone.Calendar.RoomDTO;
+import com.swp.PodBookingSystem.dto.respone.Calendar.SlotDTO;
 import com.swp.PodBookingSystem.dto.respone.Room.RoomResponse;
 import com.swp.PodBookingSystem.entity.Room;
 import com.swp.PodBookingSystem.entity.RoomType;
-import com.swp.PodBookingSystem.entity.ServicePackage;
 import com.swp.PodBookingSystem.mapper.RoomMapper;
 import com.swp.PodBookingSystem.repository.RoomRepository;
 import com.swp.PodBookingSystem.repository.RoomTypeRepository;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -119,5 +121,48 @@ public class RoomService {
         return "Delete room " + roomId + " successfully";
     }
 
+    public List<DateResponse> getCalendar(List<Integer> roomIds, Integer servicePackageId, LocalDate selectedDate, List<String> slots) {
+        List<DateResponse> response = new ArrayList<>();
+        List<LocalDate> dates = new ArrayList<>();
 
+        if(servicePackageId!= null && servicePackageId == 1) {
+            LocalDateTime currentDate = selectedDate.atStartOfDay();
+            int count = 1;
+            do {
+                dates.add(currentDate.toLocalDate());
+                currentDate.plusDays(7);
+            } while(count++<=3);
+        } else if (servicePackageId!= null && servicePackageId == 2) {
+            LocalDateTime currentDate = selectedDate.atStartOfDay();
+            int count = 1;
+            do {
+                dates.add(currentDate.toLocalDate());
+                currentDate.plusDays(1);
+            } while(count++<=29);
+        } else {
+            LocalDateTime currentDate = selectedDate.atStartOfDay();
+            dates.add(currentDate.toLocalDate());
+        }
+        for(LocalDate date: dates) {
+            List<RoomDTO> rooms = roomIds.parallelStream().map(roomId -> {
+                RoomDTO room = new RoomDTO();
+                Optional<Room> findRoom = roomRepository.findById((roomId));
+                Room roomFromDB = findRoom.orElseThrow(() -> new RuntimeException("Room not found"));
+                room.setRoomId(roomFromDB.getId());
+                room.setRoomName(roomFromDB.getName());
+                LocalDateTime currentDate = date.atStartOfDay();
+
+                List<SlotDTO> slotResponse = slots.parallelStream().map(slot->{
+                    String[] parts = slot.split("-");
+                    LocalDateTime startTime = currentDate.withHour(Integer.parseInt(parts[0].split(":")[0].trim()));
+                    LocalDateTime endTime = currentDate.withHour(Integer.parseInt(parts[1].split(":")[0].trim()));
+                    return new SlotDTO(startTime, endTime, roomRepository.isRoomAvailable(roomFromDB.getId(),startTime, endTime));
+                }).collect(Collectors.toList());
+                room.setSlots(slotResponse);
+                return room;
+            }).collect(Collectors.toList());
+            response.add(new DateResponse(date,rooms));
+        }
+        return response;
+    }
 }
