@@ -12,7 +12,8 @@ import com.swp.PodBookingSystem.dto.respone.IntrospectResponse;
 
 import com.swp.PodBookingSystem.dto.respone.RefreshTokenResponse;
 import com.swp.PodBookingSystem.service.AuthenticationService;
-import jakarta.servlet.http.HttpServletResponse;
+import com.swp.PodBookingSystem.service.SendEmailService;
+import jakarta.mail.MessagingException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
 import java.text.ParseException;
-import java.util.Map;
+
 
 @RestController
 @RequestMapping("/auth")
@@ -31,6 +32,7 @@ import java.util.Map;
 @Slf4j
 public class AuthenticationController {
     AuthenticationService authenticationService;
+    SendEmailService sendEmailService;
 
     @GetMapping("/login/google")
     public RedirectView loginGoogle(OAuth2AuthenticationToken token) throws ParseException {
@@ -77,7 +79,8 @@ public class AuthenticationController {
     }
 
     @PostMapping("/forgot-password")
-    ApiResponse forgotPassword(@RequestBody ForgotPasswordRequest request) {
+    ApiResponse forgotPassword(@RequestBody ForgotPasswordRequest request) throws MessagingException {
+        authenticationService.forgotPassword(request);
         return ApiResponse.builder()
                 .message("Gửi mail xác nhận thành công")
                 .build();

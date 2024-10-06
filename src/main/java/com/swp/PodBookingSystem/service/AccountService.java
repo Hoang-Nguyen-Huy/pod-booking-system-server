@@ -3,6 +3,8 @@ package com.swp.PodBookingSystem.service;
 import com.swp.PodBookingSystem.dto.request.Account.AccountCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.AccountResponse;
 import com.swp.PodBookingSystem.entity.Account;
+import com.swp.PodBookingSystem.exception.AppException;
+import com.swp.PodBookingSystem.exception.ErrorCode;
 import com.swp.PodBookingSystem.mapper.AccountMapper;
 import com.swp.PodBookingSystem.repository.AccountRepository;
 import lombok.AccessLevel;
@@ -38,7 +40,6 @@ public class AccountService {
     }
 
     public Account getAccountById(String id) {
-        return accountRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Account not found"));
+        return accountRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
     }
 }

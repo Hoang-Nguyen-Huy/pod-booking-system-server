@@ -1,5 +1,6 @@
 package com.swp.PodBookingSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.swp.PodBookingSystem.enums.RoomStatus;
 import jakarta.persistence.*;
 import lombok.*;

@@ -1,5 +1,8 @@
 package com.swp.PodBookingSystem.repository;
 
+import com.swp.PodBookingSystem.dto.request.Room.RoomAvailabilityDTO;
+import com.swp.PodBookingSystem.dto.respone.ApiResponse;
+import com.swp.PodBookingSystem.entity.OrderDetail;
 import com.swp.PodBookingSystem.entity.Room;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -8,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface RoomRepository extends JpaRepository<Room, Integer> {
 
@@ -27,5 +31,22 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
                                  @Param("startTime") LocalDateTime startTime,
                                  @Param("endTime") LocalDateTime endTime,
                                  Pageable pageable);
+
+    @Query("SELECT r FROM Room r WHERE r.roomType.id = :typeId")
+    List<Room> findRoomsByTypeId(@Param("typeId") Integer typeId);
+
+    @Query("SELECT CASE WHEN COUNT(o) = 0 THEN true ELSE false END " +
+            "FROM OrderDetail o WHERE o.room.id = :roomId " +
+            "AND (:startTime < o.endTime AND :endTime > o.startTime)")
+    boolean isRoomAvailable(@Param("roomId") Integer roomId,
+                            @Param("startTime") LocalDateTime startTime,
+                            @Param("endTime") LocalDateTime endTime);
+
+    @Query("SELECT o " +
+            "FROM OrderDetail o " +
+            "WHERE o.startTime >= :startTime AND o.endTime <= :endTime")
+    List<OrderDetail> findRoomAvailabilityWithinDateRange(
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime);
 
 }
