@@ -1,12 +1,15 @@
 package com.swp.PodBookingSystem.controller;
 
+import com.swp.PodBookingSystem.dto.request.Room.RoomAvailabilityDTO;
 import com.swp.PodBookingSystem.dto.request.Slot.SlotCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.request.Room.RoomCreationRequest;
 import com.swp.PodBookingSystem.dto.request.Room.RoomPaginationDTO;
+import com.swp.PodBookingSystem.dto.respone.Calendar.DateResponse;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.dto.respone.Room.RoomResponse;
 import com.swp.PodBookingSystem.entity.Room;
+import com.swp.PodBookingSystem.service.OrderDetailService;
 import com.swp.PodBookingSystem.service.RoomService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -15,10 +18,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -82,6 +85,28 @@ public class RoomController {
         return ApiResponse.<List<Room>>builder()
                 .data(roomService.getRoomByTypeAndSlot(typeId,slotList))
                 .message("Get rooms by typeId and slots successfully")
+                .build();
+    }
+
+    @GetMapping("/calendar")
+    ApiResponse<List<DateResponse>> getCalendar(@RequestParam List<Integer> roomIds,
+                                                @RequestParam(required = false) Integer servicePackageId,
+                                                @RequestParam LocalDate selectedDate,
+                                                @RequestParam List<String> slots
+                                        ) {
+        return ApiResponse.<List<DateResponse>>builder()
+                .data(roomService.getCalendar(roomIds,servicePackageId,selectedDate,slots))
+                .message("Get calendar successfully")
+                .build();
+    }
+
+    @GetMapping("/unavailable")
+    ApiResponse<List<RoomAvailabilityDTO>> getUnavailableRooms(@RequestParam LocalDateTime startTime,
+                                                                @RequestParam LocalDateTime endTime
+                                                               ) {
+        return ApiResponse.<List<RoomAvailabilityDTO>>builder()
+                .data(roomService.getUnavailableRooms(startTime,endTime))
+                .message("Get unavailable rooms successfully")
                 .build();
     }
 

@@ -1,21 +1,23 @@
 package com.swp.PodBookingSystem.service;
 
+import com.swp.PodBookingSystem.dto.request.Room.RoomAvailabilityDTO;
 import com.swp.PodBookingSystem.dto.respone.OrderDetailResponse;
 import com.swp.PodBookingSystem.entity.OrderDetail;
 import com.swp.PodBookingSystem.mapper.OrderDetailMapper;
 import com.swp.PodBookingSystem.repository.OrderDetailRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 
 @Service
 public class OrderDetailService {
-    @Autowired
+
     private OrderDetailRepository orderDetailRepository;
 
-    @Autowired
     private OrderDetailMapper orderDetailMapper;
 
     public List<OrderDetailResponse> getAllOrders() {
