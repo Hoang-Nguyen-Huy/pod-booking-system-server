@@ -7,10 +7,13 @@ import com.swp.PodBookingSystem.dto.request.CalendarRequest;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.respone.AccountResponse;
 import com.swp.PodBookingSystem.entity.Account;
+import com.swp.PodBookingSystem.exception.AppException;
+import com.swp.PodBookingSystem.exception.ErrorCode;
 import com.swp.PodBookingSystem.mapper.AccountMapper;
 import com.swp.PodBookingSystem.service.AccountService;
 import com.swp.PodBookingSystem.service.SendEmailService;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -34,6 +38,7 @@ public class AccountController {
     AccountService accountService;
     AccountMapper accountMapper;
     SendEmailService sendEmailService;
+    JwtDecoder jwtDecoder;
 
     @PostMapping
     ApiResponse<AccountResponse> createAccount(@RequestBody @Valid AccountCreationRequest request) {
@@ -60,8 +65,18 @@ public class AccountController {
     }
 
     @GetMapping("/me")
-    ApiResponse<AccountResponseClient> getMe(@AuthenticationPrincipal Jwt jwt) {
-        var result = accountService.getAccountById("d6b9469e-978f-4f84-b2bb-5910c6240deb");
+    ApiResponse<AccountResponseClient> getMe(@RequestHeader("Authorization") String token, HttpServletRequest request) {
+        // Kiểm tra token bắt đầu bằng "Bearer "
+        if (token == null || !token.startsWith("Bearer ")) {
+            throw new AppException(ErrorCode.INVALID_TOKEN);
+        }
+
+        token = token.substring(7);
+
+        Jwt jwt = jwtDecoder.decode(token);
+        String accountId = jwt.getClaimAsString("accountId");
+
+        var result = accountService.getAccountById(accountId);
         return ApiResponse.<AccountResponseClient>builder()
                 .data(accountMapper.toAccountResponseClient(result))
                 .message("Lấy thông tin cá nhân thành công")
