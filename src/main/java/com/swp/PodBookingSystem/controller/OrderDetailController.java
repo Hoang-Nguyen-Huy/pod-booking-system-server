@@ -53,23 +53,7 @@
                     .build();
         }
 
-        @PostMapping
-        public ApiResponse<OrderDetailResponse> createOrderDetail(@RequestBody OrderDetailCreationRequest request) {
-            try {
-                OrderDetailResponse createOrderDetail = orderDetailService.createOrderDetail(request);
-                return ApiResponse.<OrderDetailResponse>builder()
-                        .data(createOrderDetail)
-                        .message("OrderDetail created successfully")
-                        .code(HttpStatus.CREATED.value())
-                        .build();
-            } catch (Exception e) {
-                log.error("Error creating order detail: ", e);
-                return ApiResponse.<OrderDetailResponse>builder()
-                        .message("Failed to create order detail: " + e.getMessage())
-                        .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                        .build();
-            }
-        }
+
 
 
 

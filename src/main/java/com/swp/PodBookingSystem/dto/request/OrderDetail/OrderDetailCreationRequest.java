@@ -20,7 +20,6 @@ public class OrderDetailCreationRequest {
     private ServicePackage servicePackage;
     private Account orderHandler; // If online default null
     private double priceRoom;
-    private Order order ;
     private int discountPercentage;
     private List<OrderStatus> status;  //Pending, Process, Rejected, Paid
     private LocalDateTime startTime;

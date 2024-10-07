@@ -8,6 +8,8 @@ import com.swp.PodBookingSystem.enums.OrderStatus;
 import com.swp.PodBookingSystem.mapper.OrderDetailMapper;
 import com.swp.PodBookingSystem.mapper.OrderMapper;
 import com.swp.PodBookingSystem.repository.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,8 +42,8 @@ public class OrderDetailService {
     @Autowired
     private OrderDetailMapper orderDetailMapper;
 
-    @Autowired
-    private OrderService orderService;
+    private static final Logger log = LoggerFactory.getLogger(OrderService.class);
+
 
     public List<OrderDetailResponse> getAllOrders() {
         List<OrderDetail> orders = orderDetailRepository.findAll();
@@ -79,62 +81,66 @@ public class OrderDetailService {
 
 
 
-    public OrderDetailResponse createOrderDetail(OrderDetailCreationRequest request) {
+    public OrderDetailResponse createOrderDetail(OrderDetailCreationRequest request, Order order, Room room, OrderStatus status) {
+        try {
+
+            // Step 1: Create a new OrderDetail entity
+            OrderDetail response = new OrderDetail();
+
+            // Set customer
+            Account customer = accountRepository.findById(request.getCustomer().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Customer not found"));
+            response.setCustomer(customer);
 
 
-        // Step 1: Create a new OrderDetail entity
-        OrderDetail response = new OrderDetail();
+            response.setId(UUID.randomUUID().toString());
 
+            response.setOrder(order);
+            // Set building
+            Building building = buildingRepository.findById(request.getBuilding().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Building not found"));
+            response.setBuilding(building);
 
-        // Set customer
-        Account customer = accountRepository.findById(request.getCustomer().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Customer not found"));
+            // Set selected room (assuming only one room is selected here for simplicity)
+            if (room != null) {
+                response.setRoom(room);
+            }
 
-        Order order = orderService.createOrder(customer);
-        response.setOrder(order);
+            // Set service package
+            ServicePackage servicePackage = servicePackageRepository.findById(request.getServicePackage().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Service package not found"));
+            response.setServicePackage(servicePackage);
 
-        response.setId(UUID.randomUUID().toString());
+            // Set order handler
+            if (request.getOrderHandler() != null) {
+                Account orderHandler = accountRepository.findById(request.getOrderHandler().getId())
+                        .orElseThrow(() -> new IllegalArgumentException("Order handler not found"));
+                response.setOrderHandler(orderHandler);
+            }
 
+            // Set other fields
+            response.setPriceRoom(request.getPriceRoom());
+            response.setDiscountPercentage(request.getDiscountPercentage());
+            response.setStatus(status != null ? status : OrderStatus.Pending);
+            response.setStartTime(request.getStartTime());
+            response.setEndTime(request.getEndTime());
+            response.setCreatedAt(LocalDateTime.now());
+            response.setUpdatedAt(LocalDateTime.now());
 
-        response.setCustomer(customer);
+            // Save the OrderDetail and return response
+            return orderDetailMapper.toOrderDetailResponse(orderDetailRepository.save(response));
 
-        // Set building
-        Building building = buildingRepository.findById(request.getBuilding().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Building not found"));
-        response.setBuilding(building);
-
-        // Set selected room (assuming only one room is selected here for simplicity)
-        if (request.getSelectedRooms() != null && !request.getSelectedRooms().isEmpty()) {
-            Room room = roomRepository.findById(request.getSelectedRooms().get(0).getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Room not found"));
-            response.setRoom(room);
+        } catch (IllegalArgumentException e) {
+            // Handle specific validation errors
+            log.error("Validation error creating order detail: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            // Handle general exceptions
+            log.error("Unexpected error creating order detail", e);
+            throw new RuntimeException("Failed to create order detail: " + e.getMessage(), e);
         }
-
-        // Set service package
-        ServicePackage servicePackage = servicePackageRepository.findById(request.getServicePackage().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Service package not found"));
-        response.setServicePackage(servicePackage);
-
-        // Set order handler
-        if (request.getOrderHandler() != null) {
-            Account orderHandler = accountRepository.findById(request.getOrderHandler().getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Order handler not found"));
-            response.setOrderHandler(orderHandler);
-        }
-
-        // Set other fields
-        response.setPriceRoom(request.getPriceRoom());
-        response.setDiscountPercentage(request.getDiscountPercentage());
-        response.setStatus(request.getStatus() != null ? request.getStatus().get(0) : OrderStatus.Pending);
-        response.setStartTime(request.getStartTime());
-        response.setEndTime(request.getEndTime());
-        response.setCreatedAt(LocalDateTime.now());
-        response.setUpdatedAt(LocalDateTime.now());
-
-
-        // Save the OrderDetail and return response
-        return orderDetailMapper.toOrderDetailResponse(orderDetailRepository.save(response));
     }
+
 
 
 }
