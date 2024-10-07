@@ -4,6 +4,7 @@
     import com.swp.PodBookingSystem.dto.respone.OrderResponse;
     import com.swp.PodBookingSystem.entity.Account;
     import com.swp.PodBookingSystem.entity.Order;
+    import com.swp.PodBookingSystem.entity.OrderDetail;
     import com.swp.PodBookingSystem.mapper.OrderMapper;
     import com.swp.PodBookingSystem.repository.AccountRepository;
     import com.swp.PodBookingSystem.repository.OrderRepository;
@@ -11,8 +12,10 @@
     import org.springframework.http.HttpStatus;
     import org.springframework.stereotype.Service;
 
+    import java.time.LocalDateTime;
     import java.util.List;
     import java.util.Optional;
+    import java.util.UUID;
     import java.util.stream.Collectors;
 
     @Service
@@ -51,7 +54,7 @@
                     .collect(Collectors.toList());
         }
 
-        public OrderResponse createOrder(OrderCreationRequest request){
+        public OrderResponse createOrderByRequest(OrderCreationRequest request){
             Optional<Account> accountOptional = accountRepository.findById(request.getAccountId());
 
             Account account = accountOptional.get();
@@ -71,6 +74,15 @@
 
             return response;
 
+        }
 
+        public Order createOrder(Account customer){
+            Order order = new Order();
+            order.setId(UUID.randomUUID().toString());
+            order.setAccount(customer);
+            order.setCreatedAt(LocalDateTime.now());
+            order.setUpdatedAt(LocalDateTime.now());
+            orderRepository.save(order);
+            return order;
         }
     }

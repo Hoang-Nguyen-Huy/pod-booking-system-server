@@ -44,9 +44,9 @@ public class OrderController {
     }
 
     @PostMapping
-    public ApiResponse<OrderResponse> createOrder(@RequestBody OrderCreationRequest request) {
+    public ApiResponse<OrderResponse> createOrderByRequest(@RequestBody OrderCreationRequest request) {
         try{
-            OrderResponse createdOrder = orderService.createOrder(request);
+            OrderResponse createdOrder = orderService.createOrderByRequest(request);
             return ApiResponse.<OrderResponse>builder()
                     .data(createdOrder)
                     .message("Order created successfully")
@@ -61,6 +61,8 @@ public class OrderController {
         }
 
     }
+
+
 
     private void logOrders(List<OrderResponse> orders) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();

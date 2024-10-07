@@ -1,5 +1,7 @@
 package com.swp.PodBookingSystem.dto.request.OrderDetail;
 
+import com.swp.PodBookingSystem.entity.*;
+import com.swp.PodBookingSystem.enums.OrderStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -12,10 +14,16 @@ import java.util.List;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderDetailCreationRequest {
-    private String roomTypeId;
-    private List<Integer> selectedRooms;
-    private String date;
-    private List<Integer> timeSlots;
-    private String servicePackageId;
-    private String customerId;
+    private Account customer;
+    private Building building;
+    private List<Room> selectedRooms;
+    private ServicePackage servicePackage;
+    private Account orderHandler; // If online default null
+    private double priceRoom;
+    private Order order ;
+    private int discountPercentage;
+    private List<OrderStatus> status;  //Pending, Process, Rejected, Paid
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+
 }
