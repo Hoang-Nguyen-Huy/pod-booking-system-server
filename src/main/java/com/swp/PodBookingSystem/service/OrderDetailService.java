@@ -1,5 +1,6 @@
 package com.swp.PodBookingSystem.service;
 
+import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationRequest;
 import com.swp.PodBookingSystem.dto.request.Room.RoomAvailabilityDTO;
 import com.swp.PodBookingSystem.dto.respone.OrderDetailResponse;
 import com.swp.PodBookingSystem.entity.OrderDetail;
@@ -53,6 +54,11 @@ public class OrderDetailService {
         return orderDetails.stream()
                 .map(orderDetailMapper::toOrderDetailResponse) // Use the mapper for conversion
                 .collect(Collectors.toList());
+    }
+
+    public OrderDetailResponse createOderDetail(OrderDetailCreationRequest request){
+        OrderDetail orderDetail = orderDetailMapper.toOrderDetail(request);
+        return orderDetailMapper.toOrderDetailResponse(orderDetailRepository.save(orderDetail));
     }
 
 }

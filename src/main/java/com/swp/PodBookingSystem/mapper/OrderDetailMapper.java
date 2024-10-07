@@ -1,5 +1,7 @@
 package com.swp.PodBookingSystem.mapper;
 
+import com.swp.PodBookingSystem.dto.request.Order.OrderCreationRequest;
+import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.OrderDetailResponse;
 import com.swp.PodBookingSystem.entity.OrderDetail;
 import com.swp.PodBookingSystem.enums.OrderStatus;
@@ -21,4 +23,6 @@ public interface OrderDetailMapper {
     default OrderStatus stringToOrderStatus(String status) {
         return OrderStatus.valueOf(status); // Converts a string to an enum
     }
+
+    OrderDetail toOrderDetail(OrderDetailCreationRequest request);
 }

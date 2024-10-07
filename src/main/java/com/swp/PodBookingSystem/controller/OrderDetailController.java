@@ -1,5 +1,6 @@
 package com.swp.PodBookingSystem.controller;
 
+import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.OrderDetailResponse;
 import com.swp.PodBookingSystem.service.OrderDetailService;
 import lombok.AccessLevel;
@@ -9,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,6 +43,26 @@ public class OrderDetailController {
                 .data(orders)
                 .build();
     }
+
+    @PostMapping
+    public ApiResponse<OrderDetailResponse> createOrderDetail(@RequestBody OrderDetailCreationRequest request) {
+        try {
+            OrderDetailResponse createOrderDetail = orderDetailService.createOderDetail(request);
+            return ApiResponse.<OrderDetailResponse>builder()
+                    .data(createOrderDetail)
+                    .message("OrderDetail created successfully")
+                    .code(HttpStatus.CREATED.value())
+                    .build();
+        } catch (Exception e) {
+            log.error("Error creating order detail: ", e);
+            return ApiResponse.<OrderDetailResponse>builder()
+                    .message("Failed to create order detail: " + e.getMessage())
+                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .build();
+        }
+    }
+
+
 
     private void logOrders(List<OrderDetailResponse> orders) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
