@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -48,6 +49,14 @@ public class RoomTypeService {
      */
     public Optional<RoomTypeResponse> getRoomTypeById(int roomTypeId) {
         return roomTypeMapper.toRoomTypeResponse(roomTypeRepository.findById(roomTypeId));
+    }
+
+    /*
+    [GET]: /room-types/address&capacity&startTime&endTime&page&take
+     */
+    public Page<RoomType> getFilteredRoomTypes(String address, Integer capacity, LocalDateTime startTime, LocalDateTime endTime, int page, int take) {
+        Pageable pageable = PageRequest.of(page - 1, take);
+        return roomTypeRepository.findFilteredRoomTypes(address, capacity, startTime, endTime, pageable);
     }
 
     /*

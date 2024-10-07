@@ -11,8 +11,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,6 +52,25 @@ public class RoomTypeController {
         return ApiResponse.<Optional<RoomTypeResponse>>builder()
                 .data(roomTypeService.getRoomTypeById(roomTypeId))
                 .message("Get room type by Id successfully")
+                .build();
+    }
+
+    @GetMapping("/filtered-room-type")
+    PaginationResponse<List<RoomType>> getFilteredRoomType(@RequestParam(required = false) String address,
+                                                   @RequestParam(required = false) Integer capacity,
+                                                   @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
+                                                   @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime,
+                                                   @RequestParam(defaultValue = "1") int page,
+                                                   @RequestParam(defaultValue = "10") int take) {
+        RoomTypePaginationDTO dto = new RoomTypePaginationDTO(page, take);
+        Page<RoomType> roomTypePage = roomTypeService.getFilteredRoomTypes(address, capacity, startTime, endTime, dto.page, dto.take);
+
+        return PaginationResponse.<List<RoomType>>builder()
+                .data(roomTypePage.getContent())
+                .currentPage(roomTypePage.getNumber() + 1)
+                .totalPage(roomTypePage.getTotalPages())
+                .recordPerPage(roomTypePage.getNumberOfElements())
+                .totalRecord((int) roomTypePage.getTotalElements())
                 .build();
     }
 
