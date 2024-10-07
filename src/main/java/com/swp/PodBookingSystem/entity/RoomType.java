@@ -32,17 +32,4 @@ public class RoomType {
     @ManyToOne
     @JoinColumn(name = "buildingId", nullable = true)
     Building building;
-
-    @Override
-    public String toString() {
-        return "RoomType{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", price=" + price +
-                ", quantity=" + quantity +
-                ", capacity=" + capacity +
-                ", rooms=" + rooms +
-                ", building=" + building +
-                '}';
-    }
 }
