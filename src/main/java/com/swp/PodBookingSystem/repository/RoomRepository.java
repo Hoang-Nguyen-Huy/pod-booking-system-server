@@ -1,7 +1,5 @@
 package com.swp.PodBookingSystem.repository;
 
-import com.swp.PodBookingSystem.dto.request.Room.RoomAvailabilityDTO;
-import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.entity.OrderDetail;
 import com.swp.PodBookingSystem.entity.Room;
 import org.springframework.data.domain.Page;
