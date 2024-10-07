@@ -57,6 +57,7 @@ public class RoomTypeService {
         Optional<RoomType> existingRoomTypeOpt = roomTypeRepository.findById(roomTypeId);
 
         RoomType existingRoomType = existingRoomTypeOpt.orElseThrow(() -> new RuntimeException("RoomType not found"));
+        System.out.println(request.toString());
 
         Integer newBuildingId = request.getBuildingId();
         Optional<Building> newBuilding = buildingRepository.findById(newBuildingId);

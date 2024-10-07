@@ -12,6 +12,7 @@ import lombok.experimental.FieldDefaults;
 public class RoomTypeResponse {
     Integer id;
     String name;
+    int price;
     int quantity;
     int capacity;
     Building building;

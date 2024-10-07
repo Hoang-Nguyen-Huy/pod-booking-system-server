@@ -10,6 +10,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RoomTypeCreationRequest {
     String name;
+    int price;
     int quantity;
     int capacity;
     Integer buildingId;
