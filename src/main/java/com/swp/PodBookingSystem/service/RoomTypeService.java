@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -51,12 +52,21 @@ public class RoomTypeService {
     }
 
     /*
+    [GET]: /room-types/address&capacity&startTime&endTime&page&take
+     */
+    public Page<RoomType> getFilteredRoomTypes(String address, Integer capacity, LocalDateTime startTime, LocalDateTime endTime, int page, int take) {
+        Pageable pageable = PageRequest.of(page - 1, take);
+        return roomTypeRepository.findFilteredRoomTypes(address, capacity, startTime, endTime, pageable);
+    }
+
+    /*
     [PUT]: /room-types/roomTypeId
      */
     public RoomTypeResponse updateRoomType(int roomTypeId, RoomTypeCreationRequest request) {
         Optional<RoomType> existingRoomTypeOpt = roomTypeRepository.findById(roomTypeId);
 
         RoomType existingRoomType = existingRoomTypeOpt.orElseThrow(() -> new RuntimeException("RoomType not found"));
+        System.out.println(request.toString());
 
         Integer newBuildingId = request.getBuildingId();
         Optional<Building> newBuilding = buildingRepository.findById(newBuildingId);

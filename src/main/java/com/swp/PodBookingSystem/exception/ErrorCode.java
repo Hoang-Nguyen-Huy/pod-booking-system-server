@@ -20,6 +20,7 @@ public enum ErrorCode {
     UNAUTHENTICATED(401, "Chưa được xác thực", HttpStatus.UNAUTHORIZED, "system"),
     UNAUTHORIZED(403, "Bạn không có quyền hạn", HttpStatus.FORBIDDEN, "system"),
     REFRESH_TOKEN_NOT_EXIST(404, "Refresh token không tồn tại", HttpStatus.NOT_FOUND, "refreshToken"),
+    INVALID_TOKEN(401, "Token không đúng", HttpStatus.UNAUTHORIZED, "accessToken"),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode, String field) {

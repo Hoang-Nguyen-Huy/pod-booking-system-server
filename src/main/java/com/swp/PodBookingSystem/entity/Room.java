@@ -22,7 +22,6 @@ public class Room {
     Integer id;
 
     String name;
-    int price;
     String description;
 
     @Column(nullable = true)
