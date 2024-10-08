@@ -81,8 +81,9 @@ public class OrderDetailService {
 
 
 
-    public OrderDetailResponse createOrderDetail(OrderDetailCreationRequest request, Order order, Room room, OrderStatus status, Account account) {
+    public OrderDetailResponse createOrderDetail(OrderDetailCreationRequest request, Order order, Room room, OrderStatus status, Account account, LocalDateTime startTime, LocalDateTime endTime) {
         try {
+
 
             // Step 1: Create a new OrderDetail entity
             OrderDetail response = new OrderDetail();
@@ -115,14 +116,16 @@ public class OrderDetailService {
             }
 
 
+
+
             // Set other fields
             response.setPriceRoom(request.getPriceRoom());
             response.setDiscountPercentage(request.getDiscountPercentage());
-            response.setStatus(status != null ? status : OrderStatus.Pending);
-            response.setStartTime(request.getStartTime());
-            response.setEndTime(request.getEndTime());
+            response.setStartTime(startTime);
+            response.setEndTime(endTime);
             response.setCreatedAt(LocalDateTime.now());
             response.setUpdatedAt(LocalDateTime.now());
+            response.setStatus(OrderStatus.Successfully);
 
             // Save the OrderDetail and return response
             return orderDetailMapper.toOrderDetailResponse(orderDetailRepository.save(response));

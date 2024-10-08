@@ -71,6 +71,11 @@ public class OrderController {
     @PostMapping
     public ApiResponse<List<OrderDetailResponse>> createOrderByRequest(@RequestBody OrderDetailCreationRequest request, @RequestHeader("Authorization") String token) {
         try {
+            //Check còn phòng kh
+            //Còn phòng auto succes
+            //Trống thì trả pending
+            //Trả về FE status order success hay đang pending để hiện
+
             if (token == null || !token.startsWith("Bearer ")) {
                 throw new AppException(ErrorCode.INVALID_TOKEN);
             }
@@ -84,40 +89,83 @@ public class OrderController {
 
                 // Step 2: Iterate over each room and status to create OrderDetails
                 List<Room> selectedRooms = request.getSelectedRooms();
-                List<OrderStatus> statuses = request.getStatus();
 
-                if (selectedRooms == null || selectedRooms.isEmpty() || statuses == null || statuses.isEmpty()) {
-                    return ApiResponse.<List<OrderDetailResponse>>builder()
-                            .message("Selected rooms or statuses cannot be empty")
-                            .code(HttpStatus.BAD_REQUEST.value())
-                            .build();
-                }
-
-                if (selectedRooms.size() != statuses.size()) {
-                    return ApiResponse.<List<OrderDetailResponse>>builder()
-                            .message("The number of selected rooms must be equal to the number of statuses")
-                            .code(HttpStatus.BAD_REQUEST.value())
-                            .build();
-                }
 
                 List<OrderDetailResponse> orderDetails = new ArrayList<>();
                 Order orderCreated = new Order();// Step 2: Parse start and end times// Step 2: Parse start and end times
 
-                LocalDateTime startTime = request.getStartTime();
+                String startTime = request.getStartTime().toString();
+                String endTime = request.getEndTime().toString();
 
-                // Determine booking schedule based on service package ID
                 int servicePackageId = request.getServicePackage().getId();
-                // Loop through selected rooms and statuses to create order details
-                for (int i = 0; i < selectedRooms.size(); i++) {
-                    OrderDetailResponse orderDetailResponse = new OrderDetailResponse();
-                    orderCreated = orderService.createOrderByRequest(request, account);
 
-                    Room room = selectedRooms.get(i);
-                    OrderStatus status = statuses.get(i);
+                switch (servicePackageId){
 
-                    orderDetailResponse = orderDetailService.createOrderDetail(request, orderCreated, room, status, account);
-                    orderDetails.add(orderDetailResponse);
+                    // 4 week, same day in week
+                    case 1:
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+                        LocalDateTime originalStartTime = LocalDateTime.parse(startTime, formatter);
+                        LocalDateTime originalEndTime = LocalDateTime.parse(endTime, formatter);
+
+                        // Loop through the 4 weeks
+                        for (int week = 0; week < 4; week++) {
+                            // Add 'week' weeks to the original start and end time to get new dates
+                            LocalDateTime newStartTime = originalStartTime.plusWeeks(week);
+                            LocalDateTime newEndTime = originalEndTime.plusWeeks(week);
+
+
+                            for (int i = 0; i < selectedRooms.size(); i++) {
+                                OrderDetailResponse orderDetailResponse = new OrderDetailResponse();
+                                orderCreated = orderService.createOrderByRequest(request, account);
+
+                                Room room = selectedRooms.get(i);
+
+                                // Create order detail for each week
+                                orderDetailResponse = orderDetailService.createOrderDetail(
+                                        request, orderCreated, room, OrderStatus.Successfully, account, newStartTime, newEndTime);
+                                orderDetails.add(orderDetailResponse);
+                            }
+                        }
+                        break;
+
+                        //30 day
+                    case 2:
+                        formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+                        originalStartTime = LocalDateTime.parse(startTime, formatter);
+                        originalEndTime = LocalDateTime.parse(endTime, formatter);
+
+                        // Loop for 30 days
+                        for (int day = 0; day < 30; day++) {
+                            // Increment the start time by the current day
+                            LocalDateTime newStartTime = originalStartTime.plusDays(day);
+                            LocalDateTime newEndTime = originalEndTime.plusDays(day);
+
+                            for (Room room : selectedRooms) {
+                                orderCreated = orderService.createOrderByRequest(request, account);
+                                OrderDetailResponse orderDetailResponse = orderDetailService.createOrderDetail(
+                                        request, orderCreated, room, OrderStatus.Successfully, account, newStartTime, newEndTime);
+                                orderDetails.add(orderDetailResponse);
+                            }
+                        }
+                        break;
+
+                        //standard
+                    case 3:
+                        for (int i = 0; i < selectedRooms.size(); i++) {
+                            OrderDetailResponse orderDetailResponse = new OrderDetailResponse();
+                            orderCreated = orderService.createOrderByRequest(request, account);
+
+                            Room room = selectedRooms.get(i);
+
+                            orderDetailResponse = orderDetailService.createOrderDetail(request, orderCreated, room, OrderStatus.Successfully , account, request.getStartTime(), request.getEndTime());
+                            orderDetails.add(orderDetailResponse);
+                        }
+                        break;
+
+                    default:
+                        throw new AppException(ErrorCode.INVALID_KEY);
                 }
+
 
                 // Return response after successfully creating order details
                 return ApiResponse.<List<OrderDetailResponse>>builder()
