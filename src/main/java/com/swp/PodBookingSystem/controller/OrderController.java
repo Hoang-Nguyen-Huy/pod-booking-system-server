@@ -1,15 +1,19 @@
 package com.swp.PodBookingSystem.controller;
 
-import com.swp.PodBookingSystem.dto.request.Order.OrderCreationRequest;
 import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
-import com.swp.PodBookingSystem.dto.respone.OrderDetailResponse;
+import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderResponse;
+import com.swp.PodBookingSystem.entity.Account;
 import com.swp.PodBookingSystem.entity.Order;
 import com.swp.PodBookingSystem.entity.Room;
 import com.swp.PodBookingSystem.enums.OrderStatus;
+import com.swp.PodBookingSystem.exception.AppException;
+import com.swp.PodBookingSystem.exception.ErrorCode;
+import com.swp.PodBookingSystem.service.AccountService;
 import com.swp.PodBookingSystem.service.OrderDetailService;
 import com.swp.PodBookingSystem.service.OrderService;
+import com.swp.PodBookingSystem.service.RoomService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -17,9 +21,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -37,6 +42,14 @@ public class OrderController {
 
     @Autowired
     private OrderDetailService orderDetailService;
+
+    @Autowired
+    private AccountService accountService;
+
+    @Autowired
+    private RoomService roomService;
+
+    JwtDecoder jwtDecoder;
 
     @GetMapping
     public ApiResponse<List<OrderResponse>> getAllOrders(){
@@ -57,53 +70,123 @@ public class OrderController {
     }
 
     @PostMapping
-    public ApiResponse<List<OrderDetailResponse>> createOrderByRequest(@RequestBody OrderDetailCreationRequest request) {
+    public ApiResponse<String> createOrderByRequest(@RequestBody OrderDetailCreationRequest request, @RequestHeader("Authorization") String token) {
         try {
-                // Step 2: Iterate over each room and status to create OrderDetails
-                List<Room> selectedRooms = request.getSelectedRooms();
-                List<OrderStatus> statuses = request.getStatus();
+            //Check còn phòng kh
+            //Còn phòng auto succes
+            //Trống thì trả pending
+            //Trả về FE status order success hay đang pending để hiện
+            //Trừ quanlity các amenities, reset sau khi qua ngày
 
-                if (selectedRooms == null || selectedRooms.isEmpty() || statuses == null || statuses.isEmpty()) {
-                    return ApiResponse.<List<OrderDetailResponse>>builder()
-                            .message("Selected rooms or statuses cannot be empty")
-                            .code(HttpStatus.BAD_REQUEST.value())
-                            .build();
-                }
 
-                if (selectedRooms.size() != statuses.size()) {
-                    return ApiResponse.<List<OrderDetailResponse>>builder()
-                            .message("The number of selected rooms must be equal to the number of statuses")
-                            .code(HttpStatus.BAD_REQUEST.value())
-                            .build();
-                }
 
-                List<OrderDetailResponse> orderDetails = new ArrayList<>();
-                Order orderCreated = new Order();// Step 2: Parse start and end times// Step 2: Parse start and end times
+            if (token == null || !token.startsWith("Bearer ")) {
+                throw new AppException(ErrorCode.INVALID_TOKEN);
+            }
 
-            // Determine booking schedule based on service package ID
+            token = token.substring(7);
+            Jwt jwt = jwtDecoder.decode(token);
+            String accountId = jwt.getClaimAsString("accountId");
+            Account account = accountService.getAccountById(accountId);
+            List<Room> selectedRooms = request.getSelectedRooms();
+
+            List<OrderDetailResponse> orderDetails = new ArrayList<>();
+            Order orderCreated = orderService.createOrderByRequest(request, account);
+            String startTime = request.getStartTime().toString();
+            String endTime = request.getEndTime().toString();
             int servicePackageId = request.getServicePackage().getId();
-                // Loop through selected rooms and statuses to create order details
-                for (int i = 0; i < selectedRooms.size(); i++) {
-                    OrderDetailResponse orderDetailResponse = new OrderDetailResponse();
-                    orderCreated = orderService.createOrderByRequest(request);
 
-                    Room room = selectedRooms.get(i);
-                    OrderStatus status = statuses.get(i);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+            LocalDateTime originalStartTime = LocalDateTime.parse(startTime, formatter);
+            LocalDateTime originalEndTime = LocalDateTime.parse(endTime, formatter);
+            boolean isSomeRoomWasBook = false;
 
-                    orderDetailResponse = orderDetailService.createOrderDetail(request, orderCreated, room, status);
-                    orderDetails.add(orderDetailResponse);
+                switch (servicePackageId){
+                    // 4 week, same day in week
+                    case 1:
+                        for (int week = 0; week < 4; week++) {
+                            LocalDateTime newStartTime = originalStartTime.plusWeeks(week);
+                            LocalDateTime newEndTime = originalEndTime.plusWeeks(week);
+                            for (int i = 0; i < selectedRooms.size(); i++) {
+                                OrderDetailResponse orderDetailResponse = new OrderDetailResponse();
+                                Room room = selectedRooms.get(i);
+                                boolean isAvailable = roomService.isRoomAvailable(room.getId(), newStartTime, newEndTime);
+                                if (isAvailable){
+                                    orderDetailResponse = orderDetailService.createOrderDetail(
+                                            request, orderCreated, room, OrderStatus.Successfully, account, newStartTime, newEndTime);
+                                } else {
+                                    isSomeRoomWasBook = true;
+                                    orderDetailResponse = orderDetailService.createOrderDetail(
+                                            request, orderCreated, room, OrderStatus.Pending, account, newStartTime, newEndTime);
+                                }
+                                orderDetails.add(orderDetailResponse);
+                            }
+                        }
+                        break;
+
+                        //30 day
+                    case 2:
+                        for (int day = 0; day < 30; day++) {
+                            LocalDateTime newStartTime = originalStartTime.plusDays(day);
+                            LocalDateTime newEndTime = originalEndTime.plusDays(day);
+                            for (Room room : selectedRooms) {
+                                OrderDetailResponse orderDetailResponse = new OrderDetailResponse();
+                                boolean isAvailable = roomService.isRoomAvailable(room.getId(), newStartTime, newEndTime);
+                                if (isAvailable){
+                                    orderDetailResponse = orderDetailService.createOrderDetail(
+                                            request, orderCreated, room, OrderStatus.Successfully, account, newStartTime, newEndTime);
+                                } else {
+                                    isSomeRoomWasBook = true;
+                                    orderDetailResponse = orderDetailService.createOrderDetail(
+                                            request, orderCreated, room, OrderStatus.Pending, account, newStartTime, newEndTime);
+                                }
+                                orderDetails.add(orderDetailResponse);
+                            }
+                        }
+                        break;
+
+                        //standard
+                    case 3:
+                        for (int i = 0; i < selectedRooms.size(); i++) {
+                            OrderDetailResponse orderDetailResponse = new OrderDetailResponse();
+                            Room room = selectedRooms.get(i);
+                            boolean isAvailable = roomService.isRoomAvailable(room.getId(), request.getStartTime(), request.getEndTime());
+                            if (isAvailable){
+                                orderDetailResponse = orderDetailService.createOrderDetail(
+                                        request, orderCreated, room, OrderStatus.Successfully, account, request.getStartTime(), request.getEndTime());
+                            } else {
+                                isSomeRoomWasBook = true;
+                                orderDetailResponse = orderDetailService.createOrderDetail(
+                                        request, orderCreated, room, OrderStatus.Pending, account, request.getStartTime(), request.getEndTime());
+                            }
+                            orderDetails.add(orderDetailResponse);
+                        }
+                        break;
+
+                    default:
+                        throw new AppException(ErrorCode.INVALID_KEY);
                 }
 
-                // Return response after successfully creating order details
-                return ApiResponse.<List<OrderDetailResponse>>builder()
-                        .data(orderDetails)
-                        .message("Order and order details created successfully")
-                        .code(HttpStatus.CREATED.value())
-                        .build();
+                if (isSomeRoomWasBook) {
+                    String status = "Pending";
+                    return ApiResponse.<String>builder()
+                            .data(status)
+                            .message("Order and order details created successfully but some room was book")
+                            .code(HttpStatus.CREATED.value())
+                            .build();
+                } else {
+                    String status = "Successfully";
+                    return ApiResponse.<String>builder()
+                            .data(status)
+                            .message("Order and order details created successfully  ")
+                            .code(HttpStatus.CREATED.value())
+                            .build();
+                }
+
 
         } catch (Exception e) {
             log.error("Error creating order: ", e);
-            return ApiResponse.<List<OrderDetailResponse>>builder()
+            return ApiResponse.<String>builder()
                     .message("Failed to create order: " + e.getMessage())
                     .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .build();
