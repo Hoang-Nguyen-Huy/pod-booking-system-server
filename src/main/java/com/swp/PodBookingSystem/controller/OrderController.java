@@ -5,9 +5,14 @@ import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationReque
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetailResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderResponse;
+import com.swp.PodBookingSystem.entity.Account;
 import com.swp.PodBookingSystem.entity.Order;
 import com.swp.PodBookingSystem.entity.Room;
 import com.swp.PodBookingSystem.enums.OrderStatus;
+import com.swp.PodBookingSystem.exception.AppException;
+import com.swp.PodBookingSystem.exception.ErrorCode;
+import com.swp.PodBookingSystem.repository.AccountRepository;
+import com.swp.PodBookingSystem.service.AccountService;
 import com.swp.PodBookingSystem.service.OrderDetailService;
 import com.swp.PodBookingSystem.service.OrderService;
 import lombok.AccessLevel;
@@ -17,6 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -38,6 +45,11 @@ public class OrderController {
     @Autowired
     private OrderDetailService orderDetailService;
 
+
+    @Autowired
+            private AccountService accountService;
+    JwtDecoder jwtDecoder;
+
     @GetMapping
     public ApiResponse<List<OrderResponse>> getAllOrders(){
         List<OrderResponse> orders = orderService.getAllOrders();
@@ -57,8 +69,19 @@ public class OrderController {
     }
 
     @PostMapping
-    public ApiResponse<List<OrderDetailResponse>> createOrderByRequest(@RequestBody OrderDetailCreationRequest request) {
+    public ApiResponse<List<OrderDetailResponse>> createOrderByRequest(@RequestBody OrderDetailCreationRequest request, @RequestHeader("Authorization") String token) {
         try {
+            if (token == null || !token.startsWith("Bearer ")) {
+                throw new AppException(ErrorCode.INVALID_TOKEN);
+            }
+
+            token = token.substring(7);
+
+            Jwt jwt = jwtDecoder.decode(token);
+            String accountId = jwt.getClaimAsString("accountId");
+
+            Account account = accountService.getAccountById(accountId);
+
                 // Step 2: Iterate over each room and status to create OrderDetails
                 List<Room> selectedRooms = request.getSelectedRooms();
                 List<OrderStatus> statuses = request.getStatus();
@@ -80,17 +103,19 @@ public class OrderController {
                 List<OrderDetailResponse> orderDetails = new ArrayList<>();
                 Order orderCreated = new Order();// Step 2: Parse start and end times// Step 2: Parse start and end times
 
-            // Determine booking schedule based on service package ID
-            int servicePackageId = request.getServicePackage().getId();
+                LocalDateTime startTime = request.getStartTime();
+
+                // Determine booking schedule based on service package ID
+                int servicePackageId = request.getServicePackage().getId();
                 // Loop through selected rooms and statuses to create order details
                 for (int i = 0; i < selectedRooms.size(); i++) {
                     OrderDetailResponse orderDetailResponse = new OrderDetailResponse();
-                    orderCreated = orderService.createOrderByRequest(request);
+                    orderCreated = orderService.createOrderByRequest(request, account);
 
                     Room room = selectedRooms.get(i);
                     OrderStatus status = statuses.get(i);
 
-                    orderDetailResponse = orderDetailService.createOrderDetail(request, orderCreated, room, status);
+                    orderDetailResponse = orderDetailService.createOrderDetail(request, orderCreated, room, status, account);
                     orderDetails.add(orderDetailResponse);
                 }
 

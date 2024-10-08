@@ -57,10 +57,10 @@ import org.springframework.beans.factory.annotation.Autowired;
                     .collect(Collectors.toList());
         }
 
-        public Order createOrderByRequest(OrderDetailCreationRequest request) {
+        public Order createOrderByRequest(OrderDetailCreationRequest request, Account account) {
             try {
                 Order order = new Order();
-                order.setAccount(request.getCustomer()); // Set the account
+                order.setAccount(account); // Set the account
                 order.setId(UUID.randomUUID().toString());
                 order.setCreatedAt(LocalDateTime.now());
                 order.setUpdatedAt(LocalDateTime.now());

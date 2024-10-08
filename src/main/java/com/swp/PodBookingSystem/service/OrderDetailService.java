@@ -81,16 +81,12 @@ public class OrderDetailService {
 
 
 
-    public OrderDetailResponse createOrderDetail(OrderDetailCreationRequest request, Order order, Room room, OrderStatus status) {
+    public OrderDetailResponse createOrderDetail(OrderDetailCreationRequest request, Order order, Room room, OrderStatus status, Account account) {
         try {
 
             // Step 1: Create a new OrderDetail entity
             OrderDetail response = new OrderDetail();
-
-            // Set customer
-            Account customer = accountRepository.findById(request.getCustomer().getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Customer not found"));
-            response.setCustomer(customer);
+            response.setCustomer(account);
 
 
             response.setId(UUID.randomUUID().toString());
@@ -117,6 +113,7 @@ public class OrderDetailService {
                         .orElseThrow(() -> new IllegalArgumentException("Order handler not found"));
                 response.setOrderHandler(orderHandler);
             }
+
 
             // Set other fields
             response.setPriceRoom(request.getPriceRoom());

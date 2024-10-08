@@ -14,7 +14,6 @@ import java.util.List;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderDetailCreationRequest {
-    private Account customer;
     private Building building;
     private List<Room> selectedRooms;
     private ServicePackage servicePackage;
