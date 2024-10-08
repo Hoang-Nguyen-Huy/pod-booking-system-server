@@ -47,4 +47,5 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
             @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime);
 
+
 }

@@ -1,7 +1,6 @@
     package com.swp.PodBookingSystem.controller;
 
-    import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationRequest;
-    import com.swp.PodBookingSystem.dto.respone.OrderDetailResponse;
+    import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
     import com.swp.PodBookingSystem.service.OrderDetailService;
     import lombok.AccessLevel;
     import lombok.RequiredArgsConstructor;
