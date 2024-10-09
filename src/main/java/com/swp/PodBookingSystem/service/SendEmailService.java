@@ -6,6 +6,7 @@ import biweekly.component.VEvent;
 import biweekly.property.Method;
 import biweekly.util.Duration;
 import com.swp.PodBookingSystem.dto.request.CalendarRequest;
+import com.swp.PodBookingSystem.entity.OrderDetail;
 import jakarta.activation.DataHandler;
 import jakarta.activation.DataSource;
 import jakarta.mail.BodyPart;
@@ -21,16 +22,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +47,9 @@ public class SendEmailService {
     @NonFinal
     @Value("${spring.mail.username}")
     String fromEmailId;
+
+    @Autowired
+    OrderDetailService orderDetailService;
 
     public void sendEmail(String recipient, String body, String subject) throws MessagingException {
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
@@ -98,4 +106,26 @@ public class SendEmailService {
         Instant instant = eventDateTime.atZone(ZoneId.systemDefault()).toInstant();
         return Date.from(instant);
     }
+
+    @Scheduled(cron = "0 0 8 * * ?") //auto send mail at 8AM
+    public void sendMailReminder() throws MessagingException {
+        LocalDate toDay = LocalDate.now();
+        List<OrderDetail> orders = orderDetailService.getNextDayBookings(toDay);
+
+        for (OrderDetail orderDetail : orders){
+            String email = orderDetail.getCustomer().getEmail();
+            String subject = "Room Booking Reminder";
+            String text = "Dear " + orderDetail.getCustomer().getName() + ",\n\n"
+                    + "This is a reminder that you have a booking for room " + orderDetail.getRoom().getName() + " tomorrow.\n"
+                    + "Start Time: " + orderDetail.getStartTime() + "\n"
+                    + "End Time: " + orderDetail.getEndTime() + "\n"
+                    + "Price: $" + orderDetail.getPriceRoom() + "\n\n"
+                    + "Thank you for choosing our service!";
+
+            this.sendEmail(email, text, subject);
+        }
+
+
+    }
+
 }
