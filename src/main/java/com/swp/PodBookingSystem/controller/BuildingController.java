@@ -27,7 +27,7 @@ public class BuildingController {
     ApiResponse<BuildingResponse> createBuilding(@RequestBody BuildingCreationRequest request) {
         return ApiResponse.<BuildingResponse>builder()
                 .data(buildingService.createBuilding(request))
-                .message("Create new building successfully")
+                .message("Tạo chi nhánh thành công")
                 .build();
     }
 

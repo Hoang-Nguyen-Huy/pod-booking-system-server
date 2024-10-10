@@ -103,7 +103,7 @@ public class SendEmailService {
     }
 
     private Date getStartDate(LocalDateTime eventDateTime) {
-        Instant instant = eventDateTime.atZone(ZoneId.systemDefault()).toInstant();
+        Instant instant = eventDateTime.atZone(ZoneId.of("Asia/Ho_Chi_Minh")).toInstant();
         return Date.from(instant);
     }
 
