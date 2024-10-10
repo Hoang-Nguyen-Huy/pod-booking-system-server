@@ -19,7 +19,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -84,15 +83,15 @@ public class AccountController {
                 .build();
     }
 
-//    @GetMapping("/send-email")
-//    public String sendEmail() throws MessagingException, IOException {
-//        sendEmailService.sendCalenderInvite(
-//                CalendarRequest.builder()
-//                        .subject("test")
-//                        .description("test")
-//                        .summary("test")
-//                        .to("phuongnguyen2772004.work@gmail.com")
-//                        .eventDateTime(LocalDateTime.now()).build());
-//        return "Send email successfully";
-//    }
+    @GetMapping("/send-email")
+    public String sendEmail() throws MessagingException, IOException {
+        sendEmailService.sendCalenderInvite(
+                CalendarRequest.builder()
+                        .subject("Đăt lịch ở POD Booking")
+                        .description("Hãy đặt lịch ở calendar để không bỏ lỡ lịch")
+                        .summary("Đăt lịch ở POD Booking")
+                        .to("phuongnguyen2772004.work@gmail.com")
+                        .eventDateTime(LocalDateTime.now()).build());
+        return "Send email successfully";
+    }
 }
