@@ -11,13 +11,13 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -34,9 +34,13 @@ public class AccountService {
         return accountMapper.toAccountResponse(accountRepository.save(account));
     }
 
+    /*
+    [GET]: /accounts/page&take
+     */
     @PreAuthorize("hasRole('Admin')")
-    public List<Account> getAccounts() {
-        return accountRepository.findAll();
+    public Page<Account> getAccounts(int page, int take) {
+        Pageable pageable = PageRequest.of(page - 1, take);
+        return accountRepository.findAll(pageable);
     }
 
     public Account getAccountById(String id) {
