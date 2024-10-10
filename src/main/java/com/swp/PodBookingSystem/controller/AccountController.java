@@ -1,11 +1,12 @@
 package com.swp.PodBookingSystem.controller;
 
 import com.swp.PodBookingSystem.dto.request.Account.AccountCreationRequest;
+import com.swp.PodBookingSystem.dto.request.Account.AccountPaginationDTO;
 import com.swp.PodBookingSystem.dto.request.Account.AccountResponseClient;
-import com.swp.PodBookingSystem.dto.request.Account.GetMeRequest;
 import com.swp.PodBookingSystem.dto.request.CalendarRequest;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.respone.AccountResponse;
+import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.entity.Account;
 import com.swp.PodBookingSystem.exception.AppException;
 import com.swp.PodBookingSystem.exception.ErrorCode;
@@ -19,6 +20,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -47,11 +49,20 @@ public class AccountController {
     }
 
     @GetMapping
-    ApiResponse<List<Account>> getAccounts() {
+    PaginationResponse<List<Account>> getAccounts(@RequestParam(defaultValue = "1", name = "page") int page,
+                                                  @RequestParam(defaultValue = "10", name = "take") int take) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         authentication.getAuthorities().forEach(grantedAuthority -> log.info(grantedAuthority.getAuthority()));
-        return ApiResponse.<List<Account>>builder()
-                .data(accountService.getAccounts())
+
+        AccountPaginationDTO dto = new AccountPaginationDTO(page, take);
+        Page<Account> accountPage = accountService.getAccounts(dto.page, dto.take);
+
+        return PaginationResponse.<List<Account>>builder()
+                .data(accountPage.getContent())
+                .currentPage(accountPage.getNumber() + 1)
+                .totalPage(accountPage.getTotalPages())
+                .recordPerPage(accountPage.getNumberOfElements())
+                .totalRecord((int) accountPage.getTotalElements())
                 .build();
     }
 

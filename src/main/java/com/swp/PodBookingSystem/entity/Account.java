@@ -45,6 +45,8 @@ public class Account {
     @Column(name = "createdAt")
     LocalDate createdAt;
 
+    int status;
+
     @JsonIgnore
     @OneToMany(mappedBy = "account")
     List<RefreshToken> refreshTokens;
@@ -53,6 +55,7 @@ public class Account {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDate.now();
+        status = 1;
     }
 
 }
