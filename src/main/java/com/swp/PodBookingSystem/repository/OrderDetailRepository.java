@@ -14,4 +14,6 @@ import java.util.*;
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, String> {
     List<OrderDetail> findByCustomer_Id(String customerId);
 
+    @Query("SELECT o FROM OrderDetail o WHERE FUNCTION('DATE', o.startTime) BETWEEN FUNCTION('DATE', :startOfDay) AND FUNCTION('DATE', :endOfDay)")
+    List<OrderDetail> findAllOrderDetailsByDay(@Param("startOfDay") LocalDateTime startOfDay, @Param("endOfDay") LocalDateTime endOfDay);
 }

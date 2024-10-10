@@ -11,7 +11,9 @@
     import org.springframework.beans.factory.annotation.Autowired;
     import org.springframework.stereotype.Service;
 
+    import java.time.LocalDate;
     import java.time.LocalDateTime;
+    import java.time.LocalTime;
     import java.util.List;
     import java.util.UUID;
     import java.util.stream.Collectors;
@@ -138,6 +140,17 @@
                 log.error("Unexpected error creating order detail", e);
                 throw new RuntimeException("Failed to create order detail: " + e.getMessage(), e);
             }
+        }
+
+        public List<OrderDetail> getNextDayBookings(LocalDate dayNow){
+            // Calculate the start of the next day (00:00:00)
+            LocalDateTime startOfDay = dayNow.plusDays(1).atStartOfDay();
+
+            // Calculate the end of the next day (23:59:59.999)
+            LocalDateTime endOfDay = dayNow.plusDays(1).atTime(LocalTime.MAX);
+
+            // Fetch all bookings between start and end of tomorrow
+            return orderDetailRepository.findAllOrderDetailsByDay(startOfDay, endOfDay);
         }
 
 
