@@ -52,6 +52,10 @@
                     .collect(Collectors.toList());
         }
 
+        public List<OrderDetail> getOrdersByOrderId(String orderId) {
+            return orderDetailRepository.findByOrderId(orderId);
+        }
+
         public List<OrderDetailResponse> getOrdersByCustomerId(String customerId) {
             List<OrderDetail> orderDetails = orderDetailRepository.findByCustomer_Id(customerId);
 
