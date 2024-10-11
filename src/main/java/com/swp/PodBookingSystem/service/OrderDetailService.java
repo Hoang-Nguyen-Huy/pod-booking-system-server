@@ -48,6 +48,10 @@
         private OrderDetailAmenityService orderDetailAmenityService;
 
         private static final Logger log = LoggerFactory.getLogger(OrderService.class);
+        @Autowired
+        private AccountService accountService;
+        @Autowired
+        private ServicePackageService servicePackageService;
 
 
         public List<OrderDetailResponse> getAllOrders() {
@@ -66,8 +70,11 @@
                 List<AmenityManagementResponse> amenities = orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(orderDetail.getId());
                 return OrderDetailManagementResponse.builder()
                         .id(orderDetail.getId())
+                        .roomName(orderDetail.getRoom().getName())
                         .priceRoom(orderDetail.getPriceRoom())
-                        .discountPercentage(orderDetail.getDiscountPercentage())
+                        .orderHandler(accountService.toAccountResponse(orderDetail.getOrderHandler()))
+                        .customer(accountService.toAccountResponse(orderDetail.getCustomer()))
+                        .servicePackage(servicePackageService.toServicePackageResponse(orderDetail.getServicePackage()))
                         .status(orderDetail.getStatus().name())
                         .startTime(orderDetail.getStartTime())
                         .endTime(orderDetail.getEndTime())

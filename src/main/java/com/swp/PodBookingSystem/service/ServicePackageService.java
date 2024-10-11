@@ -22,4 +22,12 @@ public class ServicePackageService {
     public List<ServicePackage> findAll() {
         return servicePackageRepository.findAll();
     }
+
+    public ServicePackageResponse toServicePackageResponse(ServicePackage servicePackage) {
+        return ServicePackageResponse.builder()
+                .id(servicePackage.getId())
+                .name(servicePackage.getName())
+                .discountPercentage(servicePackage.getDiscountPercentage())
+                .build();
+    }
 }

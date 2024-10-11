@@ -1,6 +1,7 @@
 package com.swp.PodBookingSystem.service;
 
 import com.swp.PodBookingSystem.dto.request.Account.AccountCreationRequest;
+import com.swp.PodBookingSystem.dto.respone.Account.AccountOrderResponse;
 import com.swp.PodBookingSystem.dto.respone.AccountResponse;
 import com.swp.PodBookingSystem.entity.Account;
 import com.swp.PodBookingSystem.exception.AppException;
@@ -45,5 +46,20 @@ public class AccountService {
 
     public Account getAccountById(String id) {
         return accountRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+    }
+
+    public AccountOrderResponse toAccountResponse(Account account) {
+        return AccountOrderResponse.builder()
+                .id(account.getId())
+                .name(account.getName())
+                .email(account.getEmail())
+                .avatar(account.getAvatar())
+                .point(account.getPoint())
+                .role(account.getRole())
+                .balance(account.getBalance())
+                .buildingNumber(account.getBuildingNumber())
+                .rankingName(account.getRankingName())
+                .createdAt(account.getCreatedAt())
+                .build();
     }
 }
