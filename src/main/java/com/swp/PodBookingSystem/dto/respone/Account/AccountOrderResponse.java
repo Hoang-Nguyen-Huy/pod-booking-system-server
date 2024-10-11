@@ -16,10 +16,7 @@ public class AccountOrderResponse {
     String name;
     String email;
     String avatar;
-    int point;
     AccountRole role;
-    double balance;
     int buildingNumber;
     String rankingName;
-    LocalDate createdAt;
 }

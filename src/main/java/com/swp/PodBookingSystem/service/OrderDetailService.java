@@ -70,8 +70,12 @@
                 List<AmenityManagementResponse> amenities = orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(orderDetail.getId());
                 return OrderDetailManagementResponse.builder()
                         .id(orderDetail.getId())
+                        .roomId(orderDetail.getRoom().getId())
                         .roomName(orderDetail.getRoom().getName())
-                        .priceRoom(orderDetail.getPriceRoom())
+                        .roomPrice(orderDetail.getPriceRoom())
+                        .buildingAddress(orderDetail.getBuilding().getAddress())
+                        .buildingId(orderDetail.getBuilding().getId())
+                        .roomId(orderDetail.getRoom().getId())
                         .orderHandler(accountService.toAccountResponse(orderDetail.getOrderHandler()))
                         .customer(accountService.toAccountResponse(orderDetail.getCustomer()))
                         .servicePackage(servicePackageService.toServicePackageResponse(orderDetail.getServicePackage()))

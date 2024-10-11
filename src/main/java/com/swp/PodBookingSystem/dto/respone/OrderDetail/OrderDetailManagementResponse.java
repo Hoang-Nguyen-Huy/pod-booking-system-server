@@ -15,11 +15,14 @@ import java.util.List;
 @AllArgsConstructor
 public class OrderDetailManagementResponse {
     private String id;
+    private int roomId;
     private String roomName;
-    private double priceRoom;
+    private double roomPrice;
     private String status;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private String buildingAddress;
+    private int buildingId;
     private ServicePackageResponse servicePackage;
     private AccountOrderResponse customer;
     private AccountOrderResponse orderHandler;

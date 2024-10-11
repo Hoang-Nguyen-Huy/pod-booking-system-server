@@ -54,12 +54,9 @@ public class AccountService {
                 .name(account.getName())
                 .email(account.getEmail())
                 .avatar(account.getAvatar())
-                .point(account.getPoint())
                 .role(account.getRole())
-                .balance(account.getBalance())
                 .buildingNumber(account.getBuildingNumber())
                 .rankingName(account.getRankingName())
-                .createdAt(account.getCreatedAt())
                 .build();
     }
 }
