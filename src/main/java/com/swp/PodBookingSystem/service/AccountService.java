@@ -51,7 +51,7 @@ public class AccountService {
     }
 
     /*
-    [PATH]: /accounts/{accountId}
+    [PATCH]: /accounts/{accountId}
      */
     @PreAuthorize("hasRole('Admin')")
     public AccountResponse updateAccountByAdmin(String accountId, AccountUpdateAdminRequest request) {
@@ -63,4 +63,5 @@ public class AccountService {
 
         return accountMapper.toAccountResponse(accountRepository.save(updatedAccount));
     }
+    
 }
