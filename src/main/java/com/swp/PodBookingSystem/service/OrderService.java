@@ -96,43 +96,23 @@ public class OrderService {
         return order;
     }
 
-
-    public CustomPage<OrderManagementResponse> getOrdersByRole(int page, int size, LocalDateTime startDate, LocalDateTime endDate, Account user){
-        if(user.getRole().equals(AccountRole.Admin)){
-            return getOrdersAllDetail(startDate, endDate, page, size);
-        } else if(user.getRole().equals(AccountRole.Staff) || user.getRole().equals(AccountRole.Manager)){
+    public CustomPage<OrderManagementResponse> getOrdersByRole(int page, int size, LocalDateTime startDate, LocalDateTime endDate, Account user) {
+        Page<Order> ordersPage;
+        if (user.getRole().equals(AccountRole.Admin)) {
+            ordersPage = orderRepository.findAllWithTimeRange(startDate, endDate, PageRequest.of(page, size));
+        } else if (user.getRole().equals(AccountRole.Staff) || user.getRole().equals(AccountRole.Manager)) {
             int buildingNumber = user.getBuildingNumber();
-            return getOrdersByBuildingNumber(buildingNumber, startDate, endDate, page, size);
+            ordersPage = orderRepository.findOrdersByBuildingNumberAndTimeRange(buildingNumber, startDate, endDate, PageRequest.of(page, size));
+        } else {
+            return null;
         }
-        return null;
+
+        return convertToCustomPage(ordersPage);
     }
 
-    public CustomPage<OrderManagementResponse> getOrdersAllDetail(LocalDateTime startDate, LocalDateTime endDate, int page, int size) {
-        Page<Order> ordersPage = orderRepository.findAllWithTimeRange(startDate, endDate, PageRequest.of(page, size));
-
+    private CustomPage<OrderManagementResponse> convertToCustomPage(Page<Order> ordersPage) {
         List<OrderManagementResponse> orderResponses = ordersPage.getContent().stream().map(order -> {
-            List<OrderDetail> orderDetails = orderDetailService.getOrdersByOrderId(order.getId());
-            List<OrderDetailManagementResponse> orderDetailDTOs = orderDetails.stream().map(detail -> {
-                List<AmenityManagementResponse> amenities = orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(detail.getId()).stream().map(amenity -> {
-                    return AmenityManagementResponse.builder()
-                            .id(amenity.getAmenity().getId())
-                            .name(amenity.getAmenity().getName())
-                            .price(amenity.getPrice())
-                            .quantity(amenity.getQuantity())
-                            .build();
-                }).collect(Collectors.toList());
-
-                return OrderDetailManagementResponse.builder()
-                        .id(detail.getId())
-                        .priceRoom(detail.getPriceRoom())
-                        .discountPercentage(detail.getDiscountPercentage())
-                        .status(detail.getStatus().name())
-                        .startTime(detail.getStartTime())
-                        .endTime(detail.getEndTime())
-                        .amenities(amenities)
-                        .build();
-            }).collect(Collectors.toList());
-
+            List<OrderDetailManagementResponse> orderDetailDTOs = orderDetailService.getOrderDetailById(order.getId());
             return OrderManagementResponse.builder()
                     .id(order.getId())
                     .createdAt(order.getCreatedAt())
@@ -148,88 +128,5 @@ public class OrderService {
                 .totalElements(ordersPage.getTotalElements())
                 .build();
     }
-
-    public CustomPage<OrderManagementResponse> getOrdersByBuildingNumber(int buildingNumber, LocalDateTime startDate, LocalDateTime endDate, int page, int size) {
-        Page<Order> ordersPage = orderRepository.findOrdersByBuildingNumberAndTimeRange(buildingNumber, startDate, endDate, PageRequest.of(page, size));
-        List<OrderManagementResponse> orderResponses = ordersPage.getContent().stream().map(order -> {
-            List<OrderDetail> orderDetails = orderDetailService.getOrdersByOrderId(order.getId());
-            List<OrderDetailManagementResponse> orderDetailDTOs = orderDetails.stream().map(detail -> {
-                List<AmenityManagementResponse> amenities = orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(detail.getId()).stream().map(amenity -> {
-                    return AmenityManagementResponse.builder()
-                            .id(amenity.getAmenity().getId())
-                            .name(amenity.getAmenity().getName())
-                            .price(amenity.getPrice())
-                            .quantity(amenity.getQuantity())
-                            .build();
-                }).collect(Collectors.toList());
-
-                return OrderDetailManagementResponse.builder()
-                        .id(detail.getId())
-                        .priceRoom(detail.getPriceRoom())
-                        .discountPercentage(detail.getDiscountPercentage())
-                        .status(detail.getStatus().name())
-                        .startTime(detail.getStartTime())
-                        .endTime(detail.getEndTime())
-                        .amenities(amenities)
-                        .build();
-            }).collect(Collectors.toList());
-
-            return OrderManagementResponse.builder()
-                    .id(order.getId())
-                    .createdAt(order.getCreatedAt())
-                    .updatedAt(order.getUpdatedAt())
-                    .orderDetails(orderDetailDTOs)
-                    .build();
-        }).collect(Collectors.toList());
-        return CustomPage.<OrderManagementResponse>builder()
-                .data(orderResponses)
-                .pageNumber(ordersPage.getNumber())
-                .pageSize(ordersPage.getSize())
-                .totalElements(ordersPage.getTotalElements())
-                .build();
-    }
-
-    public CustomPage<OrderManagementResponse> getOrdersAllDetail(int page, int size, int buildingNumber) {
-        Page<Order> ordersPage = orderRepository.findAll(PageRequest.of(page, size));
-
-        List<OrderManagementResponse> orderResponses = ordersPage.getContent().stream().map(order -> {
-            List<OrderDetail> orderDetails = orderDetailService.getOrdersByOrderId(order.getId());
-            List<OrderDetailManagementResponse> orderDetailDTOs = orderDetails.stream().map(detail -> {
-                List<AmenityManagementResponse> amenities = orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(detail.getId()).stream().map(amenity -> {
-                    return AmenityManagementResponse.builder()
-                            .id(amenity.getAmenity().getId())
-                            .name(amenity.getAmenity().getName())
-                            .price(amenity.getPrice())
-                            .quantity(amenity.getQuantity())
-                            .build();
-                }).collect(Collectors.toList());
-
-                return OrderDetailManagementResponse.builder()
-                        .id(detail.getId())
-                        .priceRoom(detail.getPriceRoom())
-                        .discountPercentage(detail.getDiscountPercentage())
-                        .status(detail.getStatus().name())
-                        .startTime(detail.getStartTime())
-                        .endTime(detail.getEndTime())
-                        .amenities(amenities)
-                        .build();
-            }).collect(Collectors.toList());
-
-            return OrderManagementResponse.builder()
-                    .id(order.getId())
-                    .createdAt(order.getCreatedAt())
-                    .updatedAt(order.getUpdatedAt())
-                    .orderDetails(orderDetailDTOs)
-                    .build();
-        }).collect(Collectors.toList());
-
-        return CustomPage.<OrderManagementResponse>builder()
-                .data(orderResponses)
-                .pageNumber(ordersPage.getNumber())
-                .pageSize(ordersPage.getSize())
-                .totalElements(ordersPage.getTotalElements())
-                .build();
-    }
-
 }
 

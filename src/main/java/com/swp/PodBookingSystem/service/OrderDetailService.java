@@ -1,6 +1,8 @@
     package com.swp.PodBookingSystem.service;
 
     import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationRequest;
+    import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementResponse;
+    import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailManagementResponse;
     import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
     import com.swp.PodBookingSystem.entity.*;
     import com.swp.PodBookingSystem.enums.OrderStatus;
@@ -42,6 +44,9 @@
         @Autowired
         private OrderDetailMapper orderDetailMapper;
 
+        @Autowired
+        private OrderDetailAmenityService orderDetailAmenityService;
+
         private static final Logger log = LoggerFactory.getLogger(OrderService.class);
 
 
@@ -54,6 +59,21 @@
 
         public List<OrderDetail> getOrdersByOrderId(String orderId) {
             return orderDetailRepository.findByOrderId(orderId);
+        }
+
+        public List<OrderDetailManagementResponse> getOrderDetailById(String orderId) {
+            return orderDetailRepository.findByOrderId(orderId).stream().map(orderDetail -> {
+                List<AmenityManagementResponse> amenities = orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(orderDetail.getId());
+                return OrderDetailManagementResponse.builder()
+                        .id(orderDetail.getId())
+                        .priceRoom(orderDetail.getPriceRoom())
+                        .discountPercentage(orderDetail.getDiscountPercentage())
+                        .status(orderDetail.getStatus().name())
+                        .startTime(orderDetail.getStartTime())
+                        .endTime(orderDetail.getEndTime())
+                        .amenities(amenities)
+                        .build();
+            }).collect(Collectors.toList());
         }
 
         public List<OrderDetailResponse> getOrdersByCustomerId(String customerId) {
