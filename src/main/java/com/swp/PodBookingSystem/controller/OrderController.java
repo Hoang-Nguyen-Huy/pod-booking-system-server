@@ -2,8 +2,10 @@ package com.swp.PodBookingSystem.controller;
 
 import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
+import com.swp.PodBookingSystem.dto.respone.Order.OrderManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderResponse;
+import com.swp.PodBookingSystem.dto.respone.Page.CustomPage;
 import com.swp.PodBookingSystem.entity.Account;
 import com.swp.PodBookingSystem.entity.Order;
 import com.swp.PodBookingSystem.entity.Room;
@@ -20,6 +22,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -58,7 +61,28 @@ public class OrderController {
         return ApiResponse.<List<OrderResponse>>builder()
                 .data(orders)
                 .build();
-    }   
+    }
+
+    @GetMapping("/page")
+    public ResponseEntity<CustomPage<OrderManagementResponse>> getOrdersByRole(
+            @RequestHeader("Authorization") String token,
+            @RequestParam String startDate,
+            @RequestParam String endDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        if (token == null || !token.startsWith("Bearer ")) {
+            throw new AppException(ErrorCode.INVALID_TOKEN);
+        }
+        token = token.substring(7);
+        Jwt jwt = jwtDecoder.decode(token);
+        String accountId = jwt.getClaimAsString("accountId");
+        Account user = accountService.getAccountById(accountId);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+        LocalDateTime startDateTime = LocalDateTime.parse(startDate, formatter);
+        LocalDateTime endDateTime = LocalDateTime.parse(endDate, formatter);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(orderService.getOrdersByRole(page, size, startDateTime, endDateTime, user));
+    }
 
     @GetMapping("/{accountId}")
     public ApiResponse<List<OrderResponse>> getOrdersByAccountId(@PathVariable String accountId) {
