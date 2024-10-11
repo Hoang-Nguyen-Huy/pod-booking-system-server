@@ -12,5 +12,6 @@ import lombok.experimental.FieldDefaults;
 public class AccountUpdateAdminRequest {
     String name;
     AccountRole role;
+    int buildingNumber;
     int status;
 }
