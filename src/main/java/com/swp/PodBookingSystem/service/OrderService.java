@@ -75,14 +75,4 @@ import org.springframework.beans.factory.annotation.Autowired;
                 throw new RuntimeException("Failed to create order: " + e.getMessage());
             }
         }
-
-        public Order createOrder(Account customer){
-            Order order = new Order();
-            order.setId(UUID.randomUUID().toString());
-            order.setAccount(customer);
-            order.setCreatedAt(LocalDateTime.now());
-            order.setUpdatedAt(LocalDateTime.now());
-            orderRepository.save(order);
-            return order;
-        }
     }

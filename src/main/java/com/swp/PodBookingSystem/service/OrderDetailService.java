@@ -81,7 +81,7 @@
 
 
 
-        public OrderDetailResponse createOrderDetail(OrderDetailCreationRequest request, Order order, Room room, OrderStatus status, Account account, LocalDateTime startTime, LocalDateTime endTime) {
+        public OrderDetail createOrderDetail(OrderDetailCreationRequest request, Order order, Room room, OrderStatus status, Account account, LocalDateTime startTime, LocalDateTime endTime) {
             try {
 
 
@@ -127,8 +127,7 @@
                 response.setUpdatedAt(LocalDateTime.now());
                 response.setStatus(status);
 
-                // Save the OrderDetail and return response
-                return orderDetailMapper.toOrderDetailResponse(orderDetailRepository.save(response));
+                return orderDetailRepository.save(response);
 
 
             } catch (IllegalArgumentException e) {

@@ -11,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "orderDetailAmentity")
+@Table(name = "orderDetailAmenity")
 public class OrderDetailAmenity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -26,6 +26,6 @@ public class OrderDetailAmenity {
     OrderDetail orderDetail;
 
     @ManyToOne
-    @JoinColumn(name = "amentityId", nullable = false)
+    @JoinColumn(name = "amenityId", nullable = false)
     Amenity amenity;
 }
