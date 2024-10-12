@@ -24,6 +24,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -119,14 +121,14 @@ public class AccountController {
     }
 
     @GetMapping("/staff")
-    public List<AccountOrderResponse> getAllStaffAccounts() {
-        return accountService.getAllStaffAccounts();
+    public ResponseEntity<List<AccountOrderResponse> > getAllStaffAccounts() {
+        return ResponseEntity.status(HttpStatus.OK).body(accountService.getAllStaffAccounts());
     }
 
-    @GetMapping("/accounts/{keyword}/{role}")
-    public List<AccountOrderResponse> searchAccounts(
+    @GetMapping("/{keyword}/{role}")
+    public ResponseEntity<List<AccountOrderResponse>> searchAccounts(
             @PathVariable String keyword,
             @PathVariable AccountRole role) {
-        return accountService.searchAccounts(keyword, role);
+        return ResponseEntity.status(HttpStatus.OK).body(accountService.searchAccounts(keyword, role));
     }
 }

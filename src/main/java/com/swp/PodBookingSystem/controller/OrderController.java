@@ -225,4 +225,10 @@ public class OrderController {
         log.info("Number of orders retrieved: {}", orders.size());
         orders.forEach(order -> log.info("Order ID: {}, Account ID: {}", order.getId(), order.getAccountId()));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteOrder(@PathVariable String id) {
+        String deletedOrder = orderService.deleteOrder(id);
+        return ResponseEntity.status(HttpStatus.OK).body(deletedOrder);
+    }
 }

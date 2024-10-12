@@ -5,9 +5,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,4 +33,13 @@ public interface OrderRepository  extends JpaRepository<Order, String> {
                                                        @Param("startTime") LocalDateTime startTime,
                                                        @Param("endTime") LocalDateTime endTime,
                                                        Pageable pageable);
+
+    @Modifying
+    @Transactional
+    @Query("SELECT od.id FROM OrderDetail od WHERE od.order.id = :orderId")
+    List<String> findOrderDetailIdsByOrderId(@Param("orderId") String orderId);
+
+    @Modifying
+    @Transactional
+    void deleteById(String id);
 }
