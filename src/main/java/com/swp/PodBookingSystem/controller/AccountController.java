@@ -5,6 +5,7 @@ import com.swp.PodBookingSystem.dto.request.Account.AccountPaginationDTO;
 import com.swp.PodBookingSystem.dto.request.Account.AccountResponseClient;
 import com.swp.PodBookingSystem.dto.request.Account.AccountUpdateAdminRequest;
 import com.swp.PodBookingSystem.dto.request.CalendarRequest;
+import com.swp.PodBookingSystem.dto.respone.Account.AccountOrderResponse;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.respone.AccountResponse;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
@@ -118,12 +119,12 @@ public class AccountController {
     }
 
     @GetMapping("/staff")
-    public List<Account> getAllStaffAccounts() {
+    public List<AccountOrderResponse> getAllStaffAccounts() {
         return accountService.getAllStaffAccounts();
     }
 
     @GetMapping("/accounts/{keyword}/{role}")
-    public List<Account> searchAccounts(
+    public List<AccountOrderResponse> searchAccounts(
             @PathVariable String keyword,
             @PathVariable AccountRole role) {
         return accountService.searchAccounts(keyword, role);

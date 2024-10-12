@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -79,11 +80,17 @@ public class AccountService {
                 .build();
     }
 
-    public List<Account> getAllStaffAccounts() {
-        return accountRepository.findByRole(AccountRole.Staff);
+    public List<AccountOrderResponse> getAllStaffAccounts() {
+            List<Account> accounts = accountRepository.findByRole(AccountRole.Staff);
+            return accounts.stream()
+                    .map(this::toAccountResponse)
+                    .collect(Collectors.toList());
     }
 
-    public List<Account> searchAccounts(String keyword, AccountRole role) {
-        return accountRepository.searchAccounts(keyword, role);
+    public List<AccountOrderResponse> searchAccounts(String keyword, AccountRole role) {
+        List<Account> accounts = accountRepository.searchAccounts(keyword, role);
+        return accounts.stream()
+                .map(this::toAccountResponse)
+                .collect(Collectors.toList());
     }
 }
