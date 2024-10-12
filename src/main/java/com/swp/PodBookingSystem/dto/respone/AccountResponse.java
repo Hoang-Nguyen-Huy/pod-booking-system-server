@@ -23,4 +23,5 @@ public class AccountResponse {
     int buildingNumber;
     String rankingName;
     LocalDate createdAt;
+    int status;
 }

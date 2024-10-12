@@ -3,8 +3,8 @@ package com.swp.PodBookingSystem.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import java.time.LocalDate;
-import com.swp.PodBookingSystem.enums.AmentityStatus;
+import java.time.LocalDateTime;
+import com.swp.PodBookingSystem.enums.AmenityType;
 
 @Getter
 @Setter
@@ -25,19 +25,21 @@ public class Amenity {
 
     int quantity;
 
-    AmentityStatus type;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    AmenityType type;
 
     String imageUrl;
 
     @Column(name = "createdAt")
-    LocalDate createdAt;
+    LocalDateTime createdAt;
 
     @Column(name = "updatedAt")
-    LocalDate updatedAt;
+    LocalDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDate.now();
-        this.updatedAt = LocalDate.now();
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 }

@@ -1,5 +1,6 @@
 package com.swp.PodBookingSystem.mapper;
 
+import com.swp.PodBookingSystem.dto.request.Order.OrderCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.OrderResponse;
 import com.swp.PodBookingSystem.entity.Order;
 import org.mapstruct.Mapper;
@@ -10,5 +11,7 @@ public interface OrderMapper {
 
     @Mapping(source = "order.account.id", target = "accountId")
     OrderResponse toOrderResponse(Order order);
+
+    Order toOrder(OrderCreationRequest request);
 
 }

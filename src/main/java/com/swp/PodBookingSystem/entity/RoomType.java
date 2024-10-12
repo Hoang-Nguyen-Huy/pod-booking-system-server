@@ -21,6 +21,7 @@ public class RoomType {
     Integer id;
 
     String name;
+    int price;
     int quantity;
     int capacity;
 

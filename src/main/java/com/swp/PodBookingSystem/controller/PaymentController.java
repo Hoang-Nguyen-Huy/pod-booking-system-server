@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/payment")
-public class PaymentController {
+public class    PaymentController {
 
     @Autowired
     private PaymentService paymentService;

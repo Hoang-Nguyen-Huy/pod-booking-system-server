@@ -1,6 +1,6 @@
 package com.swp.PodBookingSystem.dto.request.Account;
 
-import jakarta.validation.constraints.Size;
+import com.swp.PodBookingSystem.enums.AccountRole;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -9,12 +9,9 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AccountCreationRequest {
-    @Size(min = 5, message = "NAME_INVALID")
+public class AccountUpdateAdminRequest {
     String name;
-    String email;
-    String password;
-    String role;
+    AccountRole role;
+    int buildingNumber;
     int status;
 }
-
