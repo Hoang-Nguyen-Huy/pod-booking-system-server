@@ -5,6 +5,7 @@ import com.swp.PodBookingSystem.dto.request.Account.AccountUpdateAdminRequest;
 import com.swp.PodBookingSystem.dto.respone.Account.AccountOrderResponse;
 import com.swp.PodBookingSystem.dto.respone.AccountResponse;
 import com.swp.PodBookingSystem.entity.Account;
+import com.swp.PodBookingSystem.enums.AccountRole;
 import com.swp.PodBookingSystem.exception.AppException;
 import com.swp.PodBookingSystem.exception.ErrorCode;
 import com.swp.PodBookingSystem.mapper.AccountMapper;
@@ -21,6 +22,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -75,5 +77,13 @@ public class AccountService {
                 .buildingNumber(account.getBuildingNumber())
                 .rankingName(account.getRankingName())
                 .build();
+    }
+
+    public List<Account> getAllStaffAccounts() {
+        return accountRepository.findByRole(AccountRole.Staff);
+    }
+
+    public List<Account> searchAccounts(String keyword, AccountRole role) {
+        return accountRepository.searchAccounts(keyword, role);
     }
 }

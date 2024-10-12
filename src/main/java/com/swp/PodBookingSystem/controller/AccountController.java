@@ -9,6 +9,7 @@ import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.respone.AccountResponse;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.entity.Account;
+import com.swp.PodBookingSystem.enums.AccountRole;
 import com.swp.PodBookingSystem.exception.AppException;
 import com.swp.PodBookingSystem.exception.ErrorCode;
 import com.swp.PodBookingSystem.mapper.AccountMapper;
@@ -114,5 +115,17 @@ public class AccountController {
                         .to("phuongnguyen2772004.work@gmail.com")
                         .eventDateTime(LocalDateTime.now()).build());
         return "Send email successfully";
+    }
+
+    @GetMapping("/staff")
+    public List<Account> getAllStaffAccounts() {
+        return accountService.getAllStaffAccounts();
+    }
+
+    @GetMapping("/accounts/{keyword}/{role}")
+    public List<Account> searchAccounts(
+            @PathVariable String keyword,
+            @PathVariable AccountRole role) {
+        return accountService.searchAccounts(keyword, role);
     }
 }
