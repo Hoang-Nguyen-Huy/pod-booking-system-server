@@ -1,7 +1,7 @@
 package com.swp.PodBookingSystem.service;
 
 import com.swp.PodBookingSystem.dto.request.Account.AccountCreationRequest;
-import com.swp.PodBookingSystem.dto.respone.Account.AccountOrderResponse;
+import com.swp.PodBookingSystem.dto.request.Account.AccountUpdateAdminRequest;
 import com.swp.PodBookingSystem.dto.respone.AccountResponse;
 import com.swp.PodBookingSystem.entity.Account;
 import com.swp.PodBookingSystem.exception.AppException;
@@ -19,6 +19,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -48,15 +50,18 @@ public class AccountService {
         return accountRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
     }
 
-    public AccountOrderResponse toAccountResponse(Account account) {
-        return AccountOrderResponse.builder()
-                .id(account.getId())
-                .name(account.getName())
-                .email(account.getEmail())
-                .avatar(account.getAvatar())
-                .role(account.getRole())
-                .buildingNumber(account.getBuildingNumber())
-                .rankingName(account.getRankingName())
-                .build();
+    /*
+    [PATCH]: /accounts/{accountId}
+     */
+    @PreAuthorize("hasRole('Admin')")
+    public AccountResponse updateAccountByAdmin(String accountId, AccountUpdateAdminRequest request) {
+        Optional<Account> existingAccountOpt = accountRepository.findById((accountId));
+
+        Account existedAccount = existingAccountOpt.orElseThrow(() -> new RuntimeException("Account not found"));
+
+        Account updatedAccount = accountMapper.toUpdatedAccountAdmin(request, existedAccount);
+
+        return accountMapper.toAccountResponse(accountRepository.save(updatedAccount));
     }
+
 }
