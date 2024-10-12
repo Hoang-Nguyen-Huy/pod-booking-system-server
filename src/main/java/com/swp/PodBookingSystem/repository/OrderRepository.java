@@ -36,10 +36,13 @@ public interface OrderRepository  extends JpaRepository<Order, String> {
 
     @Modifying
     @Transactional
-    @Query("SELECT od.id FROM OrderDetail od WHERE od.order.id = :orderId")
-    List<String> findOrderDetailIdsByOrderId(@Param("orderId") String orderId);
-
-    @Modifying
-    @Transactional
     void deleteById(String id);
+
+    @Query("""
+            SELECT o FROM Order o
+            JOIN o.account a 
+            WHERE LOWER(o.id) LIKE LOWER(CONCAT('%', :keyword, '%')) 
+               OR LOWER(a.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+           """)
+    Page<Order> searchByKeyword(String keyword, Pageable pageable);
 }

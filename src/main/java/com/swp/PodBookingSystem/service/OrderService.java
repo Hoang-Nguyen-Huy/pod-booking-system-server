@@ -137,5 +137,11 @@ public class OrderService {
         orderRepository.deleteById(orderId);
         return orderId;
     }
+
+    public CustomPage<OrderManagementResponse> searchOrdersByKeyword(int page, int size, String keyword) {
+        Page<Order> ordersPage;
+        ordersPage = orderRepository.searchByKeyword(keyword, PageRequest.of(page, size));
+        return convertToCustomPage(ordersPage);
+    }
 }
 

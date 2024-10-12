@@ -231,4 +231,11 @@ public class OrderController {
         String deletedOrder = orderService.deleteOrder(id);
         return ResponseEntity.status(HttpStatus.OK).body(deletedOrder);
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<CustomPage<OrderManagementResponse>> searchOrders(@RequestParam String keyword, @RequestParam(defaultValue = "0") int page,
+                                                                            @RequestParam(defaultValue = "10") int size) {
+        CustomPage<OrderManagementResponse> list = orderService.searchOrdersByKeyword(page, size, keyword);
+        return ResponseEntity.status(HttpStatus.OK).body(list);
+    }
 }
