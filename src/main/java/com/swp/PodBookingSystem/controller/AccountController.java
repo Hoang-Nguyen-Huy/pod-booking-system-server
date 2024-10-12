@@ -3,6 +3,7 @@ package com.swp.PodBookingSystem.controller;
 import com.swp.PodBookingSystem.dto.request.Account.AccountCreationRequest;
 import com.swp.PodBookingSystem.dto.request.Account.AccountPaginationDTO;
 import com.swp.PodBookingSystem.dto.request.Account.AccountResponseClient;
+import com.swp.PodBookingSystem.dto.request.Account.AccountUpdateAdminRequest;
 import com.swp.PodBookingSystem.dto.request.CalendarRequest;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.respone.AccountResponse;
@@ -63,6 +64,15 @@ public class AccountController {
                 .totalPage(accountPage.getTotalPages())
                 .recordPerPage(accountPage.getNumberOfElements())
                 .totalRecord((int) accountPage.getTotalElements())
+                .build();
+    }
+
+    @PatchMapping("/{id}")
+    ApiResponse<AccountResponse> updateAccountByAdmin(@PathVariable("id") String id,
+                                                      @RequestBody AccountUpdateAdminRequest request) {
+        return ApiResponse.<AccountResponse>builder()
+                .data(accountService.updateAccountByAdmin(id, request))
+                .message("Cập nhật tài khoản thành công")
                 .build();
     }
 

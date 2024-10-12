@@ -7,11 +7,13 @@ package com.swp.PodBookingSystem.mapper;
 
 import com.swp.PodBookingSystem.dto.request.Account.AccountCreationRequest;
 import com.swp.PodBookingSystem.dto.request.Account.AccountResponseClient;
+import com.swp.PodBookingSystem.dto.request.Account.AccountUpdateAdminRequest;
 import com.swp.PodBookingSystem.dto.respone.AccountResponse;
 import com.swp.PodBookingSystem.entity.Account;
 import com.swp.PodBookingSystem.enums.AccountRole;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 
 @Mapper(componentModel = "spring")
@@ -28,4 +30,7 @@ public interface AccountMapper {
     }
 
     AccountResponseClient toAccountResponseClient(Account account);
+
+    @Mapping(target = "id", ignore = true)
+    Account toUpdatedAccountAdmin (AccountUpdateAdminRequest request, @MappingTarget Account account);
 }

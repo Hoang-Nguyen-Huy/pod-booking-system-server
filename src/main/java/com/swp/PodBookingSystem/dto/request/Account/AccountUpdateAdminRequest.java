@@ -1,27 +1,17 @@
-package com.swp.PodBookingSystem.dto.respone;
+package com.swp.PodBookingSystem.dto.request.Account;
 
 import com.swp.PodBookingSystem.enums.AccountRole;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AccountResponse {
-    String id;
+public class AccountUpdateAdminRequest {
     String name;
-    String email;
-    String password;
-    String avatar;
-    int point;
     AccountRole role;
-    double balance;
     int buildingNumber;
-    String rankingName;
-    LocalDate createdAt;
     int status;
 }
