@@ -159,6 +159,10 @@ public class OrderService {
                 .build();
     }
 
+    public void updateOrderUpdateAt(String orderId){
+        orderRepository.updateOrderUpdatedAt(orderId, LocalDateTime.now());
+    }
+
     @Transactional
     public String deleteOrder(String orderId) {
         orderDetailService.deleteOrderDetailsByOrderId(orderId);

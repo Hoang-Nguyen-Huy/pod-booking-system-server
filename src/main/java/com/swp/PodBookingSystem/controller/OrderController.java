@@ -221,6 +221,7 @@ public class OrderController {
     @PutMapping("/{orderId}")
     ApiResponse<OrderResponse> updateStaffWithOrder(@PathVariable("orderId") String orderId,
                                                     @RequestBody OrderUpdateStaffRequest request){
+        orderService.updateOrderUpdateAt(orderId);
         return ApiResponse.<OrderResponse> builder()
                 .data(orderService.updateOrderHandlerWithOrder(orderId,request))
                 .message("Update order successfully")

@@ -38,6 +38,11 @@ public interface OrderRepository  extends JpaRepository<Order, String> {
     @Transactional
     void deleteById(String id);
 
+    @Modifying
+    @Transactional
+    @Query("UPDATE Order o SET o.updatedAt = :updatedAt WHERE o.id = :orderId")
+    void updateOrderUpdatedAt(String orderId, LocalDateTime updatedAt);
+
     @Query("""
             SELECT o FROM Order o
             JOIN o.account a 
