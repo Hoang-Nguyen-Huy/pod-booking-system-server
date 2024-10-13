@@ -102,12 +102,6 @@ jobs:
           echo " return-url: \"${{ secrets.VNPAY_RETURN_URL }}\"" >> src/main/resources/application.yaml
           echo " url: \"${{ secrets.VNPAY_URL }}\"" >> src/main/resources/application.yaml
       
-#    - name: Build with Maven
-#      run: mvn -B package --file pom.xml
-#
-#    - name: Build with Maven (debug)
-#      run: ./mvnw clean install -X
-
     - name: Build, test and analyze
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
