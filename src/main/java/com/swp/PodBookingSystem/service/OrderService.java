@@ -24,6 +24,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -155,6 +157,19 @@ public class OrderService {
                 .createdAt(existingOrder.getCreatedAt())
                 .updatedAt(existingOrder.getUpdatedAt())
                 .build();
+    }
+
+    @Transactional
+    public String deleteOrder(String orderId) {
+        orderDetailService.deleteOrderDetailsByOrderId(orderId);
+        orderRepository.deleteById(orderId);
+        return orderId;
+    }
+
+    public CustomPage<OrderManagementResponse> searchOrdersByKeyword(int page, int size, String keyword) {
+        Page<Order> ordersPage;
+        ordersPage = orderRepository.searchByKeyword(keyword, PageRequest.of(page, size));
+        return convertToCustomPage(ordersPage);
     }
 }
 

@@ -5,10 +5,12 @@ import com.swp.PodBookingSystem.dto.request.Account.AccountPaginationDTO;
 import com.swp.PodBookingSystem.dto.request.Account.AccountResponseClient;
 import com.swp.PodBookingSystem.dto.request.Account.AccountUpdateAdminRequest;
 import com.swp.PodBookingSystem.dto.request.CalendarRequest;
+import com.swp.PodBookingSystem.dto.respone.Account.AccountOrderResponse;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.respone.AccountResponse;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.entity.Account;
+import com.swp.PodBookingSystem.enums.AccountRole;
 import com.swp.PodBookingSystem.exception.AppException;
 import com.swp.PodBookingSystem.exception.ErrorCode;
 import com.swp.PodBookingSystem.mapper.AccountMapper;
@@ -22,6 +24,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -114,5 +118,17 @@ public class AccountController {
                         .to("phuongnguyen2772004.work@gmail.com")
                         .eventDateTime(LocalDateTime.now()).build());
         return "Send email successfully";
+    }
+
+    @GetMapping("/staff")
+    public ResponseEntity<List<AccountOrderResponse> > getAllStaffAccounts() {
+        return ResponseEntity.status(HttpStatus.OK).body(accountService.getAllStaffAccounts());
+    }
+
+    @GetMapping("/{keyword}/{role}")
+    public ResponseEntity<List<AccountOrderResponse>> searchAccounts(
+            @PathVariable String keyword,
+            @PathVariable AccountRole role) {
+        return ResponseEntity.status(HttpStatus.OK).body(accountService.searchAccounts(keyword, role));
     }
 }

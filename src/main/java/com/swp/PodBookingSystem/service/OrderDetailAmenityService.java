@@ -5,6 +5,7 @@ import com.swp.PodBookingSystem.entity.OrderDetailAmenity;
 import com.swp.PodBookingSystem.repository.OrderDetailAmenityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,5 +28,10 @@ public class OrderDetailAmenityService {
                     .quantity(amenity.getQuantity())
                     .build();
         }).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void deleteOrderDetailAmenityByOrderDetailId(String orderDetailId) {
+        orderDetailAmenityRepository.deleteByOrderDetailId(orderDetailId);
     }
 }
