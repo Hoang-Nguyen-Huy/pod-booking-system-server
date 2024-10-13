@@ -1,4 +1,5 @@
 package com.swp.PodBookingSystem.service;
+import com.swp.PodBookingSystem.dto.request.Order.OrderUpdateStaffRequest;
 import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.Order.OrderManagementResponse;
@@ -17,16 +18,28 @@ import com.swp.PodBookingSystem.repository.OrderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
+
+    private final OrderDetailService orderDetailService;
+
+    @Autowired
+    public OrderService(@Lazy OrderDetailService orderDetailService) {
+        this.orderDetailService = orderDetailService;
+    }
+
     @Autowired
     private OrderRepository orderRepository;
 
@@ -36,8 +49,7 @@ public class OrderService {
     private OrderMapper orderMapper;
     @Autowired
     private AccountRepository accountRepository;
-    @Autowired
-    private OrderDetailService orderDetailService;
+
     @Autowired
     private OrderDetailAmenityService orderDetailAmenityService;
 
@@ -86,15 +98,6 @@ public class OrderService {
         }
     }
 
-    public Order createOrder(Account customer){
-        Order order = new Order();
-        order.setId(UUID.randomUUID().toString());
-        order.setAccount(customer);
-        order.setCreatedAt(LocalDateTime.now());
-        order.setUpdatedAt(LocalDateTime.now());
-        orderRepository.save(order);
-        return order;
-    }
 
     public CustomPage<OrderManagementResponse> getOrdersByRole(int page, int size, LocalDateTime startDate, LocalDateTime endDate, Account user) {
         Page<Order> ordersPage;
@@ -126,6 +129,31 @@ public class OrderService {
                 .pageNumber(ordersPage.getNumber())
                 .pageSize(ordersPage.getSize())
                 .totalElements(ordersPage.getTotalElements())
+                .build();
+    }
+
+    public void updateOrderByUpdateOrderDetail(String id, LocalDateTime updateAt){
+        Order existingOrder = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
+
+
+        existingOrder.setUpdatedAt(updateAt);
+
+        orderRepository.save(existingOrder);
+    }
+
+    public OrderResponse updateOrderHandlerWithOrder(String id, OrderUpdateStaffRequest request){
+        Order existingOrder = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
+
+        if (request.getOrderHandler() == null) {
+            throw new RuntimeException("Account handler cannot be null");
+        }
+
+        orderDetailService.updateOrderHandlerOrderDetail(existingOrder.getId(), request.getOrderHandler());
+        return OrderResponse.builder()
+                .id(existingOrder.getId())
+                .accountId(existingOrder.getAccount().getId())
+                .createdAt(existingOrder.getCreatedAt())
+                .updatedAt(existingOrder.getUpdatedAt())
                 .build();
     }
 }

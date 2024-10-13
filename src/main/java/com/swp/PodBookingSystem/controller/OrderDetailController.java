@@ -1,5 +1,6 @@
     package com.swp.PodBookingSystem.controller;
 
+    import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailRequestDTO;
     import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
     import com.swp.PodBookingSystem.service.OrderDetailService;
     import lombok.AccessLevel;
@@ -53,6 +54,14 @@
         }
 
 
+        @PutMapping("/{orderDetailId}")
+        ApiResponse<OrderDetailResponse> updateOrderDetail(@PathVariable("orderDetailId") String orderDetailId,
+                                                           @RequestBody OrderDetailRequestDTO request){
+            return ApiResponse.<OrderDetailResponse>builder()
+                    .data(orderDetailService.updateOrderDetail(orderDetailId, request))
+                    .message("Update orderDetailId successfully")
+                    .build();
+        }
 
 
 
