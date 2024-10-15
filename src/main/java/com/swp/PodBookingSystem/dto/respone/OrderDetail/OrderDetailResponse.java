@@ -1,5 +1,5 @@
 
-package com.swp.PodBookingSystem.dto.respone;
+package com.swp.PodBookingSystem.dto.respone.OrderDetail;
 
 import com.swp.PodBookingSystem.enums.OrderStatus;
 import lombok.*;
