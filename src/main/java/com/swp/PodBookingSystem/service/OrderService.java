@@ -1,19 +1,25 @@
 package com.swp.PodBookingSystem.service;
 import com.swp.PodBookingSystem.dto.request.Order.OrderCreationRequest;
 import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationRequest;
+import com.swp.PodBookingSystem.dto.respone.Order.OrderManagementResponse;
+import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderResponse;
+import com.swp.PodBookingSystem.dto.respone.Page.CustomPage;
 import com.swp.PodBookingSystem.entity.Account;
 import com.swp.PodBookingSystem.entity.Order;
 import com.swp.PodBookingSystem.entity.OrderDetail;
+import com.swp.PodBookingSystem.enums.AccountRole;
 import com.swp.PodBookingSystem.mapper.OrderMapper;
 import com.swp.PodBookingSystem.repository.AccountRepository;
 import com.swp.PodBookingSystem.repository.OrderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +36,10 @@ public class OrderService {
     private OrderMapper orderMapper;
     @Autowired
     private AccountRepository accountRepository;
+    @Autowired
+    private OrderDetailService orderDetailService;
+    @Autowired
+    private OrderDetailAmenityService orderDetailAmenityService;
 
     public List<OrderResponse> getAllOrders() {
         List<Order> orders = orderRepository.findAll();
@@ -74,5 +84,61 @@ public class OrderService {
             log.error("Error creating order: ", e);
             throw new RuntimeException("Failed to create order: " + e.getMessage());
         }
+    }
+
+    public Order createOrder(Account customer){
+        Order order = new Order();
+        order.setId(UUID.randomUUID().toString());
+        order.setAccount(customer);
+        order.setCreatedAt(LocalDateTime.now());
+        order.setUpdatedAt(LocalDateTime.now());
+        orderRepository.save(order);
+        return order;
+    }
+
+    public CustomPage<OrderManagementResponse> getOrdersByRole(int page, int size, LocalDateTime startDate, LocalDateTime endDate, Account user) {
+        Page<Order> ordersPage;
+        if (user.getRole().equals(AccountRole.Admin)) {
+            ordersPage = orderRepository.findAllWithTimeRange(startDate, endDate, PageRequest.of(page, size));
+        } else if (user.getRole().equals(AccountRole.Staff) || user.getRole().equals(AccountRole.Manager)) {
+            int buildingNumber = user.getBuildingNumber();
+            ordersPage = orderRepository.findOrdersByBuildingNumberAndTimeRange(buildingNumber, startDate, endDate, PageRequest.of(page, size));
+        } else {
+            return null;
+        }
+
+        return convertToCustomPage(ordersPage);
+    }
+
+    private CustomPage<OrderManagementResponse> convertToCustomPage(Page<Order> ordersPage) {
+        List<OrderManagementResponse> orderResponses = ordersPage.getContent().stream().map(order -> {
+            List<OrderDetailManagementResponse> orderDetailDTOs = orderDetailService.getOrderDetailById(order.getId());
+            return OrderManagementResponse.builder()
+                    .id(order.getId())
+                    .createdAt(order.getCreatedAt())
+                    .updatedAt(order.getUpdatedAt())
+                    .orderDetails(orderDetailDTOs)
+                    .build();
+        }).collect(Collectors.toList());
+
+        return CustomPage.<OrderManagementResponse>builder()
+                .data(orderResponses)
+                .pageNumber(ordersPage.getNumber())
+                .pageSize(ordersPage.getSize())
+                .totalElements(ordersPage.getTotalElements())
+                .build();
+    }
+
+    @Transactional
+    public String deleteOrder(String orderId) {
+        orderDetailService.deleteOrderDetailsByOrderId(orderId);
+        orderRepository.deleteById(orderId);
+        return orderId;
+    }
+
+    public CustomPage<OrderManagementResponse> searchOrdersByKeyword(int page, int size, String keyword) {
+        Page<Order> ordersPage;
+        ordersPage = orderRepository.searchByKeyword(keyword, PageRequest.of(page, size));
+        return convertToCustomPage(ordersPage);
     }
 }

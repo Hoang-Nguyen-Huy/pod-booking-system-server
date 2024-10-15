@@ -1,6 +1,8 @@
 package com.swp.PodBookingSystem.service;
 
 import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationRequest;
+import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementResponse;
+import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
 import com.swp.PodBookingSystem.entity.*;
 import com.swp.PodBookingSystem.enums.OrderStatus;
@@ -17,6 +19,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class OrderDetailService {
@@ -44,12 +47,45 @@ public class OrderDetailService {
 
     private static final Logger log = LoggerFactory.getLogger(OrderService.class);
 
+    @Autowired
+    private OrderDetailAmenityService orderDetailAmenityService;
+
+    @Autowired
+    private AccountService accountService;
+    @Autowired
+    private ServicePackageService servicePackageService;
 
     public List<OrderDetailResponse> getAllOrders() {
         List<OrderDetail> orders = orderDetailRepository.findAll();
         return orders.stream()
                 .map(orderDetailMapper::toOrderDetailResponse)
                 .collect(Collectors.toList());
+    }
+
+    public List<OrderDetail> getOrdersByOrderId(String orderId) {
+        return orderDetailRepository.findByOrderId(orderId);
+    }
+
+    public List<OrderDetailManagementResponse> getOrderDetailById(String orderId) {
+        return orderDetailRepository.findByOrderId(orderId).stream().map(orderDetail -> {
+            List<AmenityManagementResponse> amenities = orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(orderDetail.getId());
+            return OrderDetailManagementResponse.builder()
+                    .id(orderDetail.getId())
+                    .roomId(orderDetail.getRoom().getId())
+                    .roomName(orderDetail.getRoom().getName())
+                    .roomPrice(orderDetail.getPriceRoom())
+                    .buildingAddress(orderDetail.getBuilding().getAddress())
+                    .buildingId(orderDetail.getBuilding().getId())
+                    .roomId(orderDetail.getRoom().getId())
+                    .orderHandler(accountService.toAccountResponse(orderDetail.getOrderHandler()))
+                    .customer(accountService.toAccountResponse(orderDetail.getCustomer()))
+                    .servicePackage(servicePackageService.toServicePackageResponse(orderDetail.getServicePackage()))
+                    .status(orderDetail.getStatus().name())
+                    .startTime(orderDetail.getStartTime())
+                    .endTime(orderDetail.getEndTime())
+                    .amenities(amenities)
+                    .build();
+        }).collect(Collectors.toList());
     }
 
     public List<OrderDetailResponse> getOrdersByCustomerId(String customerId) {
@@ -78,7 +114,6 @@ public class OrderDetailService {
                 .map(orderDetailMapper::toOrderDetailResponse) // Use the mapper for conversion
                 .collect(Collectors.toList());
     }
-
 
 
     public OrderDetail createOrderDetail(OrderDetailCreationRequest request, Order order, Room room, OrderStatus status, Account account, LocalDateTime startTime, LocalDateTime endTime) {
@@ -116,8 +151,6 @@ public class OrderDetailService {
             }
 
 
-
-
             // Set other fields
             response.setPriceRoom(request.getPriceRoom());
             response.setDiscountPercentage(request.getDiscountPercentage());
@@ -141,7 +174,8 @@ public class OrderDetailService {
         }
     }
 
-    public List<OrderDetail> getNextDayBookings(LocalDate dayNow){
+
+    public List<OrderDetail> getNextDayBookings(LocalDate dayNow) {
         // Calculate the start of the next day (00:00:00)
         LocalDateTime startOfDay = dayNow.plusDays(1).atStartOfDay();
 
@@ -152,7 +186,12 @@ public class OrderDetailService {
         return orderDetailRepository.findAllOrderDetailsByDay(startOfDay, endOfDay);
     }
 
-
-
-
+    @Transactional
+    public void deleteOrderDetailsByOrderId(String orderId) {
+        List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(orderId);
+        for (OrderDetail orderDetail : orderDetails) {
+            orderDetailAmenityService.deleteOrderDetailAmenityByOrderDetailId(orderDetail.getId());
+        }
+        orderDetailRepository.deleteByOrderId(orderId);
+    }
 }
