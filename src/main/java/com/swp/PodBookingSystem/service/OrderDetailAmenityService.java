@@ -18,6 +18,10 @@ public class OrderDetailAmenityService {
         orderDetailAmenityRepository.save(orderDetailAmenity);
     }
 
+    public List<OrderDetailAmenity> getAll() {
+        return orderDetailAmenityRepository.findAll();
+    }
+
     public List<AmenityManagementResponse> getOrderDetailAmenitiesByOrderDetailId(String orderDetailId) {
         return orderDetailAmenityRepository.findByOrderDetailId(orderDetailId).stream().map(amenity -> {
             return AmenityManagementResponse.builder()

@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,7 +21,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import org.springframework.transaction.annotation.Transactional;
+
 
 @Service
 public class OrderDetailService {
@@ -45,10 +47,10 @@ public class OrderDetailService {
     @Autowired
     private OrderDetailMapper orderDetailMapper;
 
-    private static final Logger log = LoggerFactory.getLogger(OrderService.class);
-
     @Autowired
     private OrderDetailAmenityService orderDetailAmenityService;
+
+    private static final Logger log = LoggerFactory.getLogger(OrderService.class);
 
     @Autowired
     private AccountService accountService;
@@ -61,6 +63,7 @@ public class OrderDetailService {
                 .map(orderDetailMapper::toOrderDetailResponse)
                 .collect(Collectors.toList());
     }
+
 
     public List<OrderDetail> getOrdersByOrderId(String orderId) {
         return orderDetailRepository.findByOrderId(orderId);
@@ -92,31 +95,19 @@ public class OrderDetailService {
         List<OrderDetail> orderDetails = orderDetailRepository.findByCustomer_Id(customerId);
 
         System.out.println("Orders found for customer " + customerId + ": " + orderDetails.size());
-        for (OrderDetail orderDetail : orderDetails) {
-            System.out.println("Order Detail ID: " + orderDetail.getId());
-            System.out.println("Created At: " + orderDetail.getCreatedAt());
-            System.out.println("Discount Percentage: " + orderDetail.getDiscountPercentage());
-            System.out.println("End Time: " + orderDetail.getEndTime());
-            System.out.println("Price Room: " + orderDetail.getPriceRoom());
-            System.out.println("Start Time: " + orderDetail.getStartTime());
-            System.out.println("Status: " + orderDetail.getStatus());
-            System.out.println("Updated At: " + orderDetail.getUpdatedAt());
-            System.out.println("Building Number: " + orderDetail.getBuilding().getId());
-            System.out.println("Customer ID: " + orderDetail.getCustomerId());
-            System.out.println("Order ID: " + orderDetail.getOrder().getId());
-            System.out.println("Order Handler ID: " + orderDetail.getOrderHandler().getId());
-            System.out.println("Room ID: " + orderDetail.getRoom().getId());
-            System.out.println("Service Package ID: " + orderDetail.getServicePackage().getId());
-            System.out.println("-------------------------------"); // Separator for better readability
+        var orderDetailResponses = orderDetails.stream()
+                .map(orderDetailMapper::toOrderDetailResponse) // Use the mapper for conversion
+                .toList();
+        for (OrderDetailResponse orderDetail : orderDetailResponses) {
+            System.out.println("Order Detail: " + orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(orderDetail.getOrderId()));
+            orderDetail.setAmenities(orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(orderDetail.getId()));
         }
 
-        return orderDetails.stream()
-                .map(orderDetailMapper::toOrderDetailResponse) // Use the mapper for conversion
-                .collect(Collectors.toList());
+        return orderDetailResponses;
     }
 
 
-    public OrderDetail createOrderDetail(OrderDetailCreationRequest request, Order order, Room room, OrderStatus status, Account account, LocalDateTime startTime, LocalDateTime endTime) {
+    public OrderDetailResponse createOrderDetail(OrderDetailCreationRequest request, Order order, Room room, OrderStatus status, Account account, LocalDateTime startTime, LocalDateTime endTime) {
         try {
 
 
@@ -175,6 +166,7 @@ public class OrderDetailService {
     }
 
 
+
     public List<OrderDetail> getNextDayBookings(LocalDate dayNow) {
         // Calculate the start of the next day (00:00:00)
         LocalDateTime startOfDay = dayNow.plusDays(1).atStartOfDay();
@@ -194,4 +186,5 @@ public class OrderDetailService {
         }
         orderDetailRepository.deleteByOrderId(orderId);
     }
+
 }
