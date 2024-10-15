@@ -2,8 +2,10 @@ package com.swp.PodBookingSystem.service;
 
 import com.swp.PodBookingSystem.dto.request.Account.AccountCreationRequest;
 import com.swp.PodBookingSystem.dto.request.Account.AccountUpdateAdminRequest;
+import com.swp.PodBookingSystem.dto.respone.Account.AccountOrderResponse;
 import com.swp.PodBookingSystem.dto.respone.AccountResponse;
 import com.swp.PodBookingSystem.entity.Account;
+import com.swp.PodBookingSystem.enums.AccountRole;
 import com.swp.PodBookingSystem.exception.AppException;
 import com.swp.PodBookingSystem.exception.ErrorCode;
 import com.swp.PodBookingSystem.mapper.AccountMapper;
@@ -20,7 +22,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -63,5 +67,30 @@ public class AccountService {
 
         return accountMapper.toAccountResponse(accountRepository.save(updatedAccount));
     }
-    
+
+    public AccountOrderResponse toAccountResponse(Account account) {
+        return AccountOrderResponse.builder()
+                .id(account.getId())
+                .name(account.getName())
+                .email(account.getEmail())
+                .avatar(account.getAvatar())
+                .role(account.getRole())
+                .buildingNumber(account.getBuildingNumber())
+                .rankingName(account.getRankingName())
+                .build();
+    }
+
+    public List<AccountOrderResponse> getAllStaffAccounts() {
+            List<Account> accounts = accountRepository.findByRole(AccountRole.Staff);
+            return accounts.stream()
+                    .map(this::toAccountResponse)
+                    .collect(Collectors.toList());
+    }
+
+    public List<AccountOrderResponse> searchAccounts(String keyword, AccountRole role) {
+        List<Account> accounts = accountRepository.searchAccounts(keyword, role);
+        return accounts.stream()
+                .map(this::toAccountResponse)
+                .collect(Collectors.toList());
+    }
 }

@@ -202,7 +202,7 @@ public class OrderController {
 
                             orderDetailAmenityService.createOrderDetailAmenity(orderDetailAmenity);
                         }
-                          orderDetails.add(orderDetail);
+                        orderDetails.add(orderDetail);
                     }
                     break;
 
