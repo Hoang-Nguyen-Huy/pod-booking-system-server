@@ -31,7 +31,13 @@ public class OrderDetailAmenityService {
     }
 
     @Transactional
-    public void deleteOrderDetailAmenityByOrderDetailId(String orderDetailId) {
+    public double deleteOrderDetailAmenityByOrderDetailId(String orderDetailId) {
+        List<OrderDetailAmenity> orderDetailAmenities = orderDetailAmenityRepository.findByOrderDetailId(orderDetailId);
+        double total = 0;
+        for(OrderDetailAmenity orderDetailAmenity : orderDetailAmenities) {
+            total += orderDetailAmenity.getPrice() * orderDetailAmenity.getQuantity();
+        }
         orderDetailAmenityRepository.deleteByOrderDetailId(orderDetailId);
+        return total;
     }
 }

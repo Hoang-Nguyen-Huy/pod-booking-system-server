@@ -245,9 +245,14 @@
         @Transactional
         public void deleteOrderDetailsByOrderId(String orderId) {
             List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(orderId);
+            Account customer = orderDetails.get(0).getCustomer();
+            double total = 0;
             for (OrderDetail orderDetail : orderDetails) {
-                orderDetailAmenityService.deleteOrderDetailAmenityByOrderDetailId(orderDetail.getId());
+                total += orderDetail.getPriceRoom()*orderDetail.getDiscountPercentage();
+                total += orderDetailAmenityService.deleteOrderDetailAmenityByOrderDetailId(orderDetail.getId())*orderDetail.getDiscountPercentage();
             }
+            customer.setBalance(customer.getBalance() + total);
+            accountRepository.save(customer);
             orderDetailRepository.deleteByOrderId(orderId);
         }
     }
