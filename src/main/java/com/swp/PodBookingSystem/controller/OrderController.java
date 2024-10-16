@@ -104,12 +104,11 @@ public class OrderController {
         }
     }
 
-    @PutMapping("/{orderId}")
-    ApiResponse<OrderResponse> updateStaffWithOrder(@PathVariable("orderId") String orderId,
-                                                    @RequestBody OrderUpdateStaffRequest request){
-        orderService.updateOrderUpdateAt(orderId);
+    @PutMapping("/staff")
+    ApiResponse<OrderResponse> updateStaffWithOrder(@RequestBody OrderUpdateStaffRequest request){
+        orderService.updateOrderUpdateAt(request.getId());
         return ApiResponse.<OrderResponse> builder()
-                .data(orderService.updateOrderHandlerWithOrder(orderId,request))
+                .data(orderService.updateOrderHandlerWithOrder(request.getId(),request))
                 .message("Update order successfully")
                 .build();
     }

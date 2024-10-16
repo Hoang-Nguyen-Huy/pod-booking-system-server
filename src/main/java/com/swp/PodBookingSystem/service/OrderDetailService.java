@@ -250,8 +250,9 @@ public class OrderDetailService {
 
     public void updateOrderHandlerOrderDetail(String orderId, Account accountHandler){
         List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(orderId);
+        Account orderHandler = accountService.getAccountById(accountHandler.getId());
         for(OrderDetail od : orderDetails){
-            od.setOrderHandler(accountHandler);
+            od.setOrderHandler(orderHandler);
         }
         orderDetailRepository.saveAll(orderDetails);
     }
