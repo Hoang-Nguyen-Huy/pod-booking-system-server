@@ -13,7 +13,9 @@ public interface OrderDetailMapper {
     @Mapping(target = "roomId", source = "room.id") // Map room ID to response
     @Mapping(target = "servicePackageId", source = "servicePackage.id") // Map service package ID to response
     @Mapping(target = "orderId", source = "order.id") // Map order ID to response
-    @Mapping(target = "orderHandledId", source = "orderHandler.id") // Map order handled ID to response
+    @Mapping(target = "orderHandledId", source = "orderHandler.id")
+    @Mapping(target = "roomName", source = "room.name")
+        // Map order handled ID to response
     OrderDetailResponse toOrderDetailResponse(OrderDetail orderDetail);
 
 }

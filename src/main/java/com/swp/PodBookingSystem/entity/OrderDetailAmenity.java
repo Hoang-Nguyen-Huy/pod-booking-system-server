@@ -1,5 +1,6 @@
 package com.swp.PodBookingSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -11,7 +12,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "orderDetailAmentity")
+@Table(name = "orderDetailAmenity")
 public class OrderDetailAmenity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -22,10 +23,12 @@ public class OrderDetailAmenity {
     double price;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "orderDetailId", nullable = false)
     OrderDetail orderDetail;
 
     @ManyToOne
-    @JoinColumn(name = "amentityId", nullable = false)
+    @JsonIgnore
+    @JoinColumn(name = "amenityId", nullable = false)
     Amenity amenity;
 }

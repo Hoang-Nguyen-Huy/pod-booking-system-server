@@ -10,6 +10,8 @@ import com.swp.PodBookingSystem.dto.respone.Room.RoomResponse;
 import com.swp.PodBookingSystem.entity.OrderDetail;
 import com.swp.PodBookingSystem.entity.Room;
 import com.swp.PodBookingSystem.entity.RoomType;
+import com.swp.PodBookingSystem.exception.AppException;
+import com.swp.PodBookingSystem.exception.ErrorCode;
 import com.swp.PodBookingSystem.mapper.RoomMapper;
 import com.swp.PodBookingSystem.repository.RoomRepository;
 import com.swp.PodBookingSystem.repository.RoomTypeRepository;
@@ -62,6 +64,10 @@ public class RoomService {
      */
     public Optional<RoomResponse> getRoomById(int roomId) {
         return roomMapper.toRoomResponse(roomRepository.findById(roomId));
+    }
+
+    public Room getRoomByIdV2(int roomId) {
+        return roomRepository.findById(roomId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
     }
 
     public boolean isRoomAvailable(Integer roomId, LocalDateTime startTime, LocalDateTime endTime) {
