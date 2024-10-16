@@ -14,12 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
 
 @Service
 public class OrderDetailService {
@@ -49,11 +51,11 @@ public class OrderDetailService {
     private OrderDetailAmenityService orderDetailAmenityService;
 
     private static final Logger log = LoggerFactory.getLogger(OrderService.class);
+
     @Autowired
     private AccountService accountService;
     @Autowired
     private ServicePackageService servicePackageService;
-
 
     public List<OrderDetailResponse> getAllOrders() {
         List<OrderDetail> orders = orderDetailRepository.findAll();
@@ -61,6 +63,7 @@ public class OrderDetailService {
                 .map(orderDetailMapper::toOrderDetailResponse)
                 .collect(Collectors.toList());
     }
+
 
     public List<OrderDetail> getOrdersByOrderId(String orderId) {
         return orderDetailRepository.findByOrderId(orderId);
@@ -104,7 +107,7 @@ public class OrderDetailService {
     }
 
 
-    public OrderDetailResponse createOrderDetail(OrderDetailCreationRequest request, Order order, Room room, OrderStatus status, Account account, LocalDateTime startTime, LocalDateTime endTime) {
+    public OrderDetail createOrderDetail(OrderDetailCreationRequest request, Order order, Room room, OrderStatus status, Account account, LocalDateTime startTime, LocalDateTime endTime) {
         try {
 
 
@@ -148,8 +151,7 @@ public class OrderDetailService {
             response.setUpdatedAt(LocalDateTime.now());
             response.setStatus(status);
 
-            // Save the OrderDetail and return response
-            return orderDetailMapper.toOrderDetailResponse(orderDetailRepository.save(response));
+            return orderDetailRepository.save(response);
 
 
         } catch (IllegalArgumentException e) {
@@ -162,6 +164,8 @@ public class OrderDetailService {
             throw new RuntimeException("Failed to create order detail: " + e.getMessage(), e);
         }
     }
+
+
 
     public List<OrderDetail> getNextDayBookings(LocalDate dayNow) {
         // Calculate the start of the next day (00:00:00)
@@ -182,4 +186,5 @@ public class OrderDetailService {
         }
         orderDetailRepository.deleteByOrderId(orderId);
     }
+
 }

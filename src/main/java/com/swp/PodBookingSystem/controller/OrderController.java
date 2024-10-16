@@ -1,21 +1,17 @@
 package com.swp.PodBookingSystem.controller;
 
 import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationRequest;
+import com.swp.PodBookingSystem.dto.request.Room.RoomWithAmenitiesDTO;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.respone.Order.OrderManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderResponse;
 import com.swp.PodBookingSystem.dto.respone.Page.CustomPage;
-import com.swp.PodBookingSystem.entity.Account;
-import com.swp.PodBookingSystem.entity.Order;
-import com.swp.PodBookingSystem.entity.Room;
+import com.swp.PodBookingSystem.entity.*;
 import com.swp.PodBookingSystem.enums.OrderStatus;
 import com.swp.PodBookingSystem.exception.AppException;
 import com.swp.PodBookingSystem.exception.ErrorCode;
-import com.swp.PodBookingSystem.service.AccountService;
-import com.swp.PodBookingSystem.service.OrderDetailService;
-import com.swp.PodBookingSystem.service.OrderService;
-import com.swp.PodBookingSystem.service.RoomService;
+import com.swp.PodBookingSystem.service.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -32,6 +28,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/order")
@@ -52,10 +49,15 @@ public class OrderController {
     @Autowired
     private RoomService roomService;
 
+
+
+    @Autowired
+    private OrderDetailAmenityService orderDetailAmenityService;
+
     JwtDecoder jwtDecoder;
 
     @GetMapping
-    public ApiResponse<List<OrderResponse>> getAllOrders(){
+    public ApiResponse<List<OrderResponse>> getAllOrders() {
         List<OrderResponse> orders = orderService.getAllOrders();
         logOrders(orders);
         return ApiResponse.<List<OrderResponse>>builder()
@@ -73,6 +75,7 @@ public class OrderController {
         if (token == null || !token.startsWith("Bearer ")) {
             throw new AppException(ErrorCode.INVALID_TOKEN);
         }
+
         token = token.substring(7);
         Jwt jwt = jwtDecoder.decode(token);
         String accountId = jwt.getClaimAsString("accountId");
@@ -103,7 +106,6 @@ public class OrderController {
             //Trừ quanlity các amenities, reset sau khi qua ngày
 
 
-
             if (token == null || !token.startsWith("Bearer ")) {
                 throw new AppException(ErrorCode.INVALID_TOKEN);
             }
@@ -112,9 +114,9 @@ public class OrderController {
             Jwt jwt = jwtDecoder.decode(token);
             String accountId = jwt.getClaimAsString("accountId");
             Account account = accountService.getAccountById(accountId);
-            List<Room> selectedRooms = request.getSelectedRooms();
+            List<RoomWithAmenitiesDTO> selectedRoomsWithAmenities = request.getSelectedRooms();
 
-            List<OrderDetailResponse> orderDetails = new ArrayList<>();
+            List<OrderDetail> orderDetails = new ArrayList<>();
             Order orderCreated = orderService.createOrderByRequest(request, account);
             String startTime = request.getStartTime().toString();
             String endTime = request.getEndTime().toString();
@@ -125,87 +127,129 @@ public class OrderController {
             LocalDateTime originalEndTime = LocalDateTime.parse(endTime, formatter);
             boolean isSomeRoomWasBook = false;
 
-                switch (servicePackageId){
-                    // 4 week, same day in week
-                    case 1:
-                        for (int week = 0; week < 4; week++) {
-                            LocalDateTime newStartTime = originalStartTime.plusWeeks(week);
-                            LocalDateTime newEndTime = originalEndTime.plusWeeks(week);
-                            for (int i = 0; i < selectedRooms.size(); i++) {
-                                OrderDetailResponse orderDetailResponse = new OrderDetailResponse();
-                                Room room = selectedRooms.get(i);
-                                boolean isAvailable = roomService.isRoomAvailable(room.getId(), newStartTime, newEndTime);
-                                if (isAvailable){
-                                    orderDetailResponse = orderDetailService.createOrderDetail(
-                                            request, orderCreated, room, OrderStatus.Successfully, account, newStartTime, newEndTime);
-                                } else {
-                                    isSomeRoomWasBook = true;
-                                    orderDetailResponse = orderDetailService.createOrderDetail(
-                                            request, orderCreated, room, OrderStatus.Pending, account, newStartTime, newEndTime);
-                                }
-                                orderDetails.add(orderDetailResponse);
-                            }
-                        }
-                        break;
-
-                        //30 day
-                    case 2:
-                        for (int day = 0; day < 30; day++) {
-                            LocalDateTime newStartTime = originalStartTime.plusDays(day);
-                            LocalDateTime newEndTime = originalEndTime.plusDays(day);
-                            for (Room room : selectedRooms) {
-                                OrderDetailResponse orderDetailResponse = new OrderDetailResponse();
-                                boolean isAvailable = roomService.isRoomAvailable(room.getId(), newStartTime, newEndTime);
-                                if (isAvailable){
-                                    orderDetailResponse = orderDetailService.createOrderDetail(
-                                            request, orderCreated, room, OrderStatus.Successfully, account, newStartTime, newEndTime);
-                                } else {
-                                    isSomeRoomWasBook = true;
-                                    orderDetailResponse = orderDetailService.createOrderDetail(
-                                            request, orderCreated, room, OrderStatus.Pending, account, newStartTime, newEndTime);
-                                }
-                                orderDetails.add(orderDetailResponse);
-                            }
-                        }
-                        break;
-
-                        //standard
-                    case 3:
-                        for (int i = 0; i < selectedRooms.size(); i++) {
-                            OrderDetailResponse orderDetailResponse = new OrderDetailResponse();
-                            Room room = selectedRooms.get(i);
-                            boolean isAvailable = roomService.isRoomAvailable(room.getId(), request.getStartTime(), request.getEndTime());
-                            if (isAvailable){
-                                orderDetailResponse = orderDetailService.createOrderDetail(
-                                        request, orderCreated, room, OrderStatus.Successfully, account, request.getStartTime(), request.getEndTime());
+            switch (servicePackageId) {
+                // 4 week, same day in week
+                case 1:
+                    for (int week = 0; week < 4; week++) {
+                        LocalDateTime newStartTime = originalStartTime.plusWeeks(week);
+                        LocalDateTime newEndTime = originalEndTime.plusWeeks(week);
+                        for (int i = 0; i < selectedRoomsWithAmenities.size(); i++) {
+                            OrderDetail orderDetail;
+                            RoomWithAmenitiesDTO roomWithAmenitiesDTO = selectedRoomsWithAmenities.get(i);
+                            Room room = roomService.getRoomByIdV2(roomWithAmenitiesDTO.getId());
+                            boolean isAvailable = roomService.isRoomAvailable(room.getId(), newStartTime, newEndTime);
+                            if (isAvailable) {
+                                orderDetail = orderDetailService.createOrderDetail(
+                                        request, orderCreated, room, OrderStatus.Successfully, account, newStartTime, newEndTime);
                             } else {
                                 isSomeRoomWasBook = true;
-                                orderDetailResponse = orderDetailService.createOrderDetail(
-                                        request, orderCreated, room, OrderStatus.Pending, account, request.getStartTime(), request.getEndTime());
+                                orderDetail = orderDetailService.createOrderDetail(
+                                        request, orderCreated, room, OrderStatus.Pending, account, newStartTime, newEndTime);
                             }
-                            orderDetails.add(orderDetailResponse);
+                            List<Amenity> amenities = roomWithAmenitiesDTO.getAmenities();
+                            for(Amenity amenity : amenities){
+                                OrderDetailAmenity orderDetailAmenity = new OrderDetailAmenity();
+
+                                // Set the properties using setters
+                                orderDetailAmenity.setId(UUID.randomUUID().toString());
+                                orderDetailAmenity.setQuantity(amenity.getQuantity());
+                                orderDetailAmenity.setPrice(amenity.getPrice() * amenity.getQuantity());
+                                orderDetailAmenity.setOrderDetail(orderDetail);
+                                orderDetailAmenity.setAmenity(amenity);
+                                orderDetailAmenityService.createOrderDetailAmenity(orderDetailAmenity);
+                            }
+                            orderDetails.add(orderDetail);
                         }
-                        break;
+                    }
+                    break;
 
-                    default:
-                        throw new AppException(ErrorCode.INVALID_KEY);
-                }
+                //30 day
+                case 2:
+                    for (int day = 0; day < 30; day++) {
+                        LocalDateTime newStartTime = originalStartTime.plusDays(day);
+                        LocalDateTime newEndTime = originalEndTime.plusDays(day);
+                        for (RoomWithAmenitiesDTO roomWithAmenitiesDTO : selectedRoomsWithAmenities) {
+                            OrderDetail orderDetail;
+                            Room room = roomService.getRoomByIdV2(roomWithAmenitiesDTO.getId());
+                            boolean isAvailable = roomService.isRoomAvailable(room.getId(), newStartTime, newEndTime);
 
-                if (isSomeRoomWasBook) {
-                    String status = "Pending";
-                    return ApiResponse.<String>builder()
-                            .data(status)
-                            .message("Order and order details created successfully but some room was book")
-                            .code(HttpStatus.CREATED.value())
-                            .build();
-                } else {
-                    String status = "Successfully";
-                    return ApiResponse.<String>builder()
-                            .data(status)
-                            .message("Order and order details created successfully  ")
-                            .code(HttpStatus.CREATED.value())
-                            .build();
-                }
+                            if (isAvailable) {
+                                orderDetail = orderDetailService.createOrderDetail(
+                                        request, orderCreated, room, OrderStatus.Successfully, account, newStartTime, newEndTime);
+                            } else {
+                                isSomeRoomWasBook = true;
+                                orderDetail = orderDetailService.createOrderDetail(
+                                        request, orderCreated, room, OrderStatus.Pending, account, newStartTime, newEndTime);
+                            }
+                            List<Amenity> amenities = roomWithAmenitiesDTO.getAmenities();
+                            for(Amenity amenity : amenities){
+                                OrderDetailAmenity orderDetailAmenity = new OrderDetailAmenity();
+
+                                // Set the properties using setters
+                                orderDetailAmenity.setId(UUID.randomUUID().toString());
+                                orderDetailAmenity.setQuantity(amenity.getQuantity());
+                                orderDetailAmenity.setPrice(amenity.getPrice() * amenity.getQuantity());
+                                orderDetailAmenity.setOrderDetail(orderDetail);
+                                orderDetailAmenity.setAmenity(amenity);
+                                orderDetailAmenityService.createOrderDetailAmenity(orderDetailAmenity);
+                            }
+                            orderDetails.add(orderDetail);
+                        }
+                    }
+                    break;
+
+                //standard
+                case 3:
+                    for (int i = 0; i < selectedRoomsWithAmenities.size(); i++) {
+                        OrderDetail orderDetail;
+                        RoomWithAmenitiesDTO roomWithAmenitiesDTO = selectedRoomsWithAmenities.get(i);
+                        Room room = roomService.getRoomByIdV2(roomWithAmenitiesDTO.getId());
+                        boolean isAvailable = roomService.isRoomAvailable(room.getId(), request.getStartTime(), request.getEndTime());
+                        if (isAvailable) {
+                            orderDetail = orderDetailService.createOrderDetail(
+                                    request, orderCreated, room, OrderStatus.Successfully, account, request.getStartTime(), request.getEndTime());
+                        } else {
+                            isSomeRoomWasBook = true;
+                            orderDetail = orderDetailService.createOrderDetail(
+                                    request, orderCreated, room, OrderStatus.Pending, account, request.getStartTime(), request.getEndTime());
+                        }
+                        List<Amenity> amenities = roomWithAmenitiesDTO.getAmenities();
+                        for (Amenity amenity : amenities) {
+
+                            OrderDetailAmenity orderDetailAmenity = new OrderDetailAmenity();
+
+                            // Set the properties using setters
+                            orderDetailAmenity.setId(UUID.randomUUID().toString());
+                            orderDetailAmenity.setQuantity(amenity.getQuantity());
+                            orderDetailAmenity.setPrice(amenity.getPrice() * amenity.getQuantity());
+                            orderDetailAmenity.setOrderDetail(orderDetail);
+                            orderDetailAmenity.setAmenity(amenity);
+
+                            orderDetailAmenityService.createOrderDetailAmenity(orderDetailAmenity);
+                        }
+                        orderDetails.add(orderDetail);
+                    }
+                    break;
+
+                default:
+                    throw new AppException(ErrorCode.INVALID_KEY);
+            }
+
+            if (isSomeRoomWasBook) {
+                String status = "Pending";
+                return ApiResponse.<String>builder()
+                        .data(status)
+                        .message("Order and order details created successfully but some room was book")
+                        .code(HttpStatus.CREATED.value())
+                        .build();
+            } else {
+                String status = "Successfully";
+                return ApiResponse.<String>builder()
+                        .data(status)
+                        .message("Order and order details created successfully")
+                        .code(HttpStatus.CREATED.value())
+                        .build();
+            }
 
 
         } catch (Exception e) {
@@ -216,7 +260,6 @@ public class OrderController {
                     .build();
         }
     }
-
 
 
     private void logOrders(List<OrderResponse> orders) {

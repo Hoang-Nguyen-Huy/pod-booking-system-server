@@ -7,7 +7,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface OrderDetailAmenityRepository extends JpaRepository<OrderDetailAmenity, String> {
     List<OrderDetailAmenity> findByOrderDetailId(String orderDetailId);
 

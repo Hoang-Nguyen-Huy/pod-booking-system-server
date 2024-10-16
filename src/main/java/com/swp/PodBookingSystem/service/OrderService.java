@@ -1,6 +1,6 @@
 package com.swp.PodBookingSystem.service;
+import com.swp.PodBookingSystem.dto.request.Order.OrderCreationRequest;
 import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationRequest;
-import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.Order.OrderManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderResponse;
@@ -11,22 +11,20 @@ import com.swp.PodBookingSystem.entity.OrderDetail;
 import com.swp.PodBookingSystem.enums.AccountRole;
 import com.swp.PodBookingSystem.mapper.OrderMapper;
 import com.swp.PodBookingSystem.repository.AccountRepository;
-import com.swp.PodBookingSystem.repository.OrderDetailAmenityRepository;
-import com.swp.PodBookingSystem.repository.OrderDetailRepository;
 import com.swp.PodBookingSystem.repository.OrderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
 @Service
 public class OrderService {
     @Autowired
@@ -144,4 +142,3 @@ public class OrderService {
         return convertToCustomPage(ordersPage);
     }
 }
-
