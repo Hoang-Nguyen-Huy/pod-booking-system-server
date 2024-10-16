@@ -4,7 +4,6 @@ import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationReque
 import com.swp.PodBookingSystem.dto.request.Room.RoomWithAmenitiesDTO;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.respone.Order.OrderManagementResponse;
-import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderResponse;
 import com.swp.PodBookingSystem.dto.respone.Page.CustomPage;
 import com.swp.PodBookingSystem.entity.*;
