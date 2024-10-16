@@ -39,4 +39,13 @@ public class AmenityController {
                 .build();
     }
 
+    @PutMapping("/{amenityId}")
+    ApiResponse<AmenityResponse> updateAmenity(@PathVariable("amenityId") int amenityId,
+                                               @RequestBody AmenityCreationRequest request){
+        return ApiResponse.<AmenityResponse>builder()
+                .data(amenityService.updateAmenity(amenityId,request))
+                .message("Update amenity successfully")
+                .build();
+    }
+
 }

@@ -7,6 +7,7 @@ import com.swp.PodBookingSystem.enums.AmenityType;
 import com.swp.PodBookingSystem.repository.AmenityRepository;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 
 @Mapper(componentModel = "spring")
@@ -20,5 +21,8 @@ public interface AmenityMapper {
 
     @Mapping(source = "type", target = "type", qualifiedByName = "stringToAmenityType")
     Amenity toAmenity(AmenityCreationRequest request);
+
+    @Mapping(target = "id", ignore = true)
+    Amenity toUpdateAmenity(AmenityCreationRequest request, @MappingTarget Amenity amenity);
 
 }
