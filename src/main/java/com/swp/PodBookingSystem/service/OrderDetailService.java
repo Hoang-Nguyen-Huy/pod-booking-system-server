@@ -7,6 +7,7 @@ import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
 import com.swp.PodBookingSystem.entity.*;
+import com.swp.PodBookingSystem.enums.AccountRole;
 import com.swp.PodBookingSystem.enums.OrderStatus;
 import com.swp.PodBookingSystem.exception.AppException;
 import com.swp.PodBookingSystem.exception.ErrorCode;
@@ -87,6 +88,9 @@ public class OrderDetailService {
 
     //CREATE:
     public boolean processOrderDetails(OrderDetailCreationRequest request, Order order, Account account) {
+        if(account.getRole() != AccountRole.Customer){
+            account = request.getCustomer();
+        }
         List<RoomWithAmenitiesDTO> selectedRooms = request.getSelectedRooms();
         return switch (request.getServicePackage().getId()) {
             case 1 -> handleWeeklyBooking(selectedRooms, request, order, account);
@@ -168,31 +172,20 @@ public class OrderDetailService {
 
     public OrderDetail createOrderDetail(OrderDetailCreationRequest request, Order order, Room room, OrderStatus status, Account account, LocalDateTime startTime, LocalDateTime endTime) {
         try {
-            // Step 1: Create a new OrderDetail entity
+            ServicePackage servicePackage = servicePackageRepository.findById(request.getServicePackage().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Service package not found"));
+            Building building = buildingRepository.findById(request.getBuilding().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Building not found"));
+
             OrderDetail response = new OrderDetail();
+
             response.setCustomer(account);
             response.setId(UUID.randomUUID().toString());
             response.setOrder(order);
-            // Set building
-            Building building = buildingRepository.findById(request.getBuilding().getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Building not found"));
             response.setBuilding(building);
-
-            // Set selected room (assuming only one room is selected here for simplicity)
-            if (room != null) {
-                response.setRoom(room);
-            }
-            // Set service package
-            ServicePackage servicePackage = servicePackageRepository.findById(request.getServicePackage().getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Service package not found"));
+            response.setRoom(room);
             response.setServicePackage(servicePackage);
-            // Set order handler
-            if (request.getOrderHandler() != null) {
-                Account orderHandler = accountRepository.findById(request.getOrderHandler().getId())
-                        .orElseThrow(() -> new IllegalArgumentException("Order handler not found"));
-                response.setOrderHandler(orderHandler);
-            }
-            // Set other fields
+            response.setOrderHandler(null);
             response.setPriceRoom(request.getPriceRoom());
             response.setDiscountPercentage(request.getDiscountPercentage());
             response.setStartTime(startTime);
@@ -200,14 +193,12 @@ public class OrderDetailService {
             response.setCreatedAt(LocalDateTime.now());
             response.setUpdatedAt(LocalDateTime.now());
             response.setStatus(status);
-            return orderDetailRepository.save(response);
 
+            return orderDetailRepository.save(response);
         } catch (IllegalArgumentException e) {
-            // Handle specific validation errors
             log.error("Validation error creating order detail: {}", e.getMessage());
             throw e;
         } catch (Exception e) {
-            // Handle general exceptions
             log.error("Unexpected error creating order detail", e);
             throw new RuntimeException("Failed to create order detail: " + e.getMessage(), e);
         }

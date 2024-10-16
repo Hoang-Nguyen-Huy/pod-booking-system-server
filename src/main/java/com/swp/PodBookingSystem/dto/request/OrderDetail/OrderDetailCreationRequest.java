@@ -17,7 +17,7 @@ public class OrderDetailCreationRequest {
     private Building building;
     private List<RoomWithAmenitiesDTO> selectedRooms;
     private ServicePackage servicePackage;
-    private Account orderHandler;
+    private Account customer;
     private double priceRoom;
     private int discountPercentage;
     private LocalDateTime startTime;
