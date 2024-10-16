@@ -12,6 +12,7 @@ import com.swp.PodBookingSystem.exception.AppException;
 import com.swp.PodBookingSystem.exception.ErrorCode;
 import com.swp.PodBookingSystem.mapper.OrderDetailMapper;
 import com.swp.PodBookingSystem.repository.*;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class OrderDetailService {
     private static final Logger log = LoggerFactory.getLogger(OrderService.class);
 
@@ -37,20 +39,6 @@ public class OrderDetailService {
     private final AccountService accountService;
     private final ServicePackageService servicePackageService;
     private final RoomService roomService;
-    private final OrderService orderService;
-
-    public OrderDetailService(OrderDetailRepository orderDetailRepository, AccountRepository accountRepository, BuildingRepository buildingRepository, ServicePackageRepository servicePackageRepository, OrderDetailMapper orderDetailMapper, OrderDetailAmenityService orderDetailAmenityService, AccountService accountService, ServicePackageService servicePackageService, RoomService roomService, OrderService orderService) {
-        this.orderDetailRepository = orderDetailRepository;
-        this.accountRepository = accountRepository;
-        this.buildingRepository = buildingRepository;
-        this.servicePackageRepository = servicePackageRepository;
-        this.orderDetailMapper = orderDetailMapper;
-        this.orderDetailAmenityService = orderDetailAmenityService;
-        this.accountService = accountService;
-        this.servicePackageService = servicePackageService;
-        this.roomService = roomService;
-        this.orderService = orderService;
-    }
 
     //GET:
     public List<OrderDetailResponse> getAllOrders() {
@@ -251,7 +239,7 @@ public class OrderDetailService {
         existingOrderDetail.setEndTime(request.getEndTime());
         existingOrderDetail.setUpdatedAt(LocalDateTime.now());
 
-        orderService.updateOrderByUpdateOrderDetail(existingOrderDetail.getOrder().getId(),existingOrderDetail.getUpdatedAt());
+        //orderService.updateOrderByUpdateOrderDetail(existingOrderDetail.getOrder().getId(),existingOrderDetail.getUpdatedAt());
         OrderDetail updatedOrderDetail = orderDetailRepository.save(existingOrderDetail);
         return OrderDetailResponse.builder()
                 .id(updatedOrderDetail.getId())
