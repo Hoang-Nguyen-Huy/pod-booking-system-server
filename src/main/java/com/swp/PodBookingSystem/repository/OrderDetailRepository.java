@@ -1,6 +1,5 @@
 package com.swp.PodBookingSystem.repository;
 
-import com.swp.PodBookingSystem.entity.Account;
 import com.swp.PodBookingSystem.entity.OrderDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

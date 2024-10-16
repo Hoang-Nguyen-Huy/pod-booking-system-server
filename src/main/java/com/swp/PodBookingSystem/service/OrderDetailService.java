@@ -1,72 +1,60 @@
 package com.swp.PodBookingSystem.service;
 
 import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationRequest;
+import com.swp.PodBookingSystem.dto.request.Room.RoomWithAmenitiesDTO;
 import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
 import com.swp.PodBookingSystem.entity.*;
 import com.swp.PodBookingSystem.enums.OrderStatus;
+import com.swp.PodBookingSystem.exception.AppException;
+import com.swp.PodBookingSystem.exception.ErrorCode;
 import com.swp.PodBookingSystem.mapper.OrderDetailMapper;
 import com.swp.PodBookingSystem.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-
 @Service
 public class OrderDetailService {
-
-    @Autowired
-    private OrderDetailRepository orderDetailRepository;
-
-    @Autowired
-    private AccountRepository accountRepository;
-
-    @Autowired
-    private BuildingRepository buildingRepository;
-
-    @Autowired
-    private RoomRepository roomRepository;
-
-    @Autowired
-    private ServicePackageRepository servicePackageRepository;
-
-    @Autowired
-    private OrderRepository orderRepository;
-
-    @Autowired
-    private OrderDetailMapper orderDetailMapper;
-
-    @Autowired
-    private OrderDetailAmenityService orderDetailAmenityService;
-
     private static final Logger log = LoggerFactory.getLogger(OrderService.class);
 
-    @Autowired
-    private AccountService accountService;
-    @Autowired
-    private ServicePackageService servicePackageService;
+    private final OrderDetailRepository orderDetailRepository;
+    private final AccountRepository accountRepository;
+    private final BuildingRepository buildingRepository;
+    private final ServicePackageRepository servicePackageRepository;
+    private final OrderDetailMapper orderDetailMapper;
+    private final OrderDetailAmenityService orderDetailAmenityService;
+    private final AccountService accountService;
+    private final ServicePackageService servicePackageService;
+    private final RoomService roomService;
 
+    public OrderDetailService(OrderDetailRepository orderDetailRepository, AccountRepository accountRepository, BuildingRepository buildingRepository, ServicePackageRepository servicePackageRepository, OrderDetailMapper orderDetailMapper, OrderDetailAmenityService orderDetailAmenityService, AccountService accountService, ServicePackageService servicePackageService, RoomService roomService) {
+        this.orderDetailRepository = orderDetailRepository;
+        this.accountRepository = accountRepository;
+        this.buildingRepository = buildingRepository;
+        this.servicePackageRepository = servicePackageRepository;
+        this.orderDetailMapper = orderDetailMapper;
+        this.orderDetailAmenityService = orderDetailAmenityService;
+        this.accountService = accountService;
+        this.servicePackageService = servicePackageService;
+        this.roomService = roomService;
+    }
+
+    //GET:
     public List<OrderDetailResponse> getAllOrders() {
         List<OrderDetail> orders = orderDetailRepository.findAll();
         return orders.stream()
                 .map(orderDetailMapper::toOrderDetailResponse)
                 .collect(Collectors.toList());
-    }
-
-
-    public List<OrderDetail> getOrdersByOrderId(String orderId) {
-        return orderDetailRepository.findByOrderId(orderId);
     }
 
     public List<OrderDetailManagementResponse> getOrderDetailById(String orderId) {
@@ -80,7 +68,9 @@ public class OrderDetailService {
                     .buildingAddress(orderDetail.getBuilding().getAddress())
                     .buildingId(orderDetail.getBuilding().getId())
                     .roomId(orderDetail.getRoom().getId())
-                    .orderHandler(accountService.toAccountResponse(orderDetail.getOrderHandler()))
+                    .orderHandler(Optional.ofNullable(orderDetail.getOrderHandler())
+                            .map(accountService::toAccountResponse)
+                            .orElse(null))
                     .customer(accountService.toAccountResponse(orderDetail.getCustomer()))
                     .servicePackage(servicePackageService.toServicePackageResponse(orderDetail.getServicePackage()))
                     .status(orderDetail.getStatus().name())
@@ -93,7 +83,6 @@ public class OrderDetailService {
 
     public List<OrderDetailResponse> getOrdersByCustomerId(String customerId) {
         List<OrderDetail> orderDetails = orderDetailRepository.findByCustomer_Id(customerId);
-
         System.out.println("Orders found for customer " + customerId + ": " + orderDetails.size());
         var orderDetailResponses = orderDetails.stream()
                 .map(orderDetailMapper::toOrderDetailResponse) // Use the mapper for conversion
@@ -102,22 +91,96 @@ public class OrderDetailService {
             System.out.println("Order Detail: " + orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(orderDetail.getOrderId()));
             orderDetail.setAmenities(orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(orderDetail.getId()));
         }
-
         return orderDetailResponses;
     }
 
+    //CREATE:
+    public boolean processOrderDetails(OrderDetailCreationRequest request, Order order, Account account) {
+        List<RoomWithAmenitiesDTO> selectedRooms = request.getSelectedRooms();
+        return switch (request.getServicePackage().getId()) {
+            case 1 -> handleWeeklyBooking(selectedRooms, request, order, account);
+            case 2 -> handleDailyBooking(selectedRooms, request, order, account);
+            case 3 -> handleStandardBooking(selectedRooms, request, order, account);
+            default -> throw new AppException(ErrorCode.INVALID_KEY);
+        };
+    }
+
+    private boolean handleWeeklyBooking(List<RoomWithAmenitiesDTO> selectedRooms,
+                                        OrderDetailCreationRequest request,
+                                        Order order, Account account) {
+        boolean isSomeRoomWasBook = false;
+        LocalDateTime startTime = request.getStartTime();
+        LocalDateTime endTime = request.getEndTime();
+
+        for (int week = 0; week < 4; week++) {
+            LocalDateTime newStartTime = startTime.plusWeeks(week);
+            LocalDateTime newEndTime = endTime.plusWeeks(week);
+            isSomeRoomWasBook |= createOrderDetailsForRooms(request, selectedRooms, order, account, newStartTime, newEndTime);
+        }
+        return isSomeRoomWasBook;
+    }
+
+    private boolean handleDailyBooking(List<RoomWithAmenitiesDTO> selectedRooms,
+                                       OrderDetailCreationRequest request,
+                                       Order order, Account account) {
+        boolean isSomeRoomWasBook = false;
+        LocalDateTime startTime = request.getStartTime();
+        LocalDateTime endTime = request.getEndTime();
+
+        for (int day = 0; day < 30; day++) {
+            LocalDateTime newStartTime = startTime.plusDays(day);
+            LocalDateTime newEndTime = endTime.plusDays(day);
+
+            isSomeRoomWasBook |= createOrderDetailsForRooms(request, selectedRooms, order, account, newStartTime, newEndTime);
+        }
+        return isSomeRoomWasBook;
+    }
+
+    private boolean handleStandardBooking(List<RoomWithAmenitiesDTO> selectedRooms,
+                                          OrderDetailCreationRequest request,
+                                          Order order, Account account) {
+        return createOrderDetailsForRooms(request, selectedRooms, order, account,
+                request.getStartTime(), request.getEndTime());
+    }
+
+    private boolean createOrderDetailsForRooms(OrderDetailCreationRequest request, List<RoomWithAmenitiesDTO> selectedRooms,
+                                               Order order, Account account,
+                                               LocalDateTime startTime, LocalDateTime endTime) {
+        boolean isSomeRoomWasBook = false;
+        for (RoomWithAmenitiesDTO roomWithAmenities : selectedRooms) {
+            Room room = roomService.getRoomByIdV2(roomWithAmenities.getId());
+            boolean isAvailable = roomService.isRoomAvailable(room.getId(), startTime, endTime);
+
+            OrderStatus status = isAvailable ? OrderStatus.Successfully : OrderStatus.Pending;
+            isSomeRoomWasBook |= !isAvailable;
+
+            OrderDetail orderDetail = createOrderDetail(
+                    request, order, room, status, account, startTime, endTime);
+
+            createOrderDetailAmenities(orderDetail, roomWithAmenities.getAmenities());
+        }
+        return isSomeRoomWasBook;
+    }
+
+    private void createOrderDetailAmenities(OrderDetail orderDetail, List<Amenity> amenities) {
+        for (Amenity amenity : amenities) {
+            OrderDetailAmenity orderDetailAmenity = new OrderDetailAmenity();
+            orderDetailAmenity.setId(UUID.randomUUID().toString());
+            orderDetailAmenity.setQuantity(amenity.getQuantity());
+            orderDetailAmenity.setPrice(amenity.getPrice() * amenity.getQuantity());
+            orderDetailAmenity.setOrderDetail(orderDetail);
+            orderDetailAmenity.setAmenity(amenity);
+
+            orderDetailAmenityService.createOrderDetailAmenity(orderDetailAmenity);
+        }
+    }
 
     public OrderDetail createOrderDetail(OrderDetailCreationRequest request, Order order, Room room, OrderStatus status, Account account, LocalDateTime startTime, LocalDateTime endTime) {
         try {
-
-
             // Step 1: Create a new OrderDetail entity
             OrderDetail response = new OrderDetail();
             response.setCustomer(account);
-
-
             response.setId(UUID.randomUUID().toString());
-
             response.setOrder(order);
             // Set building
             Building building = buildingRepository.findById(request.getBuilding().getId())
@@ -128,20 +191,16 @@ public class OrderDetailService {
             if (room != null) {
                 response.setRoom(room);
             }
-
             // Set service package
             ServicePackage servicePackage = servicePackageRepository.findById(request.getServicePackage().getId())
                     .orElseThrow(() -> new IllegalArgumentException("Service package not found"));
             response.setServicePackage(servicePackage);
-
             // Set order handler
             if (request.getOrderHandler() != null) {
                 Account orderHandler = accountRepository.findById(request.getOrderHandler().getId())
                         .orElseThrow(() -> new IllegalArgumentException("Order handler not found"));
                 response.setOrderHandler(orderHandler);
             }
-
-
             // Set other fields
             response.setPriceRoom(request.getPriceRoom());
             response.setDiscountPercentage(request.getDiscountPercentage());
@@ -150,9 +209,7 @@ public class OrderDetailService {
             response.setCreatedAt(LocalDateTime.now());
             response.setUpdatedAt(LocalDateTime.now());
             response.setStatus(status);
-
             return orderDetailRepository.save(response);
-
 
         } catch (IllegalArgumentException e) {
             // Handle specific validation errors
@@ -165,26 +222,24 @@ public class OrderDetailService {
         }
     }
 
-
-
     public List<OrderDetail> getNextDayBookings(LocalDate dayNow) {
-        // Calculate the start of the next day (00:00:00)
         LocalDateTime startOfDay = dayNow.plusDays(1).atStartOfDay();
-
-        // Calculate the end of the next day (23:59:59.999)
         LocalDateTime endOfDay = dayNow.plusDays(1).atTime(LocalTime.MAX);
-
-        // Fetch all bookings between start and end of tomorrow
         return orderDetailRepository.findAllOrderDetailsByDay(startOfDay, endOfDay);
     }
 
+    //DELETE:
     @Transactional
     public void deleteOrderDetailsByOrderId(String orderId) {
+        double total = 0;
         List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(orderId);
         for (OrderDetail orderDetail : orderDetails) {
-            orderDetailAmenityService.deleteOrderDetailAmenityByOrderDetailId(orderDetail.getId());
+            total += orderDetail.getPriceRoom() * orderDetail.getDiscountPercentage() / 100;
+            total += orderDetailAmenityService.deleteOrderDetailAmenityByOrderDetailId(orderDetail.getId()) * orderDetail.getDiscountPercentage() / 100;
         }
+        Account customer = orderDetails.getFirst().getCustomer();
+        customer.setBalance(customer.getBalance() + total);
+        accountRepository.save(customer);
         orderDetailRepository.deleteByOrderId(orderId);
     }
-
 }

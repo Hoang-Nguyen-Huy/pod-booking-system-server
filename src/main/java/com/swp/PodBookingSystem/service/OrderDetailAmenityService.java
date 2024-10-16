@@ -4,37 +4,42 @@ import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementResponse;
 import com.swp.PodBookingSystem.entity.OrderDetailAmenity;
 import com.swp.PodBookingSystem.repository.OrderDetailAmenityRepository;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class OrderDetailAmenityService {
-    @Autowired
-    private OrderDetailAmenityRepository orderDetailAmenityRepository;
+    private final OrderDetailAmenityRepository orderDetailAmenityRepository;
 
+    public OrderDetailAmenityService(OrderDetailAmenityRepository orderDetailAmenityRepository) {
+        this.orderDetailAmenityRepository = orderDetailAmenityRepository;
+    }
+
+    //GET:
+    public List<AmenityManagementResponse> getOrderDetailAmenitiesByOrderDetailId(String orderDetailId) {
+        return orderDetailAmenityRepository.findByOrderDetailId(orderDetailId).stream().map(amenity -> AmenityManagementResponse.builder()
+                .id(amenity.getAmenity().getId())
+                .name(amenity.getAmenity().getName())
+                .price(amenity.getPrice())
+                .quantity(amenity.getQuantity())
+                .build()).collect(Collectors.toList());
+    }
+
+    //CREATE:
     public void createOrderDetailAmenity(OrderDetailAmenity orderDetailAmenity){
         orderDetailAmenityRepository.save(orderDetailAmenity);
     }
 
-    public List<OrderDetailAmenity> getAll() {
-        return orderDetailAmenityRepository.findAll();
-    }
-
-    public List<AmenityManagementResponse> getOrderDetailAmenitiesByOrderDetailId(String orderDetailId) {
-        return orderDetailAmenityRepository.findByOrderDetailId(orderDetailId).stream().map(amenity -> {
-            return AmenityManagementResponse.builder()
-                    .id(amenity.getAmenity().getId())
-                    .name(amenity.getAmenity().getName())
-                    .price(amenity.getPrice())
-                    .quantity(amenity.getQuantity())
-                    .build();
-        }).collect(Collectors.toList());
-    }
-
+    //DELETE:
     @Transactional
-    public void deleteOrderDetailAmenityByOrderDetailId(String orderDetailId) {
+    public double deleteOrderDetailAmenityByOrderDetailId(String orderDetailId) {
+        double total = 0;
+        List<OrderDetailAmenity> orderDetailAmenities = orderDetailAmenityRepository.findByOrderDetailId(orderDetailId);
+        for (OrderDetailAmenity orderDetailAmenity : orderDetailAmenities) {
+            total += orderDetailAmenity.getPrice() * orderDetailAmenity.getQuantity();
+        }
         orderDetailAmenityRepository.deleteByOrderDetailId(orderDetailId);
+        return total;
     }
 }

@@ -1,46 +1,39 @@
 package com.swp.PodBookingSystem.service;
-import com.swp.PodBookingSystem.dto.request.Order.OrderCreationRequest;
-import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.Order.OrderManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderResponse;
-import com.swp.PodBookingSystem.dto.respone.Page.CustomPage;
-import com.swp.PodBookingSystem.entity.Account;
-import com.swp.PodBookingSystem.entity.Order;
-import com.swp.PodBookingSystem.entity.OrderDetail;
+import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
+import com.swp.PodBookingSystem.entity.*;
 import com.swp.PodBookingSystem.enums.AccountRole;
 import com.swp.PodBookingSystem.mapper.OrderMapper;
-import com.swp.PodBookingSystem.repository.AccountRepository;
 import com.swp.PodBookingSystem.repository.OrderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
 @Service
 public class OrderService {
-    @Autowired
-    private OrderRepository orderRepository;
-
     private static final Logger log = LoggerFactory.getLogger(OrderService.class);
 
-    @Autowired
-    private OrderMapper orderMapper;
-    @Autowired
-    private AccountRepository accountRepository;
-    @Autowired
-    private OrderDetailService orderDetailService;
-    @Autowired
-    private OrderDetailAmenityService orderDetailAmenityService;
+    private final OrderRepository orderRepository;
+    private final OrderMapper orderMapper;
+    private final OrderDetailService orderDetailService;
 
+    public OrderService(OrderRepository orderRepository, OrderMapper orderMapper, OrderDetailService orderDetailService) {
+        this.orderRepository = orderRepository;
+        this.orderMapper = orderMapper;
+        this.orderDetailService = orderDetailService;
+    }
+
+    //GET:
     public List<OrderResponse> getAllOrders() {
         List<Order> orders = orderRepository.findAll();
         return orders.stream()
@@ -50,67 +43,59 @@ public class OrderService {
 
     public List<OrderResponse> getOrdersByAccountId(String accountId) {
         List<Order> orders = orderRepository.findByAccountId(accountId);
-
-        System.out.println("Orders found for account " + accountId + ": " + orders.size());
-
-        for (Order order : orders) {
-            System.out.println("Order ID    : " + order.getId());
-            System.out.println("Created At: " + order.getCreatedAt());
-            System.out.println("Updated At: " + order.getUpdatedAt());
-            System.out.println("Account Id: " + order.getAccount().getId());
-            System.out.println();
-            System.out.println("-------------------------------");
-        }
-
         return orders.stream()
                 .map(orderMapper::toOrderResponse)
                 .collect(Collectors.toList());
     }
 
-    public Order createOrderByRequest(OrderDetailCreationRequest request, Account account) {
+    public PaginationResponse<List<OrderManagementResponse>> getOrdersByRole(
+            int page, int size, LocalDateTime startDate, LocalDateTime endDate, Account user) {
+        Page<Order> ordersPage;
+        if (user.getRole().equals(AccountRole.Admin)) {
+            ordersPage = orderRepository.findAllWithTimeRange(
+                    startDate, endDate, PageRequest.of(page, size));
+        } else if (user.getRole().equals(AccountRole.Staff) || user.getRole().equals(AccountRole.Manager)) {
+            int buildingNumber = user.getBuildingNumber();
+            ordersPage = orderRepository.findOrdersByBuildingNumberAndTimeRange(
+                    buildingNumber, startDate, endDate, PageRequest.of(page, size));
+        } else {
+            throw new IllegalArgumentException("User role not authorized to access orders.");
+        }
+        return convertToPaginationResponse(ordersPage);
+    }
+
+    public PaginationResponse<List<OrderManagementResponse>> searchOrdersByKeyword(int page, int size, String keyword) {
+        Page<Order> ordersPage;
+        ordersPage = orderRepository.searchByKeyword(keyword, PageRequest.of(page, size));
+        return convertToPaginationResponse(ordersPage);
+    }
+
+    //CREATE:
+    public Order createOrderByRequest(Account account) {
         try {
             Order order = new Order();
-            order.setAccount(account); // Set the account
+            order.setAccount(account);
             order.setId(UUID.randomUUID().toString());
             order.setCreatedAt(LocalDateTime.now());
             order.setUpdatedAt(LocalDateTime.now());
-
-            // Save the order to the repository
             order = orderRepository.save(order);
-
             return order;
         } catch (Exception e) {
-            // Log the error message and handle the exception appropriately
             log.error("Error creating order: ", e);
             throw new RuntimeException("Failed to create order: " + e.getMessage());
         }
     }
 
-    public Order createOrder(Account customer){
-        Order order = new Order();
-        order.setId(UUID.randomUUID().toString());
-        order.setAccount(customer);
-        order.setCreatedAt(LocalDateTime.now());
-        order.setUpdatedAt(LocalDateTime.now());
-        orderRepository.save(order);
-        return order;
+    //DELETE:
+    @Transactional
+    public String deleteOrder(String orderId) {
+        orderDetailService.deleteOrderDetailsByOrderId(orderId);
+        orderRepository.deleteById(orderId);
+        return orderId;
     }
 
-    public CustomPage<OrderManagementResponse> getOrdersByRole(int page, int size, LocalDateTime startDate, LocalDateTime endDate, Account user) {
-        Page<Order> ordersPage;
-        if (user.getRole().equals(AccountRole.Admin)) {
-            ordersPage = orderRepository.findAllWithTimeRange(startDate, endDate, PageRequest.of(page, size));
-        } else if (user.getRole().equals(AccountRole.Staff) || user.getRole().equals(AccountRole.Manager)) {
-            int buildingNumber = user.getBuildingNumber();
-            ordersPage = orderRepository.findOrdersByBuildingNumberAndTimeRange(buildingNumber, startDate, endDate, PageRequest.of(page, size));
-        } else {
-            return null;
-        }
-
-        return convertToCustomPage(ordersPage);
-    }
-
-    private CustomPage<OrderManagementResponse> convertToCustomPage(Page<Order> ordersPage) {
+    //UTILS:
+    private PaginationResponse<List<OrderManagementResponse>> convertToPaginationResponse(Page<Order> ordersPage) {
         List<OrderManagementResponse> orderResponses = ordersPage.getContent().stream().map(order -> {
             List<OrderDetailManagementResponse> orderDetailDTOs = orderDetailService.getOrderDetailById(order.getId());
             return OrderManagementResponse.builder()
@@ -120,25 +105,17 @@ public class OrderService {
                     .orderDetails(orderDetailDTOs)
                     .build();
         }).collect(Collectors.toList());
-
-        return CustomPage.<OrderManagementResponse>builder()
+        return PaginationResponse.<List<OrderManagementResponse>>builder()
                 .data(orderResponses)
-                .pageNumber(ordersPage.getNumber())
-                .pageSize(ordersPage.getSize())
-                .totalElements(ordersPage.getTotalElements())
+                .currentPage(ordersPage.getNumber())
+                .totalPage(ordersPage.getTotalPages())
+                .recordPerPage(ordersPage.getSize())
+                .totalRecord((int) ordersPage.getTotalElements())
                 .build();
     }
 
-    @Transactional
-    public String deleteOrder(String orderId) {
-        orderDetailService.deleteOrderDetailsByOrderId(orderId);
-        orderRepository.deleteById(orderId);
-        return orderId;
-    }
-
-    public CustomPage<OrderManagementResponse> searchOrdersByKeyword(int page, int size, String keyword) {
-        Page<Order> ordersPage;
-        ordersPage = orderRepository.searchByKeyword(keyword, PageRequest.of(page, size));
-        return convertToCustomPage(ordersPage);
+    public LocalDateTime parseDateTime(String dateTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+        return LocalDateTime.parse(dateTime, formatter);
     }
 }
