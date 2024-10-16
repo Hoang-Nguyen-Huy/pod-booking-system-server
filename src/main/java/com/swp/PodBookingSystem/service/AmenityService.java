@@ -1,5 +1,6 @@
 package com.swp.PodBookingSystem.service;
 
+import com.swp.PodBookingSystem.dto.request.Amenity.AmenityCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.AmenityResponse;
 import com.swp.PodBookingSystem.entity.Amenity;
 import com.swp.PodBookingSystem.mapper.AmenityMapper;
@@ -24,4 +25,10 @@ public class AmenityService {
                 .map(amenityMapper::toAmenityResponse)
                 .collect(Collectors.toList());
     }
+
+    public AmenityResponse createAmenity(AmenityCreationRequest request){
+        Amenity newAmenity = amenityMapper.toAmenity(request);
+        return amenityMapper.toAmenityResponse(amenityRepository.save(newAmenity));
+    }
+
 }
