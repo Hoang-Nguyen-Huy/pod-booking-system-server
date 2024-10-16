@@ -48,4 +48,11 @@ public class AmenityController {
                 .build();
     }
 
+    @DeleteMapping("/{amenityId}")
+    ApiResponse<AmenityResponse> deleteAmenity(@PathVariable("amenityId") int amenityId){
+        return ApiResponse.<AmenityResponse>builder()
+                .message(amenityService.deleteAmenity(amenityId))
+                .build();
+    }
+
 }

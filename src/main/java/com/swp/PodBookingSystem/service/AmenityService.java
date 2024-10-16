@@ -5,6 +5,7 @@ import com.swp.PodBookingSystem.dto.respone.AmenityResponse;
 import com.swp.PodBookingSystem.entity.Amenity;
 import com.swp.PodBookingSystem.mapper.AmenityMapper;
 import com.swp.PodBookingSystem.repository.AmenityRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,9 +34,17 @@ public class AmenityService {
     }
 
     public AmenityResponse updateAmenity(int amenityId, AmenityCreationRequest request){
-        Optional<Amenity> existingAmenity = amenityRepository.findById(amenityId);
-        Amenity updateAmenity = amenityMapper.toUpdateAmenity(request, existingAmenity.orElse(null));
+        Amenity existingAmenity = amenityRepository.findById(amenityId)
+                .orElseThrow(() -> new EntityNotFoundException("Amenity not found"));
+        Amenity updateAmenity = amenityMapper.toUpdateAmenity(request, existingAmenity);
         return amenityMapper.toAmenityResponse(amenityRepository.save(updateAmenity));
+    }
+
+    public String deleteAmenity(int amenityId){
+        Amenity existingAmenity = amenityRepository.findById(amenityId)
+                .orElseThrow(() -> new EntityNotFoundException("Amenity not found"));
+        amenityRepository.deleteById(existingAmenity.getId());
+        return "Delete amenity " + amenityId + " successfully";
     }
 
 }
