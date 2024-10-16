@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -60,5 +61,13 @@ public class BuildingService {
     public String deleteBuilding(int buildingId) {
         buildingRepository.deleteById(buildingId);
         return "Delete building " + buildingId + " successfully";
+    }
+
+    public List<Building> searchBuildings(String keyword) {
+        return buildingRepository.searchByKeyword(keyword);
+    }
+
+    public List<Building> getAllBuildings() {
+        return buildingRepository.findAll();
     }
 }

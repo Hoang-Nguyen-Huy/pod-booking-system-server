@@ -27,18 +27,13 @@ public class VNPayConfig {
     @Value("${vnpay.hash-secret}")
     public String vnp_HashSecret_private;
 
-    @Value("${vnpay.return-url}")
-    public String vnp_ReturnUrl_private;
-
     public static String vnp_TmnCode;
     public static String vnp_HashSecret;
-    public static String vnp_ReturnUrl;
 
     @PostConstruct
     public void init() {
         vnp_TmnCode = vnp_TmnCode_private;
         vnp_HashSecret = vnp_HashSecret_private;
-        vnp_ReturnUrl = vnp_ReturnUrl_private;
     }
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
 
