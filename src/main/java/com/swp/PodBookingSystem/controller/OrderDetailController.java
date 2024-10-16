@@ -53,7 +53,6 @@
                     .build();
         }
 
-
         @PutMapping("/{orderDetailId}")
         ApiResponse<OrderDetailResponse> updateOrderDetail(@PathVariable("orderDetailId") String orderDetailId,
                                                            @RequestBody OrderDetailRequestDTO request){
@@ -62,8 +61,6 @@
                     .message("Update orderDetailId successfully")
                     .build();
         }
-
-
 
         private void logOrders(List<OrderDetailResponse> orders) {
             var authentication = SecurityContextHolder.getContext().getAuthentication();

@@ -1,5 +1,6 @@
 package com.swp.PodBookingSystem.controller;
 
+import com.swp.PodBookingSystem.dto.request.Order.OrderUpdateStaffRequest;
 import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.respone.Order.OrderManagementResponse;
@@ -101,6 +102,16 @@ public class OrderController {
                     .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .build();
         }
+    }
+
+    @PutMapping("/{orderId}")
+    ApiResponse<OrderResponse> updateStaffWithOrder(@PathVariable("orderId") String orderId,
+                                                    @RequestBody OrderUpdateStaffRequest request){
+        orderService.updateOrderUpdateAt(orderId);
+        return ApiResponse.<OrderResponse> builder()
+                .data(orderService.updateOrderHandlerWithOrder(orderId,request))
+                .message("Update order successfully")
+                .build();
     }
 
     @DeleteMapping("/{id}")

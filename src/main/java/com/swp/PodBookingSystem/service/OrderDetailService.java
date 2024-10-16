@@ -1,6 +1,7 @@
 package com.swp.PodBookingSystem.service;
 
 import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationRequest;
+import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailRequestDTO;
 import com.swp.PodBookingSystem.dto.request.Room.RoomWithAmenitiesDTO;
 import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailManagementResponse;
@@ -36,8 +37,9 @@ public class OrderDetailService {
     private final AccountService accountService;
     private final ServicePackageService servicePackageService;
     private final RoomService roomService;
+    private final OrderService orderService;
 
-    public OrderDetailService(OrderDetailRepository orderDetailRepository, AccountRepository accountRepository, BuildingRepository buildingRepository, ServicePackageRepository servicePackageRepository, OrderDetailMapper orderDetailMapper, OrderDetailAmenityService orderDetailAmenityService, AccountService accountService, ServicePackageService servicePackageService, RoomService roomService) {
+    public OrderDetailService(OrderDetailRepository orderDetailRepository, AccountRepository accountRepository, BuildingRepository buildingRepository, ServicePackageRepository servicePackageRepository, OrderDetailMapper orderDetailMapper, OrderDetailAmenityService orderDetailAmenityService, AccountService accountService, ServicePackageService servicePackageService, RoomService roomService, OrderService orderService) {
         this.orderDetailRepository = orderDetailRepository;
         this.accountRepository = accountRepository;
         this.buildingRepository = buildingRepository;
@@ -47,6 +49,7 @@ public class OrderDetailService {
         this.accountService = accountService;
         this.servicePackageService = servicePackageService;
         this.roomService = roomService;
+        this.orderService = orderService;
     }
 
     //GET:
@@ -226,6 +229,52 @@ public class OrderDetailService {
         LocalDateTime startOfDay = dayNow.plusDays(1).atStartOfDay();
         LocalDateTime endOfDay = dayNow.plusDays(1).atTime(LocalTime.MAX);
         return orderDetailRepository.findAllOrderDetailsByDay(startOfDay, endOfDay);
+    }
+
+    //UPDATE:
+    public OrderDetailResponse updateOrderDetail(String orderDetailId, OrderDetailRequestDTO request){
+        Optional<OrderDetail> existingOrderDetailOptional  = orderDetailRepository.findById(orderDetailId);
+        if (existingOrderDetailOptional .isEmpty()) {
+            throw new RuntimeException("OrderDetail not found with id: " + orderDetailId);
+        }
+        OrderDetail existingOrderDetail = existingOrderDetailOptional.get();
+        existingOrderDetail.setCustomer(request.getCustomer());
+        existingOrderDetail.setBuilding(request.getBuilding());
+        existingOrderDetail.setRoom(request.getRoom());
+        existingOrderDetail.setOrder(request.getOrder());
+        existingOrderDetail.setServicePackage(request.getServicePackage());
+        existingOrderDetail.setOrderHandler(request.getOrderHandler());
+        existingOrderDetail.setPriceRoom(request.getPriceRoom());
+        existingOrderDetail.setDiscountPercentage(request.getDiscountPercentage());
+        existingOrderDetail.setStatus(request.getStatus());
+        existingOrderDetail.setStartTime(request.getStartTime());
+        existingOrderDetail.setEndTime(request.getEndTime());
+        existingOrderDetail.setUpdatedAt(LocalDateTime.now());
+
+        orderService.updateOrderByUpdateOrderDetail(existingOrderDetail.getOrder().getId(),existingOrderDetail.getUpdatedAt());
+        OrderDetail updatedOrderDetail = orderDetailRepository.save(existingOrderDetail);
+        return OrderDetailResponse.builder()
+                .id(updatedOrderDetail.getId())
+                .customerId(updatedOrderDetail.getCustomerId())
+                .buildingId(updatedOrderDetail.getBuilding().getId())
+                .roomId(updatedOrderDetail.getRoom().getId())
+                .orderId(updatedOrderDetail.getOrder().getId())
+                .servicePackageId(updatedOrderDetail.getServicePackage() != null ? updatedOrderDetail.getServicePackage().getId() : 0)
+                .orderHandledId(updatedOrderDetail.getOrderHandler() != null ? updatedOrderDetail.getOrderHandler().getId() : null)
+                .priceRoom(updatedOrderDetail.getPriceRoom())
+                .status(updatedOrderDetail.getStatus())
+                .startTime(updatedOrderDetail.getStartTime())
+                .endTime(updatedOrderDetail.getEndTime())
+                .createdAt(updatedOrderDetail.getCreatedAt())
+                .build();
+    }
+
+    public void updateOrderHandlerOrderDetail(String orderId, Account accountHandler){
+        List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(orderId);
+        for(OrderDetail od : orderDetails){
+            od.setOrderHandler(accountHandler);
+        }
+        orderDetailRepository.saveAll(orderDetails);
     }
 
     //DELETE:

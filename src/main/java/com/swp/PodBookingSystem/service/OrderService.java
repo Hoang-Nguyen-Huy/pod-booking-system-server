@@ -1,4 +1,5 @@
 package com.swp.PodBookingSystem.service;
+import com.swp.PodBookingSystem.dto.request.Order.OrderUpdateStaffRequest;
 import com.swp.PodBookingSystem.dto.respone.Order.OrderManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderResponse;
@@ -84,6 +85,36 @@ public class OrderService {
             log.error("Error creating order: ", e);
             throw new RuntimeException("Failed to create order: " + e.getMessage());
         }
+    }
+
+    //UPDATE:
+    public void updateOrderByUpdateOrderDetail(String id, LocalDateTime updateAt){
+        Order existingOrder = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
+
+
+        existingOrder.setUpdatedAt(updateAt);
+
+        orderRepository.save(existingOrder);
+    }
+
+    public OrderResponse updateOrderHandlerWithOrder(String id, OrderUpdateStaffRequest request){
+        Order existingOrder = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
+
+        if (request.getOrderHandler() == null) {
+            throw new RuntimeException("Account handler cannot be null");
+        }
+
+        orderDetailService.updateOrderHandlerOrderDetail(existingOrder.getId(), request.getOrderHandler());
+        return OrderResponse.builder()
+                .id(existingOrder.getId())
+                .accountId(existingOrder.getAccount().getId())
+                .createdAt(existingOrder.getCreatedAt())
+                .updatedAt(existingOrder.getUpdatedAt())
+                .build();
+    }
+
+    public void updateOrderUpdateAt(String orderId){
+        orderRepository.updateOrderUpdatedAt(orderId, LocalDateTime.now());
     }
 
     //DELETE:
