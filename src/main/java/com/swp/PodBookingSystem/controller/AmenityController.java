@@ -33,7 +33,7 @@ public class AmenityController {
     }
 
     @GetMapping("/type")
-    public ApiResponse<List<AmenityResponse>> getAmenitiesByType(@RequestParam String type){
+    public ApiResponse<List<AmenityResponse>> getAmenitiesByType(@RequestParam(defaultValue = "Food", name = "type") String type){
         List<AmenityResponse> amenityResponses = amenityService.getAmenitiesByType(AmenityType.valueOf(type));
         return ApiResponse.<List<AmenityResponse>>builder()
                 .data(amenityResponses)
