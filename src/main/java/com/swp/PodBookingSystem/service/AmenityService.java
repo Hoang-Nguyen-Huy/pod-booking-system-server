@@ -7,6 +7,9 @@ import com.swp.PodBookingSystem.mapper.AmenityMapper;
 import com.swp.PodBookingSystem.repository.AmenityRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -45,6 +48,11 @@ public class AmenityService {
                 .orElseThrow(() -> new EntityNotFoundException("Amenity not found"));
         amenityRepository.deleteById(existingAmenity.getId());
         return "Delete amenity " + amenityId + " successfully";
+    }
+
+    public Page<Amenity> getAmenities(int page, int take){
+        Pageable pageable = PageRequest.of(page - 1, take);
+        return amenityRepository.findAll(pageable);
     }
 
 }
