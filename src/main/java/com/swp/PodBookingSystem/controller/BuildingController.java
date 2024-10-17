@@ -68,4 +68,20 @@ public class BuildingController {
                 .message(buildingService.deleteBuilding(buildingId))
                 .build();
     }
+
+    @GetMapping("/search")
+    ApiResponse<List<Building>> searchBuildings(@RequestParam("keyword") String keyword) {
+        return ApiResponse.<List<Building>>builder()
+                .data(buildingService.searchBuildings(keyword))
+                .message("Search building by keyword successfully")
+                .build();
+    }
+
+    @GetMapping("/all")
+    ApiResponse<List<Building>> getAllBuildings() {
+        return ApiResponse.<List<Building>>builder()
+                .data(buildingService.getAllBuildings())
+                .message("Get all buildings successfully")
+                .build();
+    }
 }
