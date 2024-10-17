@@ -106,13 +106,14 @@ public class OrderDetailService {
                                         OrderDetailCreationRequest request,
                                         Order order, Account account) {
         boolean isSomeRoomWasBook = false;
-        LocalDateTime startTime = request.getStartTime();
-        LocalDateTime endTime = request.getEndTime();
-
-        for (int week = 0; week < 4; week++) {
-            LocalDateTime newStartTime = startTime.plusWeeks(week);
-            LocalDateTime newEndTime = endTime.plusWeeks(week);
-            isSomeRoomWasBook |= createOrderDetailsForRooms(request, selectedRooms, order, account, newStartTime, newEndTime);
+        for(int i = 0; i < request.getStartTime().size(); i++){
+            LocalDateTime startTime = request.getStartTime().get(i);
+            LocalDateTime endTime = request.getEndTime().get(i);
+            for (int week = 0; week < 4; week++) {
+                LocalDateTime newStartTime = startTime.plusWeeks(week);
+                LocalDateTime newEndTime = endTime.plusWeeks(week);
+                isSomeRoomWasBook |= createOrderDetailsForRooms(request, selectedRooms, order, account, newStartTime, newEndTime);
+            }
         }
         return isSomeRoomWasBook;
     }
@@ -121,14 +122,15 @@ public class OrderDetailService {
                                        OrderDetailCreationRequest request,
                                        Order order, Account account) {
         boolean isSomeRoomWasBook = false;
-        LocalDateTime startTime = request.getStartTime();
-        LocalDateTime endTime = request.getEndTime();
+        for(int i = 0; i < request.getStartTime().size(); i++){
+            LocalDateTime startTime = request.getStartTime().get(i);
+            LocalDateTime endTime = request.getEndTime().get(i);
+            for (int day = 0; day < 30; day++) {
+                LocalDateTime newStartTime = startTime.plusDays(day);
+                LocalDateTime newEndTime = endTime.plusDays(day);
 
-        for (int day = 0; day < 30; day++) {
-            LocalDateTime newStartTime = startTime.plusDays(day);
-            LocalDateTime newEndTime = endTime.plusDays(day);
-
-            isSomeRoomWasBook |= createOrderDetailsForRooms(request, selectedRooms, order, account, newStartTime, newEndTime);
+                isSomeRoomWasBook |= createOrderDetailsForRooms(request, selectedRooms, order, account, newStartTime, newEndTime);
+            }
         }
         return isSomeRoomWasBook;
     }
@@ -136,8 +138,14 @@ public class OrderDetailService {
     private boolean handleStandardBooking(List<RoomWithAmenitiesDTO> selectedRooms,
                                           OrderDetailCreationRequest request,
                                           Order order, Account account) {
-        return createOrderDetailsForRooms(request, selectedRooms, order, account,
-                request.getStartTime(), request.getEndTime());
+        boolean isSomeRoomWasBook = false;
+        for(int i = 0; i < request.getStartTime().size(); i++) {
+            LocalDateTime startTime = request.getStartTime().get(i);
+            LocalDateTime endTime = request.getEndTime().get(i);
+            isSomeRoomWasBook = createOrderDetailsForRooms(request, selectedRooms, order, account,
+                    startTime, endTime);
+        }
+        return isSomeRoomWasBook;
     }
 
     private boolean createOrderDetailsForRooms(OrderDetailCreationRequest request, List<RoomWithAmenitiesDTO> selectedRooms,

@@ -20,7 +20,7 @@ public class OrderDetailCreationRequest {
     private Account customer;
     private double priceRoom;
     private int discountPercentage;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private List<LocalDateTime> startTime;
+    private List<LocalDateTime> endTime;
 
 }
