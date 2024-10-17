@@ -3,6 +3,7 @@ package com.swp.PodBookingSystem.controller;
 import com.swp.PodBookingSystem.dto.request.Amenity.AmenityCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.AmenityResponse;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
+import com.swp.PodBookingSystem.enums.AmenityType;
 import com.swp.PodBookingSystem.service.AmenityService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,14 @@ public class AmenityController {
         List<AmenityResponse> amenities = amenityService.getAllAmenities();
         return ApiResponse.<List<AmenityResponse>>builder()
                 .data(amenities)
+                .build();
+    }
+
+    @GetMapping("/type")
+    public ApiResponse<List<AmenityResponse>> getAmenitiesByType(@RequestParam String type){
+        List<AmenityResponse> amenityResponses = amenityService.getAmenitiesByType(AmenityType.valueOf(type));
+        return ApiResponse.<List<AmenityResponse>>builder()
+                .data(amenityResponses)
                 .build();
     }
 
