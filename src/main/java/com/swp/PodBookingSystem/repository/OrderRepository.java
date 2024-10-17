@@ -18,12 +18,12 @@ public interface OrderRepository  extends JpaRepository<Order, String> {
 
     Page<Order> findAll(Pageable pageable);
 
-    @Query(value = "SELECT DISTINCT o FROM Order o JOIN OrderDetail od ON o.id = od.order.id WHERE o.createdAt >= :startTime AND o.createdAt <= :endTime ORDER BY o.createdAt ASC")
+    @Query(value = "SELECT DISTINCT o FROM Order o JOIN OrderDetail od ON o.id = od.order.id WHERE o.createdAt >= :startTime AND o.createdAt <= :endTime ORDER BY o.createdAt DESC")
     Page<Order> findAllWithTimeRange(@Param("startTime") LocalDateTime startTime,
                                      @Param("endTime") LocalDateTime endTime,
                                      Pageable pageable);
 
-    @Query(value = "SELECT DISTINCT o FROM Order o JOIN OrderDetail od ON o.id = od.order.id WHERE od.building.id = :buildingNumber AND o.createdAt >= :startTime AND o.createdAt <= :endTime ORDER BY o.createdAt ASC")
+    @Query(value = "SELECT DISTINCT o FROM Order o JOIN OrderDetail od ON o.id = od.order.id WHERE od.building.id = :buildingNumber AND o.createdAt >= :startTime AND o.createdAt <= :endTime ORDER BY o.createdAt DESC")
     Page<Order> findOrdersByBuildingNumberAndTimeRange(@Param("buildingNumber") int buildingNumber,
                                                        @Param("startTime") LocalDateTime startTime,
                                                        @Param("endTime") LocalDateTime endTime,
