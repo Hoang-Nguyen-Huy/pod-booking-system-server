@@ -35,6 +35,9 @@ public class OrderDetailAmenityService {
             throw new RuntimeException("Amenity not found");
         }
         Amenity updatedAmenity = amenity.get();
+        if(updatedAmenity.getQuantity() < orderDetailAmenity.getQuantity()){
+            throw new RuntimeException("Not enough quantity");
+        }
         updatedAmenity.setQuantity(updatedAmenity.getQuantity() - orderDetailAmenity.getQuantity());
         amenityRepository.save(updatedAmenity);
 
