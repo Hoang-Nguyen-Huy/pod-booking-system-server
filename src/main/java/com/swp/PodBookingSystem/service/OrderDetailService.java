@@ -17,6 +17,7 @@ import com.swp.PodBookingSystem.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
@@ -272,5 +273,15 @@ public class OrderDetailService {
         customer.setBalance(customer.getBalance() + total);
         accountRepository.save(customer);
         orderDetailRepository.deleteByOrderId(orderId);
+    }
+
+    //UTILS:
+    @Scheduled(cron = "0 0 */2 * * ?")
+    public void restoreAmenityQuantityIfOrderDetailExpired() {
+        LocalDateTime now = LocalDateTime.now();
+        List<OrderDetail> expiredOrderDetails = orderDetailRepository.findByEndTime(now);
+        for(OrderDetail od: expiredOrderDetails){
+            orderDetailAmenityService.restoreAmenityQuantity(od.getId());
+        }
     }
 }

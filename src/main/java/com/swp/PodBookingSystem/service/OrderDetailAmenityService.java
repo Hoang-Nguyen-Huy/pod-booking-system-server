@@ -3,6 +3,7 @@ package com.swp.PodBookingSystem.service;
 import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementResponse;
 import com.swp.PodBookingSystem.entity.Amenity;
 import com.swp.PodBookingSystem.entity.OrderDetailAmenity;
+import com.swp.PodBookingSystem.enums.AmenityType;
 import com.swp.PodBookingSystem.repository.AmenityRepository;
 import com.swp.PodBookingSystem.repository.OrderDetailAmenityRepository;
 import lombok.RequiredArgsConstructor;
@@ -54,5 +55,21 @@ public class OrderDetailAmenityService {
         }
         orderDetailAmenityRepository.deleteByOrderDetailId(orderDetailId);
         return total;
+    }
+
+    //UTILS:
+    public void restoreAmenityQuantity(String orderDetailId) {
+        List<OrderDetailAmenity> orderDetailAmenities = orderDetailAmenityRepository.findByOrderDetailId(orderDetailId);
+        for(OrderDetailAmenity orderDetailAmenity : orderDetailAmenities){
+            if(orderDetailAmenity.getAmenity().getType() == AmenityType.Office) {
+                Optional<Amenity> amenity = amenityRepository.findById(orderDetailAmenity.getAmenity().getId());
+                if (amenity.isEmpty()) {
+                    throw new RuntimeException("Amenity not found");
+                }
+                Amenity updateAmenity = amenity.get();
+                updateAmenity.setQuantity(updateAmenity.getQuantity() + orderDetailAmenity.getQuantity());
+                amenityRepository.save(updateAmenity);
+            }
+        }
     }
 }

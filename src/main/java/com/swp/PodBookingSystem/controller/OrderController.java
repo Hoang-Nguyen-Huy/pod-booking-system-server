@@ -75,8 +75,8 @@ public class OrderController {
                 .build();
     }
 
-    //Incomplete Task: minus quantity amenities, reset quantity if order Time Lapsed
-    //Explain: check room available -> yes: create order Status: Successfully, no: create order Status: Pending
+    //Check room available -> yes: create order Status: Successfully
+    //                     -> no: create order Status: Pending
     @PostMapping
     public ApiResponse<String> createOrderByRequest(
             @RequestBody OrderDetailCreationRequest request,
