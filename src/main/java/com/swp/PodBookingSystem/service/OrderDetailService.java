@@ -1,7 +1,8 @@
 package com.swp.PodBookingSystem.service;
 
+import com.swp.PodBookingSystem.dto.request.Order.OrderUpdateRequest;
 import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationRequest;
-import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailRequestDTO;
+import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailUpdateRoomRequest;
 import com.swp.PodBookingSystem.dto.request.Room.RoomWithAmenitiesDTO;
 import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailManagementResponse;
@@ -40,6 +41,7 @@ public class OrderDetailService {
     private final AccountService accountService;
     private final ServicePackageService servicePackageService;
     private final RoomService roomService;
+    private final RoomRepository roomRepository;
 
     //GET:
     public List<OrderDetailResponse> getAllOrders() {
@@ -211,41 +213,33 @@ public class OrderDetailService {
     }
 
     //UPDATE:
-    public OrderDetailResponse updateOrderDetail(String orderDetailId, OrderDetailRequestDTO request){
-        Optional<OrderDetail> existingOrderDetailOptional  = orderDetailRepository.findById(orderDetailId);
-        if (existingOrderDetailOptional .isEmpty()) {
-            throw new RuntimeException("OrderDetail not found with id: " + orderDetailId);
+    public void updateOrderDetail (OrderUpdateRequest request){
+        List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(request.getId());
+        for(OrderDetail od : orderDetails){
+            if(request.getStatus() != null){
+                od.setStatus(request.getStatus());
+            }
+            if(request.getOrderHandler() != null){
+                Account orderHandler = accountService.getAccountById(request.getOrderHandler().getId());
+                od.setOrderHandler(orderHandler);
+            }
+            if(request.getOrderDetails() != null && !request.getOrderDetails().isEmpty()){
+                for(OrderDetailUpdateRoomRequest odr : request.getOrderDetails()){
+                    if(odr.getId().equals(od.getId())){
+                        Optional<Room> room = roomRepository.findById(odr.getRoomId());
+                        if(room.isEmpty()){
+                            throw new RuntimeException("Room not found with id: " + odr.getRoomId());
+                        }
+                        if(room.get().getRoomType().equals(od.getRoom().getRoomType())){
+                            od.setRoom(room.get());
+                        }else{
+                            throw new RuntimeException("Room type not match");
+                        }
+                    }
+                }
+            }
+            orderDetailRepository.updateOrderDetailUpdatedAt(od.getId(), LocalDateTime.now());
         }
-        OrderDetail existingOrderDetail = existingOrderDetailOptional.get();
-        existingOrderDetail.setCustomer(request.getCustomer());
-        existingOrderDetail.setBuilding(request.getBuilding());
-        existingOrderDetail.setRoom(request.getRoom());
-        existingOrderDetail.setOrder(request.getOrder());
-        existingOrderDetail.setServicePackage(request.getServicePackage());
-        existingOrderDetail.setOrderHandler(request.getOrderHandler());
-        existingOrderDetail.setPriceRoom(request.getPriceRoom());
-        existingOrderDetail.setDiscountPercentage(request.getDiscountPercentage());
-        existingOrderDetail.setStatus(request.getStatus());
-        existingOrderDetail.setStartTime(request.getStartTime());
-        existingOrderDetail.setEndTime(request.getEndTime());
-        existingOrderDetail.setUpdatedAt(LocalDateTime.now());
-
-        //orderService.updateOrderByUpdateOrderDetail(existingOrderDetail.getOrder().getId(),existingOrderDetail.getUpdatedAt());
-        OrderDetail updatedOrderDetail = orderDetailRepository.save(existingOrderDetail);
-        return OrderDetailResponse.builder()
-                .id(updatedOrderDetail.getId())
-                .customerId(updatedOrderDetail.getCustomerId())
-                .buildingId(updatedOrderDetail.getBuilding().getId())
-                .roomId(updatedOrderDetail.getRoom().getId())
-                .orderId(updatedOrderDetail.getOrder().getId())
-                .servicePackageId(updatedOrderDetail.getServicePackage() != null ? updatedOrderDetail.getServicePackage().getId() : 0)
-                .orderHandledId(updatedOrderDetail.getOrderHandler() != null ? updatedOrderDetail.getOrderHandler().getId() : null)
-                .priceRoom(updatedOrderDetail.getPriceRoom())
-                .status(updatedOrderDetail.getStatus())
-                .startTime(updatedOrderDetail.getStartTime())
-                .endTime(updatedOrderDetail.getEndTime())
-                .createdAt(updatedOrderDetail.getCreatedAt())
-                .build();
     }
 
     public void updateOrderHandlerOrderDetail(String orderId, Account accountHandler){

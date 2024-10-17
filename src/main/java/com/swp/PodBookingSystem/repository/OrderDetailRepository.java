@@ -20,6 +20,10 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, String
     @Query("SELECT o FROM OrderDetail o WHERE FUNCTION('DATE', o.startTime) BETWEEN FUNCTION('DATE', :startOfDay) AND FUNCTION('DATE', :endOfDay)")
     List<OrderDetail> findAllOrderDetailsByDay(@Param("startOfDay") LocalDateTime startOfDay, @Param("endOfDay") LocalDateTime endOfDay);
 
+    @Modifying
+    @Transactional
+    @Query("UPDATE OrderDetail od SET od.updatedAt = :updatedAt WHERE od.id = :orderDetailId")
+    void updateOrderDetailUpdatedAt(String orderDetailId, LocalDateTime updatedAt);
 
     @Modifying
     @Transactional
