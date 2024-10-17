@@ -197,7 +197,7 @@ public class OrderDetailService {
             response.setServicePackage(servicePackage);
             response.setOrderHandler(null);
             response.setPriceRoom(request.getPriceRoom());
-            response.setDiscountPercentage(request.getDiscountPercentage());
+            response.setDiscountPercentage(servicePackage.getDiscountPercentage());
             response.setStartTime(startTime);
             response.setEndTime(endTime);
             response.setCreatedAt(LocalDateTime.now());

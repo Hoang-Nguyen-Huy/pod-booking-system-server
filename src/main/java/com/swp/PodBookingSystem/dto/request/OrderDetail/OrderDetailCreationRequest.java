@@ -19,7 +19,6 @@ public class OrderDetailCreationRequest {
     private ServicePackage servicePackage;
     private Account customer;
     private double priceRoom;
-    private int discountPercentage;
     private List<LocalDateTime> startTime;
     private List<LocalDateTime> endTime;
 
