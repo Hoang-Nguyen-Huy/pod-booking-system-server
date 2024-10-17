@@ -19,9 +19,10 @@ public class    PaymentController {
 
     @GetMapping("/url")
     public ResponseEntity<PaymentResDTO> generatePaymentUrl( @RequestParam("amount") long amount,
-                                                 @RequestParam("orderId") String orderId, HttpServletRequest request) {
+                                                 @RequestParam("orderId") String orderId, @RequestParam("returnUrl") String returnUrl,
+                                                             HttpServletRequest request) {
         String clientIp = request.getRemoteAddr();
-        PaymentResDTO paymentResDTO = paymentService.generatePaymentUrl(amount, orderId, clientIp);
+        PaymentResDTO paymentResDTO = paymentService.generatePaymentUrl(amount, orderId, clientIp, returnUrl);
         return ResponseEntity.status(HttpStatus.OK).body(paymentResDTO);
     }
 
