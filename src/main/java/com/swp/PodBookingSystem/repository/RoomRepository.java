@@ -1,5 +1,6 @@
 package com.swp.PodBookingSystem.repository;
 
+import com.swp.PodBookingSystem.dto.respone.Room.BookedRoomDto;
 import com.swp.PodBookingSystem.entity.OrderDetail;
 import com.swp.PodBookingSystem.entity.Room;
 import org.springframework.data.domain.Page;
@@ -47,5 +48,12 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
             @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime);
 
-
+    @Query("SELECT NEW com.swp.PodBookingSystem.dto.respone.Room.BookedRoomDto(r.id, r.name, r.description, r.image, r.status, od.startTime, od.endTime, od.servicePackage, r.roomType) " +
+            "FROM Room r " +
+            "JOIN OrderDetail od ON r.id = od.room.id " +
+            "WHERE od.endTime > :currentTime " +
+            "AND od.status = com.swp.PodBookingSystem.enums.OrderStatus.Successfully " +
+            "AND od.customer.id = :customerId " +
+            "ORDER BY od.startTime")
+    List<BookedRoomDto> findBookedRooms(@Param("currentTime") LocalDateTime currentTime, @Param("customerId") String customerId);
 }

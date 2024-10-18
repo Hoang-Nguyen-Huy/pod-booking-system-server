@@ -7,9 +7,12 @@ import com.swp.PodBookingSystem.dto.request.Room.RoomCreationRequest;
 import com.swp.PodBookingSystem.dto.request.Room.RoomPaginationDTO;
 import com.swp.PodBookingSystem.dto.respone.Calendar.DateResponse;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
+import com.swp.PodBookingSystem.dto.respone.Room.BookedRoomDto;
 import com.swp.PodBookingSystem.dto.respone.Room.RoomResponse;
+import com.swp.PodBookingSystem.entity.Account;
 import com.swp.PodBookingSystem.entity.Room;
 import com.swp.PodBookingSystem.repository.RoomRepository;
+import com.swp.PodBookingSystem.service.AccountService;
 import com.swp.PodBookingSystem.service.RoomService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +34,7 @@ import java.util.Optional;
 public class RoomController {
     RoomService roomService;
     private final RoomRepository roomRepository;
+    private final AccountService accountService;
 
     @PostMapping
     ApiResponse<RoomResponse> createRoom(@RequestBody RoomCreationRequest request) {
@@ -135,5 +139,14 @@ public class RoomController {
     @DeleteMapping("/{roomId}")
     ApiResponse<RoomResponse> deleteRoom(@PathVariable("roomId") int roomId) {
         return ApiResponse.<RoomResponse>builder().message(roomService.deleteRoom(roomId)).build();
+    }
+
+    @GetMapping("/booked-rooms")
+    ApiResponse<List<BookedRoomDto>> getBookedRooms(@RequestHeader("Authorization") String token) {
+        String accountIdFromToken = accountService.extractAccountIdFromToken(token);
+        return ApiResponse.<List<BookedRoomDto>>builder()
+                .message("Các phòng đã đặt")
+                .data(roomService.getBookedRooms(accountIdFromToken))
+                .build();
     }
 }
