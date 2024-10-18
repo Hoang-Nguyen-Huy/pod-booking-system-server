@@ -98,6 +98,20 @@ public class OrderDetailAmenityService {
                 .quantity(orderDetailAmenity.getQuantity())
                 .price(orderDetailAmenity.getPrice())
                 .amenity(orderDetailAmenity.getAmenity())
+                .orderId(orderDetailAmenity.getOrderDetail().getOrder().getId())
+                .createdAt(orderDetailAmenity.getCreatedAt())
+                .updatedAt(orderDetailAmenity.getUpdatedAt())
                 .build();
+    }
+
+    public void updateOrderDetailAmenity(String id, OrderDetailAmenity orderDetailAmenity) {
+        Optional<OrderDetailAmenity> existingOrderDetailAmenity = orderDetailAmenityRepository.findById(id);
+        if (existingOrderDetailAmenity.isEmpty()) {
+            throw new RuntimeException("OrderDetailAmenity not found");
+        }
+        OrderDetailAmenity updateOrderDetailAmenity = existingOrderDetailAmenity.get();
+        updateOrderDetailAmenity.setQuantity(orderDetailAmenity.getQuantity());
+        updateOrderDetailAmenity.setPrice(orderDetailAmenity.getPrice());
+        orderDetailAmenityRepository.save(updateOrderDetailAmenity);
     }
 }

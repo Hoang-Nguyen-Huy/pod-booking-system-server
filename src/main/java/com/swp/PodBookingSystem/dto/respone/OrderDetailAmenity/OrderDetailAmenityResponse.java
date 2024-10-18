@@ -3,6 +3,8 @@ package com.swp.PodBookingSystem.dto.respone.OrderDetailAmenity;
 import com.swp.PodBookingSystem.entity.Amenity;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Builder
@@ -13,4 +15,9 @@ public class OrderDetailAmenityResponse {
     int quantity;
     double price;
     Amenity amenity;
+    String orderId;
+    LocalDateTime createdAt;
+    LocalDateTime updatedAt;
+
+
 }

@@ -4,15 +4,13 @@ import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenit
 import com.swp.PodBookingSystem.dto.respone.OrderDetailAmenity.OrderDetailAmenityResponse;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 
+import com.swp.PodBookingSystem.entity.OrderDetailAmenity;
 import com.swp.PodBookingSystem.service.OrderDetailAmenityService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -36,4 +34,19 @@ public class OrderDetailAmenityController {
                 .totalRecord((int) orderDetailAmenityPage.getTotalElements())
                 .build();
     }
+    @PostMapping
+    public void createOrderDetailAmenity(@RequestBody OrderDetailAmenity orderDetailAmenity) {
+        orderDetailAmenityService.createOrderDetailAmenity(orderDetailAmenity);
+    }
+
+    @PutMapping("/{id}")
+    public void updateOrderDetailAmenity(@PathVariable String id, @RequestBody OrderDetailAmenity orderDetailAmenity) {
+        orderDetailAmenityService.updateOrderDetailAmenity(id, orderDetailAmenity);
+    }
+
+    @DeleteMapping("/{orderDetailId}")
+    public double deleteOrderDetailAmenity(@PathVariable String orderDetailId) {
+        return orderDetailAmenityService.deleteOrderDetailAmenityByOrderDetailId(orderDetailId);
+    }
+
 }
