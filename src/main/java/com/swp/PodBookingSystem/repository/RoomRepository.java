@@ -47,5 +47,11 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
             @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime);
 
-
+    @Query("SELECT DISTINCT r FROM Room r " +
+            "JOIN OrderDetail od ON r.id = od.room.id " +
+            "WHERE od.endTime > :currentTime " +
+            "AND od.status = 'Successfully' " +
+            "AND od.customer.id = :customerId" +
+            "ORDER BY od.startTime")
+    List<Room> findRoomsWithActiveOrFutureSuccessfulBookings(@Param("currentTime") LocalDateTime currentTime, @Param("customerId") String customerId);
 }
