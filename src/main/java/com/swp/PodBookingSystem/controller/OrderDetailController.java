@@ -1,6 +1,9 @@
 package com.swp.PodBookingSystem.controller;
 
+import com.swp.PodBookingSystem.dto.request.Building.BuildingPaginationDTO;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
+import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
+import com.swp.PodBookingSystem.entity.Building;
 import com.swp.PodBookingSystem.service.OrderDetailService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -40,12 +44,20 @@ public class OrderDetailController {
         }
     }
 
+
     @GetMapping("/{customerId}")
-    public ApiResponse<List<OrderDetailResponse>> getOrdersByCustomerId(@PathVariable String customerId) {
-        List<OrderDetailResponse> orders = orderDetailService.getOrdersByCustomerId(customerId);
-        logOrders(orders);
-        return ApiResponse.<List<OrderDetailResponse>>builder()
-                .data(orders)
+    PaginationResponse<List<OrderDetailResponse>> getBuildings(@RequestParam(defaultValue = "1", name = "page") int page,
+                                                               @RequestParam(defaultValue = "3", name = "take") int take,
+                                                               @PathVariable String customerId
+    ) {
+        BuildingPaginationDTO dto = new BuildingPaginationDTO(page, take);
+        Page<OrderDetailResponse> buildingPage = orderDetailService.getOrdersByCustomerId(customerId, dto.page, dto.take);
+        return PaginationResponse.<List<OrderDetailResponse>>builder()
+                .data(buildingPage.getContent())
+                .currentPage(buildingPage.getNumber() + 1)
+                .totalPage(buildingPage.getTotalPages())
+                .recordPerPage(buildingPage.getNumberOfElements())
+                .totalRecord((int) buildingPage.getTotalElements())
                 .build();
     }
 
