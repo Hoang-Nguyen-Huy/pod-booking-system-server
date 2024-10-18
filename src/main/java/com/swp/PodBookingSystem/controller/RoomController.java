@@ -9,6 +9,7 @@ import com.swp.PodBookingSystem.dto.respone.Calendar.DateResponse;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.dto.respone.Room.RoomResponse;
 import com.swp.PodBookingSystem.entity.Room;
+import com.swp.PodBookingSystem.repository.RoomRepository;
 import com.swp.PodBookingSystem.service.RoomService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ import java.util.Optional;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RoomController {
     RoomService roomService;
+    private final RoomRepository roomRepository;
 
     @PostMapping
     ApiResponse<RoomResponse> createRoom(@RequestBody RoomCreationRequest request) {
@@ -48,6 +50,16 @@ public class RoomController {
                 .recordPerPage(roomPage.getNumberOfElements())
                 .totalRecord((int) roomPage.getTotalElements())
                 .build();
+    }
+
+    @GetMapping("/type/{roomId}")
+    List<Room> getRoomsSameType(@PathVariable("roomId") int roomId) {
+        Optional<Room> room = roomRepository.findById(roomId);
+        if (room.isEmpty()) {
+            return new ArrayList<>();
+        }
+        int roomTypeId = room.get().getRoomType().getId();
+        return roomService.getRoomsByType(roomTypeId);
     }
 
     @GetMapping("/filtered-room")

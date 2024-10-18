@@ -59,6 +59,10 @@ public class RoomService {
         return roomRepository.findAll(pageable);
     }
 
+    public List<Room> getRoomsByType(int typeId) {
+        return roomRepository.findRoomsByTypeId(typeId);
+    }
+
     /*
     [GET]: /rooms/roomId
      */
