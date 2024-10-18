@@ -3,6 +3,7 @@ package com.swp.PodBookingSystem.service;
 import com.swp.PodBookingSystem.dto.request.Amenity.AmenityCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.AmenityResponse;
 import com.swp.PodBookingSystem.entity.Amenity;
+import com.swp.PodBookingSystem.enums.AmenityType;
 import com.swp.PodBookingSystem.mapper.AmenityMapper;
 import com.swp.PodBookingSystem.repository.AmenityRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -26,6 +27,16 @@ public class AmenityService {
 
     public List<AmenityResponse> getAllAmenities(){
         List<Amenity> amenities = amenityRepository.findAll();
+        return amenities.stream()
+                .map(amenityMapper::toAmenityResponse)
+                .collect(Collectors.toList());
+    }
+
+    /*
+    [GET]: /amenity/type?amenityType
+     */
+    public List<AmenityResponse> getAmenitiesByType(AmenityType amenityType) {
+        List<Amenity> amenities = amenityRepository.findAllByType(amenityType);
         return amenities.stream()
                 .map(amenityMapper::toAmenityResponse)
                 .collect(Collectors.toList());

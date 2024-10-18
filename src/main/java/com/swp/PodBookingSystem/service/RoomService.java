@@ -6,6 +6,7 @@ import com.swp.PodBookingSystem.dto.request.Slot.SlotCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.Calendar.DateResponse;
 import com.swp.PodBookingSystem.dto.respone.Calendar.RoomDTO;
 import com.swp.PodBookingSystem.dto.respone.Calendar.SlotDTO;
+import com.swp.PodBookingSystem.dto.respone.Room.BookedRoomDto;
 import com.swp.PodBookingSystem.dto.respone.Room.RoomResponse;
 import com.swp.PodBookingSystem.entity.OrderDetail;
 import com.swp.PodBookingSystem.entity.Room;
@@ -203,5 +204,9 @@ public class RoomService {
                 .collect(Collectors.toList());
     }
 
-
+    public List<BookedRoomDto> getBookedRooms(String customerId) {
+        LocalDateTime currentTime = LocalDateTime.now();
+        List<BookedRoomDto> bookedRoomDtos = roomRepository.findBookedRooms(currentTime, customerId);
+        return bookedRoomDtos;
+    }
 }
