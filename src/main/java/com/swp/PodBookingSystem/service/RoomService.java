@@ -46,6 +46,13 @@ public class RoomService {
         Optional<RoomType> roomType = Optional.empty();
         if (request.getRoomTypeId() != null) {
             roomType = roomTypeRepository.findById(request.getRoomTypeId());
+            if(roomType.isEmpty()) {
+                throw new RuntimeException("Room type not found");
+            }else{
+                RoomType roomTypeUpdate = roomType.get();
+                roomTypeUpdate.setQuantity(roomTypeUpdate.getQuantity() + 1);
+                roomTypeRepository.save(roomTypeUpdate);
+            }
         }
         Room newRoom = roomMapper.toRoom(request);
         newRoom.setRoomType(roomType.orElse(null));
