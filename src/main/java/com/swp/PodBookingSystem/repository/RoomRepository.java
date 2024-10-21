@@ -48,7 +48,7 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
             @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime);
 
-    @Query("SELECT NEW com.swp.PodBookingSystem.dto.respone.Room.BookedRoomDto(r.id, r.name, r.description, r.image, r.status, od.startTime, od.endTime, od.servicePackage, r.roomType) " +
+    @Query("SELECT NEW com.swp.PodBookingSystem.dto.respone.Room.BookedRoomDto(r.id, od.id, r.name, r.description, r.image, r.status, od.startTime, od.endTime, od.servicePackage, r.roomType) " +
             "FROM Room r " +
             "JOIN OrderDetail od ON r.id = od.room.id " +
             "WHERE od.endTime > :currentTime " +
