@@ -2,7 +2,9 @@ package com.swp.PodBookingSystem.service;
 
 import com.swp.PodBookingSystem.dto.request.Amenity.AmenityCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.AmenityResponse;
+import com.swp.PodBookingSystem.entity.Account;
 import com.swp.PodBookingSystem.entity.Amenity;
+import com.swp.PodBookingSystem.enums.AccountRole;
 import com.swp.PodBookingSystem.enums.AmenityType;
 import com.swp.PodBookingSystem.mapper.AmenityMapper;
 import com.swp.PodBookingSystem.repository.AmenityRepository;
@@ -62,9 +64,18 @@ public class AmenityService {
         return "Delete amenity " + amenityId + " successfully";
     }
 
-    public Page<Amenity> getAmenities(int page, int take){
+    public Page<Amenity> getAmenities(int page, int take, Account account){
         Pageable pageable = PageRequest.of(page - 1, take);
-        return amenityRepository.findAll(pageable);
+        if (account.getRole().equals(AccountRole.Admin)){
+            return amenityRepository.findAll(pageable);
+        }
+
+        if (account.getRole().equals(AccountRole.Staff) || account.getRole().equals(AccountRole.Manager)) {
+            return amenityRepository.findAllByBuildingId(account.getBuildingNumber(), pageable);
+        }
+
+        return Page.empty(); // return an empty page if no role matches
+
     }
 
 }
