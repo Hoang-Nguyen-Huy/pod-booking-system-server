@@ -25,6 +25,7 @@ public class OrderDetailAmenityController {
     public ApiResponse<OrderDetailAmenityResponse> createOrderDetailAmenity(@RequestBody OrderDetailAmenityCreationRequest request) {
         return ApiResponse.<OrderDetailAmenityResponse>builder()
                 .data(orderDetailAmenityService.createOrderDetailAmenityApi(request))
+                .message("Tạo đơn hàng tiện ích thành công")
                 .build();
     }
 }
