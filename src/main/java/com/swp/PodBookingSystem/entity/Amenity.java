@@ -37,6 +37,11 @@ public class Amenity {
     @Column(name = "updatedAt")
     LocalDateTime updatedAt;
 
+    int isDeleted;
+
+    @Column(name = "buildingNumber")
+    int buildingNumber;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
