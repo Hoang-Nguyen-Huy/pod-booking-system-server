@@ -6,12 +6,17 @@ import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenit
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailAmenityListResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetailAmenity.OrderDetailAmenityResponse;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
+import com.swp.PodBookingSystem.entity.Account;
+import com.swp.PodBookingSystem.service.AccountService;
 import com.swp.PodBookingSystem.service.OrderDetailAmenityService;
 import com.swp.PodBookingSystem.service.OrderDetailService;
+import com.swp.PodBookingSystem.service.OrderService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -21,18 +26,22 @@ import java.util.List;
 public class OrderDetailAmenityController {
     OrderDetailAmenityService orderDetailAmenityService;
     OrderDetailService orderDetailService;
+    private final AccountService accountService;
+    private final OrderService orderService;
 
     @GetMapping("/page")
     public ApiResponse<PaginationResponse<List<OrderDetailAmenityListResponse>>> getOrderDetailAndAmenity(
-            //@RequestHeader("Authorization") String token,
-            //@RequestParam String startDate,
-            //@RequestParam String endDate,
+            @RequestHeader("Authorization") String token,
+            @RequestParam String startDate,
+            @RequestParam String endDate,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        //String accountId = accountService.extractAccountIdFromToken(token);
-        // Account user = accountService.getAccountById(accountId);
+        String accountId = accountService.extractAccountIdFromToken(token);
+        Account user = accountService.getAccountById(accountId);
+        LocalDateTime startDateTime = orderService.parseDateTime(startDate);
+        LocalDateTime endDateTime = orderService.parseDateTime(endDate);
         return ApiResponse.<PaginationResponse<List<OrderDetailAmenityListResponse>>>builder()
-                .data(orderDetailService.getPagedOrderDetails(page, size))
+                .data(orderDetailService.getPagedOrderDetails(user, startDateTime, endDateTime, page, size))
                 .message("get paging order detail successfully")
                 .build();
     }

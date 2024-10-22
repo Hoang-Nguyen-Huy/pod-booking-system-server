@@ -96,8 +96,16 @@ public class OrderDetailService {
         return orderDetailResponses;
     }
 
-    public PaginationResponse<List<OrderDetailAmenityListResponse>> getPagedOrderDetails(int page, int size) {
-        Page<OrderDetail> orderDetailPage = orderDetailRepository.findAll(PageRequest.of(page, size));
+    public PaginationResponse<List<OrderDetailAmenityListResponse>> getPagedOrderDetails(Account user, LocalDateTime startDate, LocalDateTime endDate, int page, int size) {
+        Page<OrderDetail> orderDetailPage = null;
+        if(user.getRole() == AccountRole.Admin){
+            orderDetailPage = orderDetailRepository.findAllWithTimeRange(startDate, endDate,PageRequest.of(page, size));
+        }else if(user.getRole() == AccountRole.Staff || user.getRole() == AccountRole.Manager) {
+            orderDetailPage = orderDetailRepository.findOrdersByBuildingNumberAndTimeRange(user.getBuildingNumber(), startDate, endDate, PageRequest.of(page, size));
+        }else{
+            throw new RuntimeException("Only admin, staff and manager can access this API");
+        }
+
         List<OrderDetailAmenityListResponse> orderDetailResponses = orderDetailPage.getContent().stream()
                 .map(orderDetail -> {
                     List<OrderDetailAmenity> amenities =
