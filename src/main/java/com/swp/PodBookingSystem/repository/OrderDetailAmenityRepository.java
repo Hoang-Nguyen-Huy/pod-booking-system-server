@@ -17,4 +17,8 @@ public interface OrderDetailAmenityRepository extends JpaRepository<OrderDetailA
     @Transactional
     @Query("DELETE FROM OrderDetailAmenity a WHERE a.orderDetail.id = :orderDetailId")
     void deleteByOrderDetailId(String orderDetailId);
+
+    @Modifying
+    @Transactional
+    void deleteById(String id);
 }

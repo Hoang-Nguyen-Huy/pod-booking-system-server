@@ -175,11 +175,11 @@ public class OrderDetailService {
             OrderDetailAmenity orderDetailAmenity = new OrderDetailAmenity();
             orderDetailAmenity.setId(UUID.randomUUID().toString());
             orderDetailAmenity.setQuantity(amenity.getQuantity());
-            orderDetailAmenity.setPrice(amenity.getPrice() * amenity.getQuantity());
+            orderDetailAmenity.setPrice(amenity.getPrice());
             orderDetailAmenity.setOrderDetail(orderDetail);
             orderDetailAmenity.setAmenity(amenity);
 
-            orderDetailAmenityService.createOrderDetailAmenity(orderDetailAmenity);
+            orderDetailAmenityService.updateAmenityQuantityAfterCreateODA(orderDetailAmenity);
         }
     }
 
