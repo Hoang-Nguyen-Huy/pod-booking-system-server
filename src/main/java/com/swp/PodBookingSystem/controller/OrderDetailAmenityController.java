@@ -3,12 +3,16 @@ package com.swp.PodBookingSystem.controller;
 import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenityRequest;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenityCreationRequest;
+import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailAmenityListResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetailAmenity.OrderDetailAmenityResponse;
+import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.service.OrderDetailAmenityService;
+import com.swp.PodBookingSystem.service.OrderDetailService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/order-detail-amenity")
@@ -16,6 +20,22 @@ import org.springframework.web.bind.annotation.*;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class OrderDetailAmenityController {
     OrderDetailAmenityService orderDetailAmenityService;
+    OrderDetailService orderDetailService;
+
+    @GetMapping("/page")
+    public ApiResponse<PaginationResponse<List<OrderDetailAmenityListResponse>>> getOrderDetailAndAmenity(
+            //@RequestHeader("Authorization") String token,
+            //@RequestParam String startDate,
+            //@RequestParam String endDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        //String accountId = accountService.extractAccountIdFromToken(token);
+        // Account user = accountService.getAccountById(accountId);
+        return ApiResponse.<PaginationResponse<List<OrderDetailAmenityListResponse>>>builder()
+                .data(orderDetailService.getPagedOrderDetails(page, size))
+                .message("get paging order detail successfully")
+                .build();
+    }
 
     @PostMapping
     public ApiResponse<OrderDetailAmenityResponse> createOrderDetailAmenity(@RequestBody OrderDetailAmenityCreationRequest request) {
@@ -39,11 +59,5 @@ public class OrderDetailAmenityController {
         }
     }
 
-    @DeleteMapping("/{id}")
-    public ApiResponse<String> deleteOrderDetailAmenity (@PathVariable String id) {
-        return ApiResponse.<String>builder()
-                .data(orderDetailAmenityService.deleteOrderDetailAmenityById(id))
-                .message("Delete order successfully")
-                .build();
-    }
+    //Update
 }

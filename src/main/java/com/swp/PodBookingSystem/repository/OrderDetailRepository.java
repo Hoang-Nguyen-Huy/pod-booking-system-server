@@ -1,6 +1,8 @@
 package com.swp.PodBookingSystem.repository;
 
 import com.swp.PodBookingSystem.entity.OrderDetail;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -18,6 +20,8 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, String
     List<OrderDetail> findByOrderId(String orderId);
 
     List<OrderDetail> findByEndTime(LocalDateTime endTime);
+
+    Page<OrderDetail> findAll(Pageable pageable);
 
     @Query("SELECT o FROM OrderDetail o WHERE FUNCTION('DATE', o.startTime) BETWEEN FUNCTION('DATE', :startOfDay) AND FUNCTION('DATE', :endOfDay)")
     List<OrderDetail> findAllOrderDetailsByDay(@Param("startOfDay") LocalDateTime startOfDay, @Param("endOfDay") LocalDateTime endOfDay);

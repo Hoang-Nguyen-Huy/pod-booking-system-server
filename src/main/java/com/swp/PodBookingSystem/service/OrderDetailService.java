@@ -5,8 +5,10 @@ import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationReque
 import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailUpdateRoomRequest;
 import com.swp.PodBookingSystem.dto.request.Room.RoomWithAmenitiesDTO;
 import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementResponse;
+import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailAmenityListResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
+import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.entity.*;
 import com.swp.PodBookingSystem.enums.AccountRole;
 import com.swp.PodBookingSystem.enums.OrderStatus;
@@ -17,6 +19,8 @@ import com.swp.PodBookingSystem.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +47,7 @@ public class OrderDetailService {
     private final ServicePackageService servicePackageService;
     private final RoomService roomService;
     private final RoomRepository roomRepository;
+    private final OrderDetailAmenityRepository orderDetailAmenityRepository;
 
     //GET:
     public List<OrderDetailResponse> getAllOrders() {
@@ -89,6 +94,45 @@ public class OrderDetailService {
             orderDetail.setAmenities(orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(orderDetail.getId()));
         }
         return orderDetailResponses;
+    }
+
+    public PaginationResponse<List<OrderDetailAmenityListResponse>> getPagedOrderDetails(int page, int size) {
+        Page<OrderDetail> orderDetailPage = orderDetailRepository.findAll(PageRequest.of(page, size));
+        List<OrderDetailAmenityListResponse> orderDetailResponses = orderDetailPage.getContent().stream()
+                .map(orderDetail -> {
+                    List<OrderDetailAmenity> amenities =
+                            orderDetailAmenityService.getOrderDetailAmenitiesAllInfoByOrderDetailId(orderDetail.getId());
+                    OrderDetailAmenityListResponse response = OrderDetailAmenityListResponse.builder()
+                            .id(orderDetail.getId())
+                            .customerId(Optional.ofNullable(orderDetail.getCustomer())
+                                    .map(Account::getId)
+                                    .orElse(null))
+                            .buildingId(orderDetail.getBuilding().getId())
+                            .roomId(orderDetail.getRoom().getId())
+                            .roomName(orderDetail.getRoom().getName())
+                            .orderId(orderDetail.getOrder().getId())
+                            .amenities(amenities)
+                            .servicePackageId(orderDetail.getServicePackage().getId())
+                            .orderHandledId(Optional.ofNullable(orderDetail.getOrderHandler())
+                                    .map(Account::getId)
+                                    .orElse(null))
+                            .priceRoom(orderDetail.getPriceRoom())
+                            .status(orderDetail.getStatus())
+                            .startTime(orderDetail.getStartTime())
+                            .endTime(orderDetail.getEndTime())
+                            .createdAt(orderDetail.getCreatedAt())
+                            .build();
+                    return response;
+                })
+                .collect(Collectors.toList());
+
+        return PaginationResponse.<List<OrderDetailAmenityListResponse>>builder()
+                .data(orderDetailResponses)
+                .currentPage(orderDetailPage.getNumber())
+                .totalPage(orderDetailPage.getTotalPages())
+                .recordPerPage(orderDetailPage.getSize())
+                .totalRecord((int) orderDetailPage.getTotalElements())
+                .build();
     }
 
     //CREATE:

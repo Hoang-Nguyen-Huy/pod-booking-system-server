@@ -18,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -43,6 +45,10 @@ public class OrderDetailAmenityService {
                 .build()).collect(Collectors.toList());
     }
 
+    public List<OrderDetailAmenity> getOrderDetailAmenitiesAllInfoByOrderDetailId(String orderDetailId) {
+        return orderDetailAmenityRepository.findByOrderDetailId(orderDetailId);
+    }
+
     //CREATE:
     public void createOrderDetailAmenity(OrderDetailAmenityRequest request) {
         Optional<OrderDetail> orderDetail = orderDetailRepository.findById(request.getOrderDetailId());
@@ -51,8 +57,8 @@ public class OrderDetailAmenityService {
             throw new RuntimeException("Order detail or amenity not found");
         }
         OrderDetailAmenity orderDetailAmenity = new OrderDetailAmenity();
-        //orderDetailAmenity.setCreatedAt(LocalDateTime.now());
-        //orderDetailAmenity.setUpdatedAt(LocalDateTime.now());
+        orderDetailAmenity.setCreatedAt(LocalDateTime.now());
+        orderDetailAmenity.setUpdatedAt(LocalDateTime.now());
         orderDetailAmenity.setId(UUID.randomUUID().toString());
         orderDetailAmenity.setQuantity(request.getQuantity());
         orderDetailAmenity.setPrice(amenity.get().getPrice());
@@ -119,18 +125,6 @@ public class OrderDetailAmenityService {
         }
         orderDetailAmenityRepository.deleteByOrderDetailId(orderDetailId);
         return total;
-    }
-
-    @Transactional
-    public String deleteOrderDetailAmenityById(String orderDetailAmenityId) {
-        Optional<OrderDetailAmenity> oda = orderDetailAmenityRepository.findById(orderDetailAmenityId);
-        if (oda.isEmpty()) {
-            return("Order detail amenity not found");
-        }else {
-            String odaId = oda.get().getId();
-            orderDetailAmenityRepository.deleteById(orderDetailAmenityId);
-            return("Order detail amenity with id: " + odaId + " has been deleted");
-        }
     }
 
     //UTILS:
