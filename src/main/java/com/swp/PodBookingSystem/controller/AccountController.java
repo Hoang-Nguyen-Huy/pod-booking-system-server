@@ -108,20 +108,20 @@ public class AccountController {
                 .build();
     }
 
-    @GetMapping("/send-email")
-    public String sendEmail() throws MessagingException, IOException {
-        sendEmailService.sendCalenderInvite(
-                CalendarRequest.builder()
-                        .subject("Đăt lịch ở POD Booking")
-                        .description("Hãy đặt lịch ở calendar để không bỏ lỡ lịch")
-                        .summary("Đăt lịch ở POD Booking")
-                        .to("phuongnguyen2772004.work@gmail.com")
-                        .eventDateTime(LocalDateTime.now()).build());
-        return "Send email successfully";
-    }
+//    @GetMapping("/send-email")
+//    public String sendEmail() throws MessagingException, IOException {
+//        sendEmailService.sendCalenderInvite(
+//                CalendarRequest.builder()
+//                        .subject("Đăt lịch ở POD Booking")
+//                        .description("Hãy đặt lịch ở calendar để không bỏ lỡ lịch")
+//                        .summary("Đăt lịch ở POD Booking")
+//                        .to("phuongnguyen2772004.work@gmail.com")
+//                        .eventDateTime(LocalDateTime.now()).build());
+//        return "Send email successfully";
+//    }
 
     @GetMapping("/staff")
-    public ResponseEntity<List<AccountOrderResponse> > getAllStaffAccounts() {
+    public ResponseEntity<List<AccountOrderResponse>> getAllStaffAccounts() {
         return ResponseEntity.status(HttpStatus.OK).body(accountService.getAllStaffAccounts());
     }
 

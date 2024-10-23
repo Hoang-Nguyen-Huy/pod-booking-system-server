@@ -21,9 +21,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -83,17 +85,20 @@ public class OrderDetailService {
         }).collect(Collectors.toList());
     }
 
-    public List<OrderDetailResponse> getOrdersByCustomerId(String customerId) {
-        List<OrderDetail> orderDetails = orderDetailRepository.findByCustomer_Id(customerId);
-        System.out.println("Orders found for customer " + customerId + ": " + orderDetails.size());
-        var orderDetailResponses = orderDetails.stream()
-                .map(orderDetailMapper::toOrderDetailResponse) // Use the mapper for conversion
-                .toList();
-        for (OrderDetailResponse orderDetail : orderDetailResponses) {
-            System.out.println("Order Detail: " + orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(orderDetail.getOrderId()));
-            orderDetail.setAmenities(orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(orderDetail.getId()));
-        }
-        return orderDetailResponses;
+
+    public Page<OrderDetailResponse> getOrdersByCustomerId(String customerId, int page, int take) {
+        Pageable pageable = PageRequest.of(page - 1, take);
+
+        Page<OrderDetail> orderDetails = orderDetailRepository.findByCustomer_Id(customerId, pageable);
+
+        return orderDetails.map(orderDetail -> {
+            OrderDetailResponse response = orderDetailMapper.toOrderDetailResponse(orderDetail);
+
+            // Gán amenities cho từng OrderDetailResponse
+            response.setAmenities(orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(response.getId()));
+
+            return response;
+        });
     }
 
     public PaginationResponse<List<OrderDetailAmenityListResponse>> getPagedOrderDetails(Account user, LocalDateTime startDate, LocalDateTime endDate, int page, int size) {
@@ -145,7 +150,7 @@ public class OrderDetailService {
 
     //CREATE:
     public boolean processOrderDetails(OrderDetailCreationRequest request, Order order, Account account) {
-        if(account.getRole() != AccountRole.Customer){
+        if (account.getRole() != AccountRole.Customer) {
             account = request.getCustomer();
         }
         List<RoomWithAmenitiesDTO> selectedRooms = request.getSelectedRooms();
@@ -161,7 +166,7 @@ public class OrderDetailService {
                                         OrderDetailCreationRequest request,
                                         Order order, Account account) {
         boolean isSomeRoomWasBook = false;
-        for(int i = 0; i < request.getStartTime().size(); i++){
+        for (int i = 0; i < request.getStartTime().size(); i++) {
             LocalDateTime startTime = request.getStartTime().get(i);
             LocalDateTime endTime = request.getEndTime().get(i);
             for (int week = 0; week < 4; week++) {
@@ -177,7 +182,7 @@ public class OrderDetailService {
                                        OrderDetailCreationRequest request,
                                        Order order, Account account) {
         boolean isSomeRoomWasBook = false;
-        for(int i = 0; i < request.getStartTime().size(); i++){
+        for (int i = 0; i < request.getStartTime().size(); i++) {
             LocalDateTime startTime = request.getStartTime().get(i);
             LocalDateTime endTime = request.getEndTime().get(i);
             for (int day = 0; day < 30; day++) {
@@ -194,7 +199,7 @@ public class OrderDetailService {
                                           OrderDetailCreationRequest request,
                                           Order order, Account account) {
         boolean isSomeRoomWasBook = false;
-        for(int i = 0; i < request.getStartTime().size(); i++) {
+        for (int i = 0; i < request.getStartTime().size(); i++) {
             LocalDateTime startTime = request.getStartTime().get(i);
             LocalDateTime endTime = request.getEndTime().get(i);
             isSomeRoomWasBook = createOrderDetailsForRooms(request, selectedRooms, order, account,
@@ -276,26 +281,26 @@ public class OrderDetailService {
     }
 
     //UPDATE:
-    public void updateOrderDetail (OrderUpdateRequest request){
+    public void updateOrderDetail(OrderUpdateRequest request) {
         List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(request.getId());
-        for(OrderDetail od : orderDetails){
-            if(request.getStatus() != null){
+        for (OrderDetail od : orderDetails) {
+            if (request.getStatus() != null) {
                 od.setStatus(request.getStatus());
             }
-            if(request.getOrderHandler() != null){
+            if (request.getOrderHandler() != null) {
                 Account orderHandler = accountService.getAccountById(request.getOrderHandler().getId());
                 od.setOrderHandler(orderHandler);
             }
-            if(request.getOrderDetails() != null && !request.getOrderDetails().isEmpty()){
-                for(OrderDetailUpdateRoomRequest odr : request.getOrderDetails()){
-                    if(odr.getId().equals(od.getId())){
+            if (request.getOrderDetails() != null && !request.getOrderDetails().isEmpty()) {
+                for (OrderDetailUpdateRoomRequest odr : request.getOrderDetails()) {
+                    if (odr.getId().equals(od.getId())) {
                         Optional<Room> room = roomRepository.findById(odr.getRoomId());
-                        if(room.isEmpty()){
+                        if (room.isEmpty()) {
                             throw new RuntimeException("Room not found with id: " + odr.getRoomId());
                         }
-                        if(room.get().getRoomType().equals(od.getRoom().getRoomType())){
+                        if (room.get().getRoomType().equals(od.getRoom().getRoomType())) {
                             od.setRoom(room.get());
-                        }else{
+                        } else {
                             throw new RuntimeException("Room type not match");
                         }
                     }
@@ -305,10 +310,10 @@ public class OrderDetailService {
         }
     }
 
-    public void updateOrderHandlerOrderDetail(String orderId, Account accountHandler){
+    public void updateOrderHandlerOrderDetail(String orderId, Account accountHandler) {
         List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(orderId);
         Account orderHandler = accountService.getAccountById(accountHandler.getId());
-        for(OrderDetail od : orderDetails){
+        for (OrderDetail od : orderDetails) {
             od.setOrderHandler(orderHandler);
         }
         orderDetailRepository.saveAll(orderDetails);
@@ -334,7 +339,7 @@ public class OrderDetailService {
     public void restoreAmenityQuantityIfOrderDetailExpired() {
         LocalDateTime now = LocalDateTime.now();
         List<OrderDetail> expiredOrderDetails = orderDetailRepository.findByEndTime(now);
-        for(OrderDetail od: expiredOrderDetails){
+        for (OrderDetail od : expiredOrderDetails) {
             orderDetailAmenityService.restoreAmenityQuantity(od.getId());
         }
     }

@@ -15,7 +15,9 @@ import java.util.*;
 
 @Repository
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, String> {
-    List<OrderDetail> findByCustomer_Id(String customerId);
+    @Query("SELECT od FROM OrderDetail od " +
+            "WHERE (od.customer.id = :customerId)")
+    Page<OrderDetail> findByCustomer_Id(@Param("customerId") String customerId, Pageable pageable);
 
     List<OrderDetail> findByOrderId(String orderId);
 
