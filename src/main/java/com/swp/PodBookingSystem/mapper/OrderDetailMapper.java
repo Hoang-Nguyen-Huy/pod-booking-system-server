@@ -15,6 +15,7 @@ public interface OrderDetailMapper {
     @Mapping(target = "orderId", source = "order.id") // Map order ID to response
     @Mapping(target = "orderHandledId", source = "orderHandler.id")
     @Mapping(target = "roomName", source = "room.name")
+    @Mapping(target = "roomImage", source = "room.image")
         // Map order handled ID to response
     OrderDetailResponse toOrderDetailResponse(OrderDetail orderDetail);
 
