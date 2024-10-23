@@ -148,4 +148,12 @@ public class RoomController {
                 .data(roomService.getBookedRooms(accountIdFromToken))
                 .build();
     }
+
+    @GetMapping("/number-served-rooms-currently")
+    ApiResponse<Integer> countCurrentlyServedRooms() {
+        return ApiResponse.<Integer>builder()
+                .message("Số phòng đang được phục vụ")
+                .data(roomService.countCurrentlyServedRooms())
+                .build();
+    }
 }
