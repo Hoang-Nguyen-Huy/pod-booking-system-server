@@ -1,6 +1,8 @@
 package com.swp.PodBookingSystem.repository;
 
 import com.swp.PodBookingSystem.entity.OrderDetail;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -13,7 +15,9 @@ import java.util.*;
 
 @Repository
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, String> {
-    List<OrderDetail> findByCustomer_Id(String customerId);
+    @Query("SELECT od FROM OrderDetail od " +
+            "WHERE (od.customer.id = :customerId)")
+    Page<OrderDetail> findByCustomer_Id(@Param("customerId") String customerId, Pageable pageable);
 
     List<OrderDetail> findByOrderId(String orderId);
 
