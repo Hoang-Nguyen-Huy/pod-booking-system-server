@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Builder
@@ -31,4 +33,21 @@ public class OrderDetailAmenity {
     @JsonIgnore
     @JoinColumn(name = "amenityId", nullable = false)
     Amenity amenity;
+
+    @Column(name = "createdAt")
+    LocalDateTime createdAt;
+
+    @Column(name = "updatedAt")
+    LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }
