@@ -8,9 +8,11 @@ import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailAmenityListResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
+import com.swp.PodBookingSystem.dto.respone.OrderDetailAmenity.OrderDetailAmenityResponseDTO;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.entity.*;
 import com.swp.PodBookingSystem.enums.AccountRole;
+import com.swp.PodBookingSystem.enums.OrderDetailAmenityStatus;
 import com.swp.PodBookingSystem.enums.OrderStatus;
 import com.swp.PodBookingSystem.exception.AppException;
 import com.swp.PodBookingSystem.exception.ErrorCode;
@@ -49,7 +51,6 @@ public class OrderDetailService {
     private final ServicePackageService servicePackageService;
     private final RoomService roomService;
     private final RoomRepository roomRepository;
-    private final OrderDetailAmenityRepository orderDetailAmenityRepository;
 
     //GET:
     public List<OrderDetailResponse> getAllOrders() {
@@ -102,7 +103,7 @@ public class OrderDetailService {
     }
 
     public PaginationResponse<List<OrderDetailAmenityListResponse>> getPagedOrderDetails(Account user, LocalDateTime startDate, LocalDateTime endDate, int page, int size) {
-        Page<OrderDetail> orderDetailPage = null;
+        Page<OrderDetail> orderDetailPage;
         if (user.getRole() == AccountRole.Admin) {
             orderDetailPage = orderDetailRepository.findAllWithTimeRange(startDate, endDate, PageRequest.of(page, size));
         } else if (user.getRole() == AccountRole.Staff || user.getRole() == AccountRole.Manager) {
@@ -113,8 +114,25 @@ public class OrderDetailService {
 
         List<OrderDetailAmenityListResponse> orderDetailResponses = orderDetailPage.getContent().stream()
                 .map(orderDetail -> {
-                    List<OrderDetailAmenity> amenities =
-                            orderDetailAmenityService.getOrderDetailAmenitiesAllInfoByOrderDetailId(orderDetail.getId());
+                    List<OrderDetailAmenityResponseDTO> amenities =
+                            orderDetailAmenityService.getOrderDetailAmenitiesAllInfoByOrderDetailId(orderDetail.getId()).stream()
+                                    .map(oda -> OrderDetailAmenityResponseDTO.builder()
+                                            .id(oda.getId())
+                                            .quantity(oda.getQuantity())
+                                            .price(oda.getPrice())
+                                            .orderDetailId(oda.getOrderDetail().getId())
+                                            .amenityId(oda.getAmenity().getId())
+                                            .amenityName(oda.getAmenity().getName())
+                                            .amenityType(oda.getAmenity().getType())
+                                            .status(Optional.ofNullable(oda.getStatus())
+                                                    .orElse(null))
+                                            .statusDescription(Optional.ofNullable(oda.getStatus())
+                                                    .map(OrderDetailAmenityStatus::getDescription)
+                                                    .orElse(null))
+                                            .createdAt(oda.getCreatedAt())
+                                            .updatedAt(oda.getUpdatedAt())
+                                            .build())
+                                    .collect(Collectors.toList());
                     return OrderDetailAmenityListResponse.builder()
                             .id(orderDetail.getId())
                             .customerId(Optional.ofNullable(orderDetail.getCustomer())
@@ -124,7 +142,7 @@ public class OrderDetailService {
                             .roomId(orderDetail.getRoom().getId())
                             .roomName(orderDetail.getRoom().getName())
                             .orderId(orderDetail.getOrder().getId())
-                            .amenities(amenities)
+                            .orderDetailAmenities(amenities)
                             .servicePackageId(orderDetail.getServicePackage().getId())
                             .orderHandledId(Optional.ofNullable(orderDetail.getOrderHandler())
                                     .map(Account::getId)

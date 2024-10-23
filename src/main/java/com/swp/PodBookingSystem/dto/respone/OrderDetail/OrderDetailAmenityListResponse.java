@@ -1,8 +1,6 @@
 package com.swp.PodBookingSystem.dto.respone.OrderDetail;
 
-import com.swp.PodBookingSystem.entity.OrderDetail;
-import com.swp.PodBookingSystem.entity.OrderDetailAmenity;
-import com.swp.PodBookingSystem.entity.Room;
+import com.swp.PodBookingSystem.dto.respone.OrderDetailAmenity.OrderDetailAmenityResponseDTO;
 import com.swp.PodBookingSystem.enums.OrderStatus;
 import lombok.*;
 
@@ -21,7 +19,7 @@ public class OrderDetailAmenityListResponse {
     int roomId;
     String roomName;
     String orderId;
-    private List<OrderDetailAmenity> amenities;
+    private List<OrderDetailAmenityResponseDTO> orderDetailAmenities;
     int servicePackageId;
     String orderHandledId;
     double priceRoom;

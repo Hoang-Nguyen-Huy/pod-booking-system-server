@@ -2,12 +2,14 @@ package com.swp.PodBookingSystem.service;
 
 import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenityRequest;
 import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenityCreationRequest;
+import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenityUpdateReq;
 import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetailAmenity.OrderDetailAmenityResponse;
 import com.swp.PodBookingSystem.entity.Amenity;
 import com.swp.PodBookingSystem.entity.OrderDetail;
 import com.swp.PodBookingSystem.entity.OrderDetailAmenity;
 import com.swp.PodBookingSystem.enums.AmenityType;
+import com.swp.PodBookingSystem.enums.OrderDetailAmenityStatus;
 import com.swp.PodBookingSystem.mapper.AmenityMapper;
 import com.swp.PodBookingSystem.mapper.OrderDetailAmenityMapper;
 import com.swp.PodBookingSystem.repository.AmenityRepository;
@@ -57,6 +59,7 @@ public class OrderDetailAmenityService {
             throw new RuntimeException("Order detail or amenity not found");
         }
         OrderDetailAmenity orderDetailAmenity = new OrderDetailAmenity();
+        orderDetailAmenity.setStatus(OrderDetailAmenityStatus.Booked);
         orderDetailAmenity.setCreatedAt(LocalDateTime.now());
         orderDetailAmenity.setUpdatedAt(LocalDateTime.now());
         orderDetailAmenity.setId(UUID.randomUUID().toString());
@@ -113,6 +116,17 @@ public class OrderDetailAmenityService {
                 .orderDetailId(savedOrderDetailAmenity.getOrderDetail().getId())
                 .amenity(amenityMapper.toAmenityResponseDTO(updatedAmenity))
                 .build();
+    }
+
+    //UPDATE:
+    public void updateOrderDetailAmenityStatus(OrderDetailAmenityUpdateReq request) {
+        Optional<OrderDetailAmenity> orderDetailAmenity = orderDetailAmenityRepository.findById(request.getId());
+        if (orderDetailAmenity.isEmpty()) {
+            throw new RuntimeException("Order detail amenity not found");
+        }
+        OrderDetailAmenity updateOrderDetailAmenity = orderDetailAmenity.get();
+        updateOrderDetailAmenity.setStatus(request.getStatus());
+        orderDetailAmenityRepository.save(updateOrderDetailAmenity);
     }
 
     //DELETE:

@@ -1,6 +1,7 @@
 package com.swp.PodBookingSystem.controller;
 
 import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenityRequest;
+import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenityUpdateReq;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenityCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailAmenityListResponse;
@@ -68,5 +69,17 @@ public class OrderDetailAmenityController {
         }
     }
 
-    //Update
+    @PutMapping
+    public ApiResponse<String> updateOrderDetailAmenity(@RequestBody OrderDetailAmenityUpdateReq request) {
+        try {
+            orderDetailAmenityService.updateOrderDetailAmenityStatus(request);
+            return ApiResponse.<String>builder()
+                    .message("Update order detail amenity successfully")
+                    .build();
+        } catch (Exception e) {
+            return ApiResponse.<String>builder()
+                    .message("Failed to update order detail amenity: " + e.getMessage())
+                    .build();
+        }
+    }
 }
