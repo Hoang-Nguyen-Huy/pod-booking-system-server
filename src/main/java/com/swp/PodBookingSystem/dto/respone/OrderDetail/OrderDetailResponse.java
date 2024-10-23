@@ -21,6 +21,7 @@ public class OrderDetailResponse {
     int buildingId;
     int roomId;
     String roomName;
+    String roomImage;
     String orderId;
     List<AmenityManagementResponse> amenities;
     int servicePackageId;
