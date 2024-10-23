@@ -103,11 +103,11 @@ public class OrderDetailService {
 
     public PaginationResponse<List<OrderDetailAmenityListResponse>> getPagedOrderDetails(Account user, LocalDateTime startDate, LocalDateTime endDate, int page, int size) {
         Page<OrderDetail> orderDetailPage = null;
-        if(user.getRole() == AccountRole.Admin){
-            orderDetailPage = orderDetailRepository.findAllWithTimeRange(startDate, endDate,PageRequest.of(page, size));
-        }else if(user.getRole() == AccountRole.Staff || user.getRole() == AccountRole.Manager) {
+        if (user.getRole() == AccountRole.Admin) {
+            orderDetailPage = orderDetailRepository.findAllWithTimeRange(startDate, endDate, PageRequest.of(page, size));
+        } else if (user.getRole() == AccountRole.Staff || user.getRole() == AccountRole.Manager) {
             orderDetailPage = orderDetailRepository.findOrdersByBuildingNumberAndTimeRange(user.getBuildingNumber(), startDate, endDate, PageRequest.of(page, size));
-        }else{
+        } else {
             throw new RuntimeException("Only admin, staff and manager can access this API");
         }
 
@@ -115,7 +115,7 @@ public class OrderDetailService {
                 .map(orderDetail -> {
                     List<OrderDetailAmenity> amenities =
                             orderDetailAmenityService.getOrderDetailAmenitiesAllInfoByOrderDetailId(orderDetail.getId());
-                    OrderDetailAmenityListResponse response = OrderDetailAmenityListResponse.builder()
+                    return OrderDetailAmenityListResponse.builder()
                             .id(orderDetail.getId())
                             .customerId(Optional.ofNullable(orderDetail.getCustomer())
                                     .map(Account::getId)
@@ -135,7 +135,6 @@ public class OrderDetailService {
                             .endTime(orderDetail.getEndTime())
                             .createdAt(orderDetail.getCreatedAt())
                             .build();
-                    return response;
                 })
                 .collect(Collectors.toList());
 
