@@ -39,8 +39,9 @@ public class Amenity {
 
     int isDeleted;
 
-    @Column(name = "buildingNumber")
-    int buildingNumber;
+    @ManyToOne
+    @JoinColumn(name = "building_id")
+    Building building;
 
     @PrePersist
     protected void onCreate() {
