@@ -360,4 +360,17 @@ public class OrderDetailService {
             orderDetailAmenityService.restoreAmenityQuantity(od.getId());
         }
     }
+
+    /*
+    [GET]: /order-detail/revenue?
+     */
+    public double calculateRevenue(LocalDateTime startTime, LocalDateTime endTime) {
+        if (startTime == null) {
+            startTime = LocalDate.now().atStartOfDay();
+        }
+        if (endTime == null) {
+            endTime = LocalDate.now().atTime(LocalTime.MAX);
+        }
+        return orderDetailRepository.calculateRevenue(startTime, endTime);
+    }
 }

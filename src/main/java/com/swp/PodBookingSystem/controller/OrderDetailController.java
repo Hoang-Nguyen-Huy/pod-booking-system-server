@@ -12,10 +12,12 @@ import lombok.extern.slf4j.Slf4j;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
@@ -66,5 +68,14 @@ public class OrderDetailController {
         log.info("Username: {}", authentication.getName());
         log.info("Number of orders retrieved: {}", orders.size());
         orders.forEach(order -> log.info("Order ID: {}, Customer ID: {}", order.getId(), order.getCustomerId()));
+    }
+
+    @GetMapping("/revenue")
+    ApiResponse<Double> getRevenue(@RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm a") LocalDateTime startTime,
+                                   @RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm a") LocalDateTime endTime) {
+        return ApiResponse.<Double>builder()
+                .message("Doanh thu")
+                .data(orderDetailService.calculateRevenue(startTime, endTime))
+                .build();
     }
 }
