@@ -145,8 +145,8 @@ public class OrderController {
     }
 
     @GetMapping("/number-order")
-    ApiResponse<Integer> countOrder(@RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm a") LocalDateTime startTime,
-                                    @RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm a") LocalDateTime endTime) {
+    ApiResponse<Integer> countOrder(@RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy'T'hh:mm'T'a") LocalDateTime startTime,
+                                    @RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy'T'hh:mm'T'a") LocalDateTime endTime) {
         return ApiResponse.<Integer>builder()
                 .message("Số đơn hàng từ " + startTime + " đến " + endTime)
                 .data(orderService.countOrder(startTime, endTime))
