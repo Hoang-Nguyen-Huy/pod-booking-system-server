@@ -23,6 +23,20 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, String
 
     List<OrderDetail> findByEndTime(LocalDateTime endTime);
 
+    @Query(value = "SELECT od FROM OrderDetail od WHERE od.createdAt BETWEEN :startTime AND :endTime ORDER BY od.createdAt DESC")
+    Page<OrderDetail> findAllWithTimeRange(@Param("startTime") LocalDateTime startTime,
+                                         @Param("endTime") LocalDateTime endTime,
+                                         Pageable pageable);
+
+    @Query(value = "SELECT od FROM OrderDetail od WHERE od.createdAt BETWEEN :startTime AND :endTime AND od.building.id = :buildingNumber ORDER BY od.createdAt DESC")
+    Page<OrderDetail> findOrdersByBuildingNumberAndTimeRange(
+            @Param("buildingNumber") int buildingNumber,
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime,
+            Pageable pageable);
+
+    Page<OrderDetail> findAll(Pageable pageable);
+
     @Query("SELECT o FROM OrderDetail o WHERE FUNCTION('DATE', o.startTime) BETWEEN FUNCTION('DATE', :startOfDay) AND FUNCTION('DATE', :endOfDay)")
     List<OrderDetail> findAllOrderDetailsByDay(@Param("startOfDay") LocalDateTime startOfDay, @Param("endOfDay") LocalDateTime endOfDay);
 
