@@ -2,16 +2,20 @@ package com.swp.PodBookingSystem.controller;
 
 import com.swp.PodBookingSystem.dto.request.Building.BuildingCreationRequest;
 import com.swp.PodBookingSystem.dto.request.Building.BuildingPaginationDTO;
+
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.respone.Building.BuildingResponse;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.entity.Building;
+
 import com.swp.PodBookingSystem.service.BuildingService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
+
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +49,25 @@ public class BuildingController {
                 .build();
     }
 
+    @GetMapping("/filtered-building")
+    PaginationResponse<List<Building>> getFilteredBuildings(@RequestParam(required = false) String address,
+                                                            @RequestParam(defaultValue = "1") int page,
+                                                            @RequestParam(defaultValue = "10") int take) {
+        BuildingPaginationDTO dto = new BuildingPaginationDTO(page, take);
+        if (address == null) {
+            address = "";
+        }
+        Page<Building> buildingPage = buildingService.getFilteredBuildings(address, dto.page, dto.take);
+        return PaginationResponse.<List<Building>>builder()
+                .data(buildingPage.getContent())
+                .currentPage(buildingPage.getNumber() + 1)
+                .totalPage(buildingPage.getTotalPages())
+                .recordPerPage(buildingPage.getNumberOfElements())
+                .totalRecord((int) buildingPage.getTotalElements())
+                .build();
+
+    }
+
     @GetMapping("/{buildingId}")
     ApiResponse<Optional<BuildingResponse>> getBuildingById(@PathVariable("buildingId") int buildingId) {
         return ApiResponse.<Optional<BuildingResponse>>builder()
@@ -66,6 +89,22 @@ public class BuildingController {
     ApiResponse<BuildingResponse> deleteBuilding(@PathVariable("buildingId") int buildingId) {
         return ApiResponse.<BuildingResponse>builder()
                 .message(buildingService.deleteBuilding(buildingId))
+                .build();
+    }
+
+    @GetMapping("/search")
+    ApiResponse<List<Building>> searchBuildings(@RequestParam("keyword") String keyword) {
+        return ApiResponse.<List<Building>>builder()
+                .data(buildingService.searchBuildings(keyword))
+                .message("Search building by keyword successfully")
+                .build();
+    }
+
+    @GetMapping("/all")
+    ApiResponse<List<Building>> getAllBuildings() {
+        return ApiResponse.<List<Building>>builder()
+                .data(buildingService.getAllBuildings())
+                .message("Get all buildings successfully")
                 .build();
     }
 }

@@ -37,6 +37,12 @@ public class Amenity {
     @Column(name = "updatedAt")
     LocalDateTime updatedAt;
 
+    int isDeleted;
+
+    @ManyToOne
+    @JoinColumn(name = "building_id")
+    Building building;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();

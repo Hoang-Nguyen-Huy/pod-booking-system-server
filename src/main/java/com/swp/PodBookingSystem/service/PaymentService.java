@@ -16,7 +16,7 @@ import java.util.*;
 @Service
 public class PaymentService {
 
-    public PaymentResDTO generatePaymentUrl(long amount, String orderId, String clientIP) {
+    public PaymentResDTO generatePaymentUrl(long amount, String orderId, String clientIP, String returnUrl) {
         try {
             String vnp_Version = "2.1.0";
             String vnp_Command = "pay";
@@ -29,7 +29,7 @@ public class PaymentService {
             vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
             vnp_Params.put("vnp_Amount", String.valueOf(amount) + "00");
             vnp_Params.put("vnp_Locale", "vn");
-            vnp_Params.put("vnp_ReturnUrl", VNPayConfig.vnp_ReturnUrl);
+            vnp_Params.put("vnp_ReturnUrl", returnUrl);
             vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
             vnp_Params.put("vnp_CurrCode", "VND");
             vnp_Params.put("vnp_BankCode", "NCB");

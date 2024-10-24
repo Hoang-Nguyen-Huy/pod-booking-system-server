@@ -1,4 +1,4 @@
-package com.swp.PodBookingSystem.dto.socketPayload;
+package com.swp.PodBookingSystem.dto.request.Account;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,8 +8,6 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UpdateOrder {
-    int id;
-    String name;
-    int buildingNumber;
+public class SendMailRequest {
+    String email;
 }

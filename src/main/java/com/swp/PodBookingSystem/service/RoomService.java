@@ -6,10 +6,13 @@ import com.swp.PodBookingSystem.dto.request.Slot.SlotCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.Calendar.DateResponse;
 import com.swp.PodBookingSystem.dto.respone.Calendar.RoomDTO;
 import com.swp.PodBookingSystem.dto.respone.Calendar.SlotDTO;
+import com.swp.PodBookingSystem.dto.respone.Room.BookedRoomDto;
 import com.swp.PodBookingSystem.dto.respone.Room.RoomResponse;
 import com.swp.PodBookingSystem.entity.OrderDetail;
 import com.swp.PodBookingSystem.entity.Room;
 import com.swp.PodBookingSystem.entity.RoomType;
+import com.swp.PodBookingSystem.exception.AppException;
+import com.swp.PodBookingSystem.exception.ErrorCode;
 import com.swp.PodBookingSystem.mapper.RoomMapper;
 import com.swp.PodBookingSystem.repository.RoomRepository;
 import com.swp.PodBookingSystem.repository.RoomTypeRepository;
@@ -43,6 +46,13 @@ public class RoomService {
         Optional<RoomType> roomType = Optional.empty();
         if (request.getRoomTypeId() != null) {
             roomType = roomTypeRepository.findById(request.getRoomTypeId());
+            if(roomType.isEmpty()) {
+                throw new RuntimeException("Room type not found");
+            }else{
+                RoomType roomTypeUpdate = roomType.get();
+                roomTypeUpdate.setQuantity(roomTypeUpdate.getQuantity() + 1);
+                roomTypeRepository.save(roomTypeUpdate);
+            }
         }
         Room newRoom = roomMapper.toRoom(request);
         newRoom.setRoomType(roomType.orElse(null));
@@ -57,11 +67,19 @@ public class RoomService {
         return roomRepository.findAll(pageable);
     }
 
+    public List<Room> getRoomsByType(int typeId) {
+        return roomRepository.findRoomsByTypeId(typeId);
+    }
+
     /*
     [GET]: /rooms/roomId
      */
     public Optional<RoomResponse> getRoomById(int roomId) {
         return roomMapper.toRoomResponse(roomRepository.findById(roomId));
+    }
+
+    public Room getRoomByIdV2(int roomId) {
+        return roomRepository.findById(roomId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
     }
 
     public boolean isRoomAvailable(Integer roomId, LocalDateTime startTime, LocalDateTime endTime) {
@@ -186,5 +204,9 @@ public class RoomService {
                 .collect(Collectors.toList());
     }
 
-
+    public List<BookedRoomDto> getBookedRooms(String customerId) {
+        LocalDateTime currentTime = LocalDateTime.now();
+        List<BookedRoomDto> bookedRoomDtos = roomRepository.findBookedRooms(currentTime, customerId);
+        return bookedRoomDtos;
+    }
 }

@@ -29,8 +29,9 @@ public interface AccountMapper {
         return AccountRole.valueOf(role); // Chuyển từ chuỗi thành enum
     }
 
+    @Mapping(source = "role", target = "role", qualifiedByName = "stringToAccountRole")
     AccountResponseClient toAccountResponseClient(Account account);
 
     @Mapping(target = "id", ignore = true)
-    Account toUpdatedAccountAdmin (AccountUpdateAdminRequest request, @MappingTarget Account account);
+    Account toUpdatedAccountAdmin(AccountUpdateAdminRequest request, @MappingTarget Account account);
 }

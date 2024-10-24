@@ -12,10 +12,7 @@ import jakarta.activation.DataSource;
 import jakarta.mail.BodyPart;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
-import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeBodyPart;
-import jakarta.mail.internet.MimeMessage;
-import jakarta.mail.internet.MimeMultipart;
+import jakarta.mail.internet.*;
 import jakarta.mail.util.ByteArrayDataSource;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -87,7 +84,7 @@ public class SendEmailService {
         return calenderBody;
     }
 
-    private String createCal(CalendarRequest calenderDto) {
+    private String createCal(CalendarRequest calenderDto) throws AddressException {
         ICalendar ical = new ICalendar();
         ical.addProperty(new Method(Method.REQUEST));
 
@@ -95,6 +92,7 @@ public class SendEmailService {
         event.setSummary(calenderDto.getSummary());
         event.setDescription(calenderDto.getDescription());
         event.setDateStart(getStartDate(calenderDto.getEventDateTime()));
+        event.setOrganizer(String.valueOf(new InternetAddress(fromEmailId)));
         event.setDuration(new Duration.Builder()
                 .hours(2)
                 .build());
@@ -112,7 +110,7 @@ public class SendEmailService {
         LocalDate toDay = LocalDate.now();
         List<OrderDetail> orders = orderDetailService.getNextDayBookings(toDay);
 
-        for (OrderDetail orderDetail : orders){
+        for (OrderDetail orderDetail : orders) {
             String email = orderDetail.getCustomer().getEmail();
             String subject = "Room Booking Reminder";
             String text = "Dear " + orderDetail.getCustomer().getName() + ",\n\n"

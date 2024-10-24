@@ -20,6 +20,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,6 +35,7 @@ import java.util.stream.Collectors;
 public class AccountService {
     AccountRepository accountRepository;
     AccountMapper accountMapper;
+    JwtDecoder jwtDecoder;
 
     public AccountResponse createAccount(AccountCreationRequest request) {
         Account account = accountMapper.toAccount(request);
@@ -68,18 +71,6 @@ public class AccountService {
         return accountMapper.toAccountResponse(accountRepository.save(updatedAccount));
     }
 
-    public AccountOrderResponse toAccountResponse(Account account) {
-        return AccountOrderResponse.builder()
-                .id(account.getId())
-                .name(account.getName())
-                .email(account.getEmail())
-                .avatar(account.getAvatar())
-                .role(account.getRole())
-                .buildingNumber(account.getBuildingNumber())
-                .rankingName(account.getRankingName())
-                .build();
-    }
-
     public List<AccountOrderResponse> getAllStaffAccounts() {
             List<Account> accounts = accountRepository.findByRole(AccountRole.Staff);
             return accounts.stream()
@@ -92,5 +83,26 @@ public class AccountService {
         return accounts.stream()
                 .map(this::toAccountResponse)
                 .collect(Collectors.toList());
+    }
+
+    public AccountOrderResponse toAccountResponse(Account account) {
+        return AccountOrderResponse.builder()
+                .id(account.getId())
+                .name(account.getName())
+                .email(account.getEmail())
+                .avatar(account.getAvatar())
+                .role(account.getRole())
+                .buildingNumber(account.getBuildingNumber())
+                .rankingName(account.getRankingName())
+                .build();
+    }
+
+    public String extractAccountIdFromToken(String token) {
+        if (token == null || !token.startsWith("Bearer ")) {
+            throw new AppException(ErrorCode.INVALID_TOKEN);
+        }
+        token = token.substring(7);
+        Jwt jwt = jwtDecoder.decode(token);
+        return jwt.getClaimAsString("accountId");
     }
 }
