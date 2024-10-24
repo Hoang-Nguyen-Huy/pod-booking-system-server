@@ -134,4 +134,12 @@ public class OrderController {
         log.info("Number of orders retrieved: {}", orders.size());
         orders.forEach(order -> log.info("Order ID: {}, Account ID: {}", order.getId(), order.getAccountId()));
     }
+
+    @GetMapping("/number-order-current-day")
+    ApiResponse<Integer> countCurrentlyOrder() {
+        return ApiResponse.<Integer>builder()
+                .message("Số đơn hàng trong ngày")
+                .data(orderService.countCurrentlyOrder())
+                .build();
+    }
 }
