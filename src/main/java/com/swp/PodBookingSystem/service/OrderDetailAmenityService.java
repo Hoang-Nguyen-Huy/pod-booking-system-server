@@ -1,12 +1,15 @@
 package com.swp.PodBookingSystem.service;
 
+import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenityRequest;
 import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenityCreationRequest;
+import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenityUpdateReq;
 import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetailAmenity.OrderDetailAmenityResponse;
 import com.swp.PodBookingSystem.entity.Amenity;
 import com.swp.PodBookingSystem.entity.OrderDetail;
 import com.swp.PodBookingSystem.entity.OrderDetailAmenity;
 import com.swp.PodBookingSystem.enums.AmenityType;
+import com.swp.PodBookingSystem.enums.OrderDetailAmenityStatus;
 import com.swp.PodBookingSystem.mapper.AmenityMapper;
 import com.swp.PodBookingSystem.mapper.OrderDetailAmenityMapper;
 import com.swp.PodBookingSystem.repository.AmenityRepository;
@@ -15,11 +18,13 @@ import com.swp.PodBookingSystem.repository.OrderDetailRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,6 +45,40 @@ public class OrderDetailAmenityService {
                 .price(amenity.getPrice())
                 .quantity(amenity.getQuantity())
                 .build()).collect(Collectors.toList());
+    }
+
+    public List<OrderDetailAmenity> getOrderDetailAmenitiesAllInfoByOrderDetailId(String orderDetailId) {
+        return orderDetailAmenityRepository.findByOrderDetailId(orderDetailId);
+    }
+
+    //CREATE:
+    public void createOrderDetailAmenity(OrderDetailAmenityRequest request) {
+        Optional<OrderDetail> orderDetail = orderDetailRepository.findById(request.getOrderDetailId());
+        Optional<Amenity> amenity = amenityRepository.findById(request.getAmenityId());
+        if(orderDetail.isEmpty() || amenity.isEmpty()) {
+            throw new RuntimeException("Order detail or amenity not found");
+        }
+        OrderDetailAmenity orderDetailAmenity = new OrderDetailAmenity();
+        orderDetailAmenity.setStatus(OrderDetailAmenityStatus.Booked);
+        orderDetailAmenity.setCreatedAt(LocalDateTime.now());
+        orderDetailAmenity.setUpdatedAt(LocalDateTime.now());
+        orderDetailAmenity.setId(UUID.randomUUID().toString());
+        orderDetailAmenity.setQuantity(request.getQuantity());
+        orderDetailAmenity.setPrice(amenity.get().getPrice());
+        orderDetailAmenity.setOrderDetail(orderDetail.get());
+        orderDetailAmenity.setAmenity(amenity.get());
+
+        updateAmenityQuantityAfterCreateODA(orderDetailAmenity);
+    }
+
+    public void updateAmenityQuantityAfterCreateODA(OrderDetailAmenity orderDetailAmenity) {
+        Amenity amenity = orderDetailAmenity.getAmenity();
+        if(amenity.getQuantity() < orderDetailAmenity.getQuantity()) {
+            throw new RuntimeException("Not enough quantity");
+        }
+        amenity.setQuantity(amenity.getQuantity() - orderDetailAmenity.getQuantity());
+        amenityRepository.save(amenity);
+        orderDetailAmenityRepository.save(orderDetailAmenity);
     }
 
     /*
@@ -79,20 +118,15 @@ public class OrderDetailAmenityService {
                 .build();
     }
 
-    //CREATE in orderDetail
-    public void createOrderDetailAmenity(OrderDetailAmenity orderDetailAmenity){
-        Optional<Amenity> amenity = amenityRepository.findById(orderDetailAmenity.getAmenity().getId());
-        if (amenity.isEmpty()) {
-            throw new RuntimeException("Amenity not found");
+    //UPDATE:
+    public void updateOrderDetailAmenityStatus(OrderDetailAmenityUpdateReq request) {
+        Optional<OrderDetailAmenity> orderDetailAmenity = orderDetailAmenityRepository.findById(request.getId());
+        if (orderDetailAmenity.isEmpty()) {
+            throw new RuntimeException("Order detail amenity not found");
         }
-        Amenity updatedAmenity = amenity.get();
-        if(updatedAmenity.getQuantity() < orderDetailAmenity.getQuantity()){
-            throw new RuntimeException("Not enough quantity");
-        }
-        updatedAmenity.setQuantity(updatedAmenity.getQuantity() - orderDetailAmenity.getQuantity());
-        amenityRepository.save(updatedAmenity);
-
-        orderDetailAmenityRepository.save(orderDetailAmenity);
+        OrderDetailAmenity updateOrderDetailAmenity = orderDetailAmenity.get();
+        updateOrderDetailAmenity.setStatus(request.getStatus());
+        orderDetailAmenityRepository.save(updateOrderDetailAmenity);
     }
 
     //DELETE:
