@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -137,6 +138,15 @@ public class AccountController {
         return ApiResponse.<Integer>builder()
                 .message("Số khách hàng trong ngày")
                 .data(accountService.countCurrentCustomer())
+                .build();
+    }
+
+    @GetMapping("/number-accounts")
+    ApiResponse<Integer> countCustomer(@RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm a") LocalDateTime startTime,
+                                       @RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm a") LocalDateTime endTime) {
+        return ApiResponse.<Integer>builder()
+                .message("Số khách hàng từ " + startTime + " đến " + endTime)
+                .data(accountService.countCustomer(startTime, endTime))
                 .build();
     }
 }

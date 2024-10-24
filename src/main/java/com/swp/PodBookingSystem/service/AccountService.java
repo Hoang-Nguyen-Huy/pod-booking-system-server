@@ -24,6 +24,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -111,5 +112,12 @@ public class AccountService {
      */
     public int countCurrentCustomer() {
         return accountRepository.countCurrentCustomer();
+    }
+
+    /*
+    [GET]: /accounts/number-accounts
+     */
+    public int countCustomer(LocalDateTime startTime, LocalDateTime endTime) {
+        return accountRepository.countCustomerBetweenDatetime(startTime, endTime);
     }
 }
