@@ -107,15 +107,18 @@ public class AccountController {
     }
 
     @PostMapping("/send-email")
-    public String sendEmail(@RequestBody SendMailRequest request) throws MessagingException, IOException {
+    ApiResponse sendEmail(@RequestBody SendMailRequest request) throws MessagingException, IOException {
         sendEmailService.sendCalenderInvite(
                 CalendarRequest.builder()
                         .subject("Đăt lịch ở POD Booking")
                         .description("Hãy đặt lịch ở calendar để không bị bỏ lỡ")
                         .summary("Đăt lịch ở POD Booking")
                         .to(request.getEmail())
-                        .eventDateTime(LocalDateTime.parse("2024-10-27T17:00:00")).build());
-        return "Send email successfully";
+                        .eventDateTime(LocalDateTime.parse(request.getStartTime())).build());
+        return ApiResponse.builder()
+                .message("Gửi lời mời đặt lịch thành công")
+                .code(200)
+                .build();
     }
 
     @GetMapping("/staff")
