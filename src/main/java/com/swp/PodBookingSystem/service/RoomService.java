@@ -209,4 +209,11 @@ public class RoomService {
         List<BookedRoomDto> bookedRoomDtos = roomRepository.findBookedRooms(currentTime, customerId);
         return bookedRoomDtos;
     }
+
+    /*
+    [GET]: /rooms/number-served-rooms-currently
+     */
+    public int countCurrentlyServedRooms() {
+        return roomRepository.countCurrentlyServedRooms(LocalDateTime.now());
+    }
 }

@@ -45,4 +45,18 @@ public interface OrderRepository  extends JpaRepository<Order, String> {
                OR LOWER(a.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
            """)
     Page<Order> searchByKeyword(String keyword, Pageable pageable);
+
+    @Query("SELECT COUNT(DISTINCT o.id) FROM Order o " +
+            "JOIN OrderDetail  od ON od.order.id = o.id " +
+            "WHERE CURRENT_DATE BETWEEN CAST(od.startTime AS DATE) AND CAST(od.endTime AS DATE)" +
+            "AND od.status = com.swp.PodBookingSystem.enums.OrderStatus.Successfully")
+    int countCurrentlyOrder();
+
+    @Query("SELECT COUNT(DISTINCT o.id) FROM Order o " +
+            "JOIN OrderDetail od ON od.order.id = o.id " +
+            "WHERE :startTime <= od.endTime " +
+            "AND :endTime >= od.startTime " +
+            "AND od.status = com.swp.PodBookingSystem.enums.OrderStatus.Successfully")
+    int countOrdersBetweenDatetime(@Param("startTime") LocalDateTime startTime,
+                                    @Param("endTime") LocalDateTime endTime);
 }
