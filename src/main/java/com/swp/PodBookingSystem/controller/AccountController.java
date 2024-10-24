@@ -1,9 +1,6 @@
 package com.swp.PodBookingSystem.controller;
 
-import com.swp.PodBookingSystem.dto.request.Account.AccountCreationRequest;
-import com.swp.PodBookingSystem.dto.request.Account.AccountPaginationDTO;
-import com.swp.PodBookingSystem.dto.request.Account.AccountResponseClient;
-import com.swp.PodBookingSystem.dto.request.Account.AccountUpdateAdminRequest;
+import com.swp.PodBookingSystem.dto.request.Account.*;
 import com.swp.PodBookingSystem.dto.request.CalendarRequest;
 import com.swp.PodBookingSystem.dto.respone.Account.AccountOrderResponse;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
@@ -109,17 +106,17 @@ public class AccountController {
                 .build();
     }
 
-//    @GetMapping("/send-email")
-//    public String sendEmail() throws MessagingException, IOException {
-//        sendEmailService.sendCalenderInvite(
-//                CalendarRequest.builder()
-//                        .subject("Đăt lịch ở POD Booking")
-//                        .description("Hãy đặt lịch ở calendar để không bỏ lỡ lịch")
-//                        .summary("Đăt lịch ở POD Booking")
-//                        .to("phuongnguyen2772004.work@gmail.com")
-//                        .eventDateTime(LocalDateTime.now()).build());
-//        return "Send email successfully";
-//    }
+    @PostMapping("/send-email")
+    public String sendEmail(@RequestBody SendMailRequest request) throws MessagingException, IOException {
+        sendEmailService.sendCalenderInvite(
+                CalendarRequest.builder()
+                        .subject("Đăt lịch ở POD Booking")
+                        .description("Hãy đặt lịch ở calendar để không bị bỏ lỡ")
+                        .summary("Đăt lịch ở POD Booking")
+                        .to(request.getEmail())
+                        .eventDateTime(LocalDateTime.parse("2024-10-27T17:00:00")).build());
+        return "Send email successfully";
+    }
 
     @GetMapping("/staff")
     public ResponseEntity<List<AccountOrderResponse>> getAllStaffAccounts() {
