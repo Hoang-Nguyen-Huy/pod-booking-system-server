@@ -148,4 +148,12 @@ public class RoomController {
                 .data(roomService.getBookedRooms(accountIdFromToken))
                 .build();
     }
+
+    @GetMapping("/booked-rooms/account")
+    ApiResponse<List<BookedRoomDto>> getBookedRoomsByAccountId(@RequestParam("accountId") String accountId) {
+        return ApiResponse.<List<BookedRoomDto>>builder()
+                .message("Các phòng đã đặt")
+                .data(roomService.getBookedRooms(accountId))
+                .build();
+    }
 }
