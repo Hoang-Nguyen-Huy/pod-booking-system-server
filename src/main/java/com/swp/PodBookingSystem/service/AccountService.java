@@ -105,4 +105,11 @@ public class AccountService {
         Jwt jwt = jwtDecoder.decode(token);
         return jwt.getClaimAsString("accountId");
     }
+
+    /*
+    [GET]: /accounts/number-accounts-current
+     */
+    public int countCurrentCustomer() {
+        return accountRepository.countCurrentCustomer();
+    }
 }

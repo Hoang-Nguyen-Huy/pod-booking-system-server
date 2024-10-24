@@ -131,4 +131,12 @@ public class AccountController {
             @PathVariable AccountRole role) {
         return ResponseEntity.status(HttpStatus.OK).body(accountService.searchAccounts(keyword, role));
     }
+
+    @GetMapping("/number-accounts-current")
+    ApiResponse<Integer> countCurrentCustomer() {
+        return ApiResponse.<Integer>builder()
+                .message("Số khách hàng trong ngày")
+                .data(accountService.countCurrentCustomer())
+                .build();
+    }
 }

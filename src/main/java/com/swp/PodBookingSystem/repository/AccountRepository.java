@@ -27,4 +27,9 @@ public interface AccountRepository extends JpaRepository<Account, String> {
             """)
     List<Account> searchAccounts(@Param("keyword") String keyword, @Param("role") AccountRole role);
 
+    @Query("SELECT COUNT(DISTINCT a.id) FROM Account a " +
+            "JOIN OrderDetail od ON od.customer.id = a.id " +
+            "WHERE CURRENT_DATE BETWEEN CAST(od.startTime AS DATE) AND CAST(od.endTime AS DATE) " +
+            "AND od.status = com.swp.PodBookingSystem.enums.OrderStatus.Successfully")
+    int countCurrentCustomer();
 }
