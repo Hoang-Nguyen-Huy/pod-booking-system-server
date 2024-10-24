@@ -1,6 +1,8 @@
 package com.swp.PodBookingSystem.repository;
 
 import com.swp.PodBookingSystem.entity.OrderDetail;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -13,11 +15,27 @@ import java.util.*;
 
 @Repository
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, String> {
-    List<OrderDetail> findByCustomer_Id(String customerId);
+    @Query("SELECT od FROM OrderDetail od " +
+            "WHERE (od.customer.id = :customerId)")
+    Page<OrderDetail> findByCustomer_Id(@Param("customerId") String customerId, Pageable pageable);
 
     List<OrderDetail> findByOrderId(String orderId);
 
     List<OrderDetail> findByEndTime(LocalDateTime endTime);
+
+    @Query(value = "SELECT od FROM OrderDetail od WHERE od.createdAt BETWEEN :startTime AND :endTime ORDER BY od.createdAt DESC")
+    Page<OrderDetail> findAllWithTimeRange(@Param("startTime") LocalDateTime startTime,
+                                         @Param("endTime") LocalDateTime endTime,
+                                         Pageable pageable);
+
+    @Query(value = "SELECT od FROM OrderDetail od WHERE od.createdAt BETWEEN :startTime AND :endTime AND od.building.id = :buildingNumber ORDER BY od.createdAt DESC")
+    Page<OrderDetail> findOrdersByBuildingNumberAndTimeRange(
+            @Param("buildingNumber") int buildingNumber,
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime,
+            Pageable pageable);
+
+    Page<OrderDetail> findAll(Pageable pageable);
 
     @Query("SELECT o FROM OrderDetail o WHERE FUNCTION('DATE', o.startTime) BETWEEN FUNCTION('DATE', :startOfDay) AND FUNCTION('DATE', :endOfDay)")
     List<OrderDetail> findAllOrderDetailsByDay(@Param("startOfDay") LocalDateTime startOfDay, @Param("endOfDay") LocalDateTime endOfDay);
@@ -31,4 +49,6 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, String
     @Transactional
     @Query("DELETE FROM OrderDetail od WHERE od.order.id = :orderId")
     void deleteByOrderId(String orderId);
+
+    Optional<OrderDetail> findById(String id);
 }

@@ -1,6 +1,7 @@
 package com.swp.PodBookingSystem.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.swp.PodBookingSystem.enums.OrderDetailAmenityStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -33,6 +34,10 @@ public class OrderDetailAmenity {
     @JsonIgnore
     @JoinColumn(name = "amenityId", nullable = false)
     Amenity amenity;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private OrderDetailAmenityStatus status;
 
     @Column(name = "createdAt")
     LocalDateTime createdAt;

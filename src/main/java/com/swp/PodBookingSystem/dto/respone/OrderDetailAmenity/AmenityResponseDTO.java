@@ -1,5 +1,6 @@
 package com.swp.PodBookingSystem.dto.respone.OrderDetailAmenity;
 
+import com.swp.PodBookingSystem.enums.AmenityType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -8,10 +9,9 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class OrderDetailAmenityResponse {
-    String id;
-    int quantity;
-    double price;
-    String orderDetailId;
-    AmenityResponseDTO amenity;
+public class AmenityResponseDTO {
+    Integer id;
+    String name;
+    AmenityType type;
+    String imageUrl;
 }

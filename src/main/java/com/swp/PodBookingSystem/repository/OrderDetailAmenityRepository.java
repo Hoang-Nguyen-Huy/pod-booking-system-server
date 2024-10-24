@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 
+@Repository
 public interface OrderDetailAmenityRepository extends JpaRepository<OrderDetailAmenity, String> {
     List<OrderDetailAmenity> findByOrderDetailId(String orderDetailId);
 
@@ -16,7 +17,4 @@ public interface OrderDetailAmenityRepository extends JpaRepository<OrderDetailA
     @Transactional
     @Query("DELETE FROM OrderDetailAmenity a WHERE a.orderDetail.id = :orderDetailId")
     void deleteByOrderDetailId(String orderDetailId);
-
-
-
 }

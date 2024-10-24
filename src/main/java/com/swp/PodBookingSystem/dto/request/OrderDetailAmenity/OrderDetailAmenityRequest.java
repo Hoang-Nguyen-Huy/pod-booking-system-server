@@ -8,9 +8,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class OrderDetailAmenityCreationRequest {
-    int quantity;
-    double price;
-    String orderDetailId;
-    int amenityId;
+public class OrderDetailAmenityRequest {
+    private String orderDetailId;
+    private int quantity;
+    private int amenityId;
 }

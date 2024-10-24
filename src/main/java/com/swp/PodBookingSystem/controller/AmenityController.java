@@ -5,8 +5,10 @@ import com.swp.PodBookingSystem.dto.request.Amenity.AmenityPaginationDTO;
 import com.swp.PodBookingSystem.dto.respone.AmenityResponse;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
+import com.swp.PodBookingSystem.entity.Account;
 import com.swp.PodBookingSystem.entity.Amenity;
 import com.swp.PodBookingSystem.enums.AmenityType;
+import com.swp.PodBookingSystem.service.AccountService;
 import com.swp.PodBookingSystem.service.AmenityService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,9 @@ public class AmenityController {
 
     @Autowired
     private AmenityService amenityService;
+
+    @Autowired
+    private AccountService accountService;
 
     @GetMapping("/all")
     public ApiResponse<List<AmenityResponse>> getAllAmentity(){
@@ -70,9 +75,11 @@ public class AmenityController {
 
     @GetMapping
     PaginationResponse<List<Amenity>> getAmenity(@RequestParam(defaultValue = "1", name = "page") int page,
-                                                 @RequestParam(defaultValue = "10", name = "take") int take){
+                                                 @RequestParam(defaultValue = "10", name = "take") int take,
+                                                 @RequestHeader("Authorization") String token){
         AmenityPaginationDTO dto = new AmenityPaginationDTO(page, take);
-        Page<Amenity> amenityPage = amenityService.getAmenities(dto.page, dto.take);
+        Account account = accountService.getAccountById(accountService.extractAccountIdFromToken(token));
+        Page<Amenity> amenityPage = amenityService.getAmenities(dto.page, dto.take, account);
         return PaginationResponse.<List<Amenity>>builder()
                 .data(amenityPage.getContent())
                 .currentPage(amenityPage.getNumber() + 1)

@@ -15,6 +15,8 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BookedRoomDto {
     Integer id;
+    String orderId;
+    String orderDetailId;
     String name;
     String description;
     String image;

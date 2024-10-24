@@ -63,6 +63,12 @@ public class BuildingService {
         return "Delete building " + buildingId + " successfully";
     }
 
+
+    public Page<Building> getFilteredBuildings(String address, int page, int take) {
+        Pageable pageable = PageRequest.of(page - 1, take);
+        return buildingRepository.findFilteredBuildings(address, pageable);
+    }
+
     public List<Building> searchBuildings(String keyword) {
         return buildingRepository.searchByKeyword(keyword);
     }
