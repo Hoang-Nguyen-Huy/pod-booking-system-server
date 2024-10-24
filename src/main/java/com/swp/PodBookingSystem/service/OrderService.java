@@ -159,4 +159,11 @@ public class OrderService {
     public int countCurrentlyOrder () {
         return orderRepository.countCurrentlyOrder();
     }
+
+    /*
+    [GET]: /order/number-order
+     */
+    public int countOrder (LocalDateTime startTime, LocalDateTime endTime) {
+        return orderRepository.countOrdersBetweenDatetime(startTime, endTime);
+    }
 }

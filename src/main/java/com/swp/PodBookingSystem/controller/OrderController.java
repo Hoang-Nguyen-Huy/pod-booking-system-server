@@ -13,6 +13,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -140,6 +141,15 @@ public class OrderController {
         return ApiResponse.<Integer>builder()
                 .message("Số đơn hàng trong ngày")
                 .data(orderService.countCurrentlyOrder())
+                .build();
+    }
+
+    @GetMapping("/number-order")
+    ApiResponse<Integer> countOrder(@RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm a") LocalDateTime startTime,
+                                    @RequestParam @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm a") LocalDateTime endTime) {
+        return ApiResponse.<Integer>builder()
+                .message("Số đơn hàng từ " + startTime + " đến " + endTime)
+                .data(orderService.countOrder(startTime, endTime))
                 .build();
     }
 }
