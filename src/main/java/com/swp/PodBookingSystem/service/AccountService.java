@@ -108,7 +108,7 @@ public class AccountService {
     }
 
     /*
-    [GET]: /accounts/number-accounts-current
+    [GET]: /accounts/number-accounts-current-day
      */
     public int countCurrentCustomer() {
         return accountRepository.countCurrentCustomer();

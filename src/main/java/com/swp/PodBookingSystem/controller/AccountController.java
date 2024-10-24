@@ -130,7 +130,7 @@ public class AccountController {
         return ResponseEntity.status(HttpStatus.OK).body(accountService.searchAccounts(keyword, role));
     }
 
-    @GetMapping("/number-accounts-current")
+    @GetMapping("/number-accounts-current-day")
     ApiResponse<Integer> countCurrentCustomer() {
         return ApiResponse.<Integer>builder()
                 .message("Số khách hàng trong ngày")
