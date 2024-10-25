@@ -4,6 +4,7 @@ import lombok.Getter;
 @Getter
 public enum OrderDetailAmenityStatus {
     Booked("Đã đặt"),
+    Paid("Đã thanh toán"),
     Delivered("Đã giao"),
     Canceled("Đã hủy");
 
