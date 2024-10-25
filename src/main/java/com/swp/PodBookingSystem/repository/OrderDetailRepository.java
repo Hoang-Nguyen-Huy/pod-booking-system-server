@@ -2,6 +2,7 @@ package com.swp.PodBookingSystem.repository;
 
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueByMonthDto;
 import com.swp.PodBookingSystem.entity.OrderDetail;
+import com.swp.PodBookingSystem.enums.OrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,8 +18,10 @@ import java.util.*;
 @Repository
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, String> {
     @Query("SELECT od FROM OrderDetail od " +
-            "WHERE (od.customer.id = :customerId)")
-    Page<OrderDetail> findByCustomer_Id(@Param("customerId") String customerId, Pageable pageable);
+            "WHERE (od.customer.id = :customerId)" +
+            "AND (od.status = :status)" +
+            "ORDER BY od.createdAt DESC")
+    Page<OrderDetail> findByCustomer_Id(@Param("customerId") String customerId, @Param("status") OrderStatus status, Pageable pageable);
 
     List<OrderDetail> findByOrderId(String orderId);
 
@@ -26,8 +29,8 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, String
 
     @Query(value = "SELECT od FROM OrderDetail od WHERE od.createdAt BETWEEN :startTime AND :endTime ORDER BY od.createdAt DESC")
     Page<OrderDetail> findAllWithTimeRange(@Param("startTime") LocalDateTime startTime,
-                                         @Param("endTime") LocalDateTime endTime,
-                                         Pageable pageable);
+                                           @Param("endTime") LocalDateTime endTime,
+                                           Pageable pageable);
 
     @Query(value = "SELECT od FROM OrderDetail od WHERE od.createdAt BETWEEN :startTime AND :endTime AND od.building.id = :buildingNumber ORDER BY od.createdAt DESC")
     Page<OrderDetail> findOrdersByBuildingNumberAndTimeRange(
