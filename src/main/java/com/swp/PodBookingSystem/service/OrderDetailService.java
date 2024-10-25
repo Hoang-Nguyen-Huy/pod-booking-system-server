@@ -170,6 +170,14 @@ public class OrderDetailService {
         if (account.getRole() != AccountRole.Customer) {
             account = request.getCustomer();
         }
+        if (request.getServicePackage() == null) {
+            ServicePackage defaultPackage = new ServicePackage();
+            defaultPackage.setId(1);
+            defaultPackage.setName("Standard Package");
+            defaultPackage.setDiscountPercentage(5) ;
+            request.setServicePackage(defaultPackage);
+        }
+
         List<RoomWithAmenitiesDTO> selectedRooms = request.getSelectedRooms();
         return switch (request.getServicePackage().getId()) {
             case 1 -> handleWeeklyBooking(selectedRooms, request, order, account);
