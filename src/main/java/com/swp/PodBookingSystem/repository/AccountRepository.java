@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,4 +28,17 @@ public interface AccountRepository extends JpaRepository<Account, String> {
             """)
     List<Account> searchAccounts(@Param("keyword") String keyword, @Param("role") AccountRole role);
 
+    @Query("SELECT COUNT(DISTINCT a.id) FROM Account a " +
+            "JOIN OrderDetail od ON od.customer.id = a.id " +
+            "WHERE CURRENT_DATE BETWEEN CAST(od.startTime AS DATE) AND CAST(od.endTime AS DATE) " +
+            "AND od.status = com.swp.PodBookingSystem.enums.OrderStatus.Successfully")
+    int countCurrentCustomer();
+
+    @Query("SELECT COUNT(DISTINCT a.id) FROM Account a " +
+            "JOIN OrderDetail  od ON od.customer.id = a.id " +
+            "WHERE :startTime <= od.endTime " +
+            "AND :endTime >= od.startTime " +
+            "AND od.status = com.swp.PodBookingSystem.enums.OrderStatus.Successfully")
+    int countCustomerBetweenDatetime(@Param("startTime") LocalDateTime startTime,
+                                     @Param("endTime") LocalDateTime endTime);
 }

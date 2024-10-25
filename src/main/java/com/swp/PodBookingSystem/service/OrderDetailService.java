@@ -8,6 +8,7 @@ import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailAmenityListResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
+import com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueByMonthDto;
 import com.swp.PodBookingSystem.dto.respone.OrderDetailAmenity.OrderDetailAmenityResponseDTO;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.entity.*;
@@ -360,4 +361,24 @@ public class OrderDetailService {
             orderDetailAmenityService.restoreAmenityQuantity(od.getId());
         }
     }
+
+    /*
+    [GET]: /order-detail/revenue?
+     */
+    public double calculateRevenue(LocalDateTime startTime, LocalDateTime endTime) {
+        if (startTime == null) {
+            startTime = LocalDate.now().atStartOfDay();
+        }
+        if (endTime == null) {
+            endTime = LocalDate.now().atTime(LocalTime.MAX);
+        }
+        return orderDetailRepository.calculateRevenue(startTime, endTime);
+    }
+
+    /*
+    [GET]: /order-detail/revenue-by-month
+     */
+//    public List<RevenueByMonthDto> calculateRevenueByMonth() {
+//        return orderDetailRepository.calculateRevenueByMonthForCurrentYear();
+//    }
 }
