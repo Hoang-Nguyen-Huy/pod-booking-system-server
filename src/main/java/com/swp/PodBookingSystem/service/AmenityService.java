@@ -59,7 +59,7 @@ public class AmenityService {
     public String deleteAmenity(int amenityId){
         Amenity existingAmenity = amenityRepository.findById(amenityId)
                 .orElseThrow(() -> new EntityNotFoundException("Amenity not found"));
-        existingAmenity.setIsDeleted(1);
+        existingAmenity.setIsDeleted(existingAmenity.getIsDeleted() == 1 ? 0 : 1);
         amenityRepository.save(existingAmenity);
         return "Delete amenity " + amenityId + " successfully";
     }

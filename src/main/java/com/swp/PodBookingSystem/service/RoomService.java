@@ -208,4 +208,11 @@ public class RoomService {
         LocalDateTime currentTime = LocalDateTime.now();
         return roomRepository.findBookedRooms(currentTime, customerId);
     }
+
+    /*
+    [GET]: /rooms/number-served-rooms-currently
+     */
+    public int countCurrentlyServedRooms() {
+        return roomRepository.countCurrentlyServedRooms(LocalDateTime.now());
+    }
 }
