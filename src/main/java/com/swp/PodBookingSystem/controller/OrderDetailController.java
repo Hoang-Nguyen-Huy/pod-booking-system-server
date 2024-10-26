@@ -20,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @RestController
@@ -74,11 +75,16 @@ public class OrderDetailController {
     }
 
     @GetMapping("/revenue")
-    ApiResponse<Double> getRevenue(@RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm a") LocalDateTime startTime,
-                                   @RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm a") LocalDateTime endTime) {
+    ApiResponse<Double> getRevenue(@RequestParam(required = false) String startTime,
+                                   @RequestParam(required = false) String endTime) {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy'T'hh:mm'T'a");
+        LocalDateTime start = startTime != null ? LocalDateTime.parse(startTime, formatter) : null;
+        LocalDateTime end = endTime != null ? LocalDateTime.parse(endTime, formatter) : null;
+
         return ApiResponse.<Double>builder()
                 .message("Doanh thu")
-                .data(orderDetailService.calculateRevenue(startTime, endTime))
+                .data(orderDetailService.calculateRevenue(start, end))
                 .build();
     }
 
