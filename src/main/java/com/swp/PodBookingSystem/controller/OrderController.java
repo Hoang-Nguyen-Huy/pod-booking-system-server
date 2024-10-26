@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
@@ -145,11 +146,17 @@ public class OrderController {
     }
 
     @GetMapping("/number-order")
-    ApiResponse<Integer> countOrder(@RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy'T'hh:mm'T'a") LocalDateTime startTime,
-                                    @RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy'T'hh:mm'T'a") LocalDateTime endTime) {
+    ApiResponse<Integer> countOrder(
+            @RequestParam(required = false) String startTime,
+            @RequestParam(required = false) String endTime) {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy'T'hh:mm'T'a");
+        LocalDateTime start = startTime != null ? LocalDateTime.parse(startTime, formatter) : null;
+        LocalDateTime end = endTime != null ? LocalDateTime.parse(endTime, formatter) : null;
+
         return ApiResponse.<Integer>builder()
-                .message("Số đơn hàng từ " + startTime + " đến " + endTime)
-                .data(orderService.countOrder(startTime, endTime))
+                .message("Số đơn hàng từ " + start + " đến " + end)
+                .data(orderService.countOrder(start, end))
                 .build();
     }
 }
