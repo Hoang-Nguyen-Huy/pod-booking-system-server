@@ -5,6 +5,7 @@ import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueByMonthDto;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.entity.Building;
+import com.swp.PodBookingSystem.enums.OrderStatus;
 import com.swp.PodBookingSystem.service.OrderDetailService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -51,10 +52,11 @@ public class OrderDetailController {
     @GetMapping("/{customerId}")
     PaginationResponse<List<OrderDetailResponse>> getBuildings(@RequestParam(defaultValue = "1", name = "page") int page,
                                                                @RequestParam(defaultValue = "3", name = "take") int take,
+                                                               @RequestParam(defaultValue = "Successfully", name = "status") String status,
                                                                @PathVariable String customerId
     ) {
         BuildingPaginationDTO dto = new BuildingPaginationDTO(page, take);
-        Page<OrderDetailResponse> buildingPage = orderDetailService.getOrdersByCustomerId(customerId, dto.page, dto.take);
+        Page<OrderDetailResponse> buildingPage = orderDetailService.getOrdersByCustomerId(customerId, status, dto.page, dto.take);
         return PaginationResponse.<List<OrderDetailResponse>>builder()
                 .data(buildingPage.getContent())
                 .currentPage(buildingPage.getNumber() + 1)

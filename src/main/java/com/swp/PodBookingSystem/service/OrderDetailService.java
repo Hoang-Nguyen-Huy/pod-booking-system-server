@@ -88,10 +88,10 @@ public class OrderDetailService {
     }
 
 
-    public Page<OrderDetailResponse> getOrdersByCustomerId(String customerId, int page, int take) {
+    public Page<OrderDetailResponse> getOrdersByCustomerId(String customerId, String status, int page, int take) {
         Pageable pageable = PageRequest.of(page - 1, take);
 
-        Page<OrderDetail> orderDetails = orderDetailRepository.findByCustomer_Id(customerId, pageable);
+        Page<OrderDetail> orderDetails = orderDetailRepository.findByCustomer_Id(customerId, OrderStatus.valueOf(status), pageable);
 
         return orderDetails.map(orderDetail -> {
             OrderDetailResponse response = orderDetailMapper.toOrderDetailResponse(orderDetail);
