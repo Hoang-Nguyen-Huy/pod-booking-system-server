@@ -53,6 +53,9 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, String
 
     Optional<OrderDetail> findById(String id);
 
+//    @Query("SELECT COUNT(od) FROM OrderDetail od WHERE od.building.id = :buildingId")
+//    integer countByBuildingId(@Param("buildingId") Integer buildingId);
+
     @Query("SELECT SUM((od.priceRoom + COALESCE(amenityTotal.totalAmenityPrice, 0)) * " +
             "(1 - COALESCE(od.discountPercentage, 0) / 100.0) * (1 - COALESCE(sp.discountPercentage, 0) / 100.0)) as grandTotal " +
             "FROM OrderDetail od " +
