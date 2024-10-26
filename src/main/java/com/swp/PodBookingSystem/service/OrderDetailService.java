@@ -5,10 +5,7 @@ import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationReque
 import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailUpdateRoomRequest;
 import com.swp.PodBookingSystem.dto.request.Room.RoomWithAmenitiesDTO;
 import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementResponse;
-import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailAmenityListResponse;
-import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailManagementResponse;
-import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
-import com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueByMonthDto;
+import com.swp.PodBookingSystem.dto.respone.OrderDetail.*;
 import com.swp.PodBookingSystem.dto.respone.OrderDetailAmenity.OrderDetailAmenityResponseDTO;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.entity.*;
@@ -61,16 +58,17 @@ public class OrderDetailService {
                 .collect(Collectors.toList());
     }
 
-    public OrderDetailManagementResponse getOrderDetailByOrderDetailId(String orderDetailId) {
+    public OrderDetailFullInfoResponse getOrderDetailByOrderDetailId(String orderDetailId) {
         OrderDetail orderDetail = orderDetailRepository.findById(orderDetailId).orElse(null);
         if (orderDetail == null) {
             throw new AppException(ErrorCode.ORDER_DETAIL_NOT_EXIST);
         }
         List<AmenityManagementResponse> amenities = orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(orderDetail.getId());
-        return OrderDetailManagementResponse.builder()
+        return OrderDetailFullInfoResponse.builder()
                 .id(orderDetail.getId())
                 .roomId(orderDetail.getRoom().getId())
                 .roomName(orderDetail.getRoom().getName())
+                .roomImage(orderDetail.getRoom().getImage())
                 .roomPrice(orderDetail.getPriceRoom())
                 .buildingAddress(orderDetail.getBuilding().getAddress())
                 .buildingId(orderDetail.getBuilding().getId())

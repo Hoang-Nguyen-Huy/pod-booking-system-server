@@ -1,6 +1,7 @@
 package com.swp.PodBookingSystem.controller;
 
 import com.swp.PodBookingSystem.dto.request.Building.BuildingPaginationDTO;
+import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailFullInfoResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueByMonthDto;
@@ -50,14 +51,14 @@ public class OrderDetailController {
     }
 
     @GetMapping("/{orderDetailId}")
-    public ApiResponse<OrderDetailManagementResponse> getOrderDetail(@PathVariable String orderDetailId) {
-        OrderDetailManagementResponse orderDetail = orderDetailService.getOrderDetailByOrderDetailId(orderDetailId);
-        return ApiResponse.<OrderDetailManagementResponse>builder()
+    public ApiResponse<OrderDetailFullInfoResponse> getOrderDetail(@PathVariable String orderDetailId) {
+        OrderDetailFullInfoResponse orderDetail = orderDetailService.getOrderDetailByOrderDetailId(orderDetailId);
+        return ApiResponse.<OrderDetailFullInfoResponse>builder()
                 .code(HttpStatus.OK.value())
                 .message("Lấy order detail thành công")
                 .data(orderDetail)
                 .build();
-   
+
     }
 
 
