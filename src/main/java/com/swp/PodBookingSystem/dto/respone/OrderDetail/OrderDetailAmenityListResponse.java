@@ -15,7 +15,9 @@ import java.util.List;
 public class OrderDetailAmenityListResponse {
     String id;
     String customerId;
+    String customerName;
     int buildingId;
+    String buildingAddress;
     int roomId;
     String roomName;
     String orderId;

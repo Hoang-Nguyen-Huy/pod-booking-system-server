@@ -31,20 +31,17 @@ public class OrderDetailAmenityController {
     private final OrderService orderService;
 
     @GetMapping("/page")
-    public ApiResponse<PaginationResponse<List<OrderDetailAmenityListResponse>>> getOrderDetailAndAmenity(
+    public PaginationResponse<List<OrderDetailAmenityListResponse>> getOrderDetailAndAmenity(
             @RequestHeader("Authorization") String token,
             @RequestParam String startDate,
             @RequestParam String endDate,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int take) {
         String accountId = accountService.extractAccountIdFromToken(token);
         Account user = accountService.getAccountById(accountId);
         LocalDateTime startDateTime = orderService.parseDateTime(startDate);
         LocalDateTime endDateTime = orderService.parseDateTime(endDate);
-        return ApiResponse.<PaginationResponse<List<OrderDetailAmenityListResponse>>>builder()
-                .data(orderDetailService.getPagedOrderDetails(user, startDateTime, endDateTime, page, size))
-                .message("get paging order detail successfully")
-                .build();
+        return orderDetailService.getPagedOrderDetails(user, startDateTime, endDateTime, page, take);
     }
 
     @PostMapping

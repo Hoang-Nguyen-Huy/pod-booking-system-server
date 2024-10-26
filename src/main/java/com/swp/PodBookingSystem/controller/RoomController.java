@@ -149,6 +149,14 @@ public class RoomController {
                 .build();
     }
 
+    @GetMapping("/booked-rooms/account")
+    ApiResponse<List<BookedRoomDto>> getBookedRoomsByAccountId(@RequestParam("accountId") String accountId) {
+        return ApiResponse.<List<BookedRoomDto>>builder()
+                .message("Các phòng đã đặt")
+                .data(roomService.getBookedRooms(accountId))
+                .build();
+    }
+
     @GetMapping("/number-served-rooms-currently")
     ApiResponse<Integer> countCurrentlyServedRooms() {
         return ApiResponse.<Integer>builder()
