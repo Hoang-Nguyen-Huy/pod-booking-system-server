@@ -2,8 +2,10 @@ package com.swp.PodBookingSystem.controller;
 
 import com.swp.PodBookingSystem.dto.request.Building.BuildingPaginationDTO;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
+import com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueByMonthDto;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.entity.Building;
+import com.swp.PodBookingSystem.enums.OrderStatus;
 import com.swp.PodBookingSystem.service.OrderDetailService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -12,10 +14,12 @@ import lombok.extern.slf4j.Slf4j;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
@@ -48,10 +52,11 @@ public class OrderDetailController {
     @GetMapping("/{customerId}")
     PaginationResponse<List<OrderDetailResponse>> getBuildings(@RequestParam(defaultValue = "1", name = "page") int page,
                                                                @RequestParam(defaultValue = "3", name = "take") int take,
+                                                               @RequestParam(defaultValue = "Successfully", name = "status") String status,
                                                                @PathVariable String customerId
     ) {
         BuildingPaginationDTO dto = new BuildingPaginationDTO(page, take);
-        Page<OrderDetailResponse> buildingPage = orderDetailService.getOrdersByCustomerId(customerId, dto.page, dto.take);
+        Page<OrderDetailResponse> buildingPage = orderDetailService.getOrdersByCustomerId(customerId, status, dto.page, dto.take);
         return PaginationResponse.<List<OrderDetailResponse>>builder()
                 .data(buildingPage.getContent())
                 .currentPage(buildingPage.getNumber() + 1)
@@ -67,4 +72,21 @@ public class OrderDetailController {
         log.info("Number of orders retrieved: {}", orders.size());
         orders.forEach(order -> log.info("Order ID: {}, Customer ID: {}", order.getId(), order.getCustomerId()));
     }
+
+    @GetMapping("/revenue")
+    ApiResponse<Double> getRevenue(@RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm a") LocalDateTime startTime,
+                                   @RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm a") LocalDateTime endTime) {
+        return ApiResponse.<Double>builder()
+                .message("Doanh thu")
+                .data(orderDetailService.calculateRevenue(startTime, endTime))
+                .build();
+    }
+
+//    @GetMapping("/revenue-by-month")
+//    ApiResponse<List<RevenueByMonthDto>> getRevenueByMonth() {
+//        return ApiResponse.<List<RevenueByMonthDto>>builder()
+//                .message("Doanh thu các tháng năm hiện tại")
+//                .data(orderDetailService.calculateRevenueByMonth())
+//                .build();
+//    }
 }
