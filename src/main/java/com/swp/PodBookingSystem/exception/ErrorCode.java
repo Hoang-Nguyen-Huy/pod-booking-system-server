@@ -21,6 +21,7 @@ public enum ErrorCode {
     UNAUTHORIZED(403, "Bạn không có quyền hạn", HttpStatus.FORBIDDEN, "system"),
     REFRESH_TOKEN_NOT_EXIST(404, "Refresh token không tồn tại", HttpStatus.NOT_FOUND, "refreshToken"),
     INVALID_TOKEN(401, "Token không đúng", HttpStatus.UNAUTHORIZED, "accessToken"),
+    ORDER_DETAIL_NOT_EXIST(404, "Order detail không tồn tại", HttpStatus.NOT_FOUND, "orderDetailId"),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode, String field) {

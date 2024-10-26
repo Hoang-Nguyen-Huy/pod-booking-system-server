@@ -1,6 +1,7 @@
 package com.swp.PodBookingSystem.controller;
 
 import com.swp.PodBookingSystem.dto.request.Building.BuildingPaginationDTO;
+import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueByMonthDto;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
@@ -48,8 +49,19 @@ public class OrderDetailController {
         }
     }
 
+    @GetMapping("/{orderDetailId}")
+    public ApiResponse<OrderDetailManagementResponse> getOrderDetail(@PathVariable String orderDetailId) {
+        OrderDetailManagementResponse orderDetail = orderDetailService.getOrderDetailByOrderDetailId(orderDetailId);
+        return ApiResponse.<OrderDetailManagementResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("Lấy order detail thành công")
+                .data(orderDetail)
+                .build();
+   
+    }
 
-    @GetMapping("/{customerId}")
+
+    @GetMapping("/customer/{customerId}")
     PaginationResponse<List<OrderDetailResponse>> getBuildings(@RequestParam(defaultValue = "1", name = "page") int page,
                                                                @RequestParam(defaultValue = "3", name = "take") int take,
                                                                @RequestParam(defaultValue = "Successfully", name = "status") String status,

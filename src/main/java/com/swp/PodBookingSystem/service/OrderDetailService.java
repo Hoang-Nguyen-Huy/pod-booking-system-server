@@ -61,6 +61,33 @@ public class OrderDetailService {
                 .collect(Collectors.toList());
     }
 
+    public OrderDetailManagementResponse getOrderDetailByOrderDetailId(String orderDetailId) {
+        OrderDetail orderDetail = orderDetailRepository.findById(orderDetailId).orElse(null);
+        if (orderDetail == null) {
+            throw new AppException(ErrorCode.ORDER_DETAIL_NOT_EXIST);
+        }
+        List<AmenityManagementResponse> amenities = orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(orderDetail.getId());
+        return OrderDetailManagementResponse.builder()
+                .id(orderDetail.getId())
+                .roomId(orderDetail.getRoom().getId())
+                .roomName(orderDetail.getRoom().getName())
+                .roomPrice(orderDetail.getPriceRoom())
+                .buildingAddress(orderDetail.getBuilding().getAddress())
+                .buildingId(orderDetail.getBuilding().getId())
+                .servicePackage(servicePackageService.toServicePackageResponse(orderDetail.getServicePackage()))
+                .status(orderDetail.getStatus().name())
+                .orderHandler(Optional.ofNullable(orderDetail.getOrderHandler())
+                        .map(accountService::toAccountResponse)
+                        .orElse(null))
+                .customer(Optional.ofNullable(orderDetail.getCustomer())
+                        .map(accountService::toAccountResponse)
+                        .orElse(null))
+                .startTime(orderDetail.getStartTime())
+                .endTime(orderDetail.getEndTime())
+                .amenities(amenities)
+                .build();
+    }
+
     public List<OrderDetailManagementResponse> getOrderDetailById(String orderId) {
         return orderDetailRepository.findByOrderId(orderId).stream().map(orderDetail -> {
             List<AmenityManagementResponse> amenities = orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(orderDetail.getId());
