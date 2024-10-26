@@ -74,6 +74,14 @@ public class OrderDetailController {
         orders.forEach(order -> log.info("Order ID: {}, Customer ID: {}", order.getId(), order.getCustomerId()));
     }
 
+    @GetMapping("/revenue-current-day")
+    ApiResponse<Double> getRevenueCurrentDay() {
+        return ApiResponse.<Double>builder()
+                .message("Doanh thu trong ngày")
+                .data(orderDetailService.calculateRevenueCurrentDay())
+                .build();
+    }
+
     @GetMapping("/revenue")
     ApiResponse<Double> getRevenue(@RequestParam(required = false) String startTime,
                                    @RequestParam(required = false) String endTime) {

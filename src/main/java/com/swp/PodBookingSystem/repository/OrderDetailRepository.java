@@ -66,9 +66,20 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, String
             "LEFT JOIN (SELECT oda.orderDetail.id as orderDetailId, SUM(oda.price * oda.quantity) as totalAmenityPrice " +
             "           FROM OrderDetailAmenity oda GROUP BY oda.orderDetail.id) amenityTotal " +
             "ON od.id = amenityTotal.orderDetailId " +
+            "WHERE CURRENT_DATE BETWEEN CAST(od.startTime AS DATE) AND CAST(od.endTime AS DATE) " +
+            "AND od.status = com.swp.PodBookingSystem.enums.OrderStatus.Successfully")
+    Double calculateRevenueCurrentDay();
+
+    @Query("SELECT SUM((od.priceRoom + COALESCE(amenityTotal.totalAmenityPrice, 0)) * " +
+            "(1 - COALESCE(od.discountPercentage, 0) / 100.0) * (1 - COALESCE(sp.discountPercentage, 0) / 100.0)) as grandTotal " +
+            "FROM OrderDetail od " +
+            "LEFT JOIN od.servicePackage sp " +
+            "LEFT JOIN (SELECT oda.orderDetail.id as orderDetailId, SUM(oda.price * oda.quantity) as totalAmenityPrice " +
+            "           FROM OrderDetailAmenity oda GROUP BY oda.orderDetail.id) amenityTotal " +
+            "ON od.id = amenityTotal.orderDetailId " +
             "WHERE od.startTime >= :startTime AND od.endTime <= :endTime " +
             "AND od.status = com.swp.PodBookingSystem.enums.OrderStatus.Successfully")
-    Double calculateRevenue(@Param("startTime") LocalDateTime startTime,
+    Double calculateRevenueBetweenDateTime(@Param("startTime") LocalDateTime startTime,
                             @Param("endTime") LocalDateTime endTime);
 
 //    @Query("SELECT NEW com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueByMonthDto(" +

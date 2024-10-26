@@ -363,16 +363,17 @@ public class OrderDetailService {
     }
 
     /*
+    [GET]: /order-detail/revenue-current-day
+     */
+    public double calculateRevenueCurrentDay() {
+        return orderDetailRepository.calculateRevenueCurrentDay();
+    }
+
+    /*
     [GET]: /order-detail/revenue?
      */
     public double calculateRevenue(LocalDateTime startTime, LocalDateTime endTime) {
-        if (startTime == null) {
-            startTime = LocalDate.now().atStartOfDay();
-        }
-        if (endTime == null) {
-            endTime = LocalDate.now().atTime(LocalTime.MAX);
-        }
-        return orderDetailRepository.calculateRevenue(startTime, endTime);
+        return orderDetailRepository.calculateRevenueBetweenDateTime(startTime, endTime);
     }
 
     /*
