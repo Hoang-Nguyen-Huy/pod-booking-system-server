@@ -96,11 +96,11 @@ public class OrderDetailController {
                 .build();
     }
 
-//    @GetMapping("/revenue-by-month")
-//    ApiResponse<List<RevenueByMonthDto>> getRevenueByMonth() {
-//        return ApiResponse.<List<RevenueByMonthDto>>builder()
-//                .message("Doanh thu các tháng năm hiện tại")
-//                .data(orderDetailService.calculateRevenueByMonth())
-//                .build();
-//    }
+    @GetMapping("/revenue-by-month")
+    ApiResponse<List<RevenueByMonthDto>> getRevenueByMonth() {
+        return ApiResponse.<List<RevenueByMonthDto>>builder()
+                .message("Doanh thu các tháng năm hiện tại")
+                .data(orderDetailService.calculateRevenueByMonth())
+                .build();
+    }
 }

@@ -379,7 +379,7 @@ public class OrderDetailService {
     /*
     [GET]: /order-detail/revenue-by-month
      */
-//    public List<RevenueByMonthDto> calculateRevenueByMonth() {
-//        return orderDetailRepository.calculateRevenueByMonthForCurrentYear();
-//    }
+    public List<RevenueByMonthDto> calculateRevenueByMonth() {
+        return orderDetailRepository.calculateRevenueByMonthForCurrentYear();
+    }
 }
