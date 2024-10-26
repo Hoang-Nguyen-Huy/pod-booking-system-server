@@ -152,4 +152,18 @@ public class OrderService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
         return LocalDateTime.parse(dateTime, formatter);
     }
+
+    /*
+    [GET]: /order/number-order-current-day
+     */
+    public int countCurrentlyOrder () {
+        return orderRepository.countCurrentlyOrder();
+    }
+
+    /*
+    [GET]: /order/number-order
+     */
+    public int countOrder (LocalDateTime startTime, LocalDateTime endTime) {
+        return orderRepository.countOrdersBetweenDatetime(startTime, endTime);
+    }
 }

@@ -56,4 +56,10 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
             "AND od.customer.id = :customerId " +
             "ORDER BY od.startTime")
     List<BookedRoomDto> findBookedRooms(@Param("currentTime") LocalDateTime currentTime, @Param("customerId") String customerId);
+
+    @Query("SELECT COUNT(DISTINCT r.id) FROM Room r " +
+            "JOIN OrderDetail od ON r.id = od.room.id " +
+            "WHERE :currentTime BETWEEN od.startTime AND od.endTime " +
+            "AND od.status = com.swp.PodBookingSystem.enums.OrderStatus.Successfully")
+    int countCurrentlyServedRooms(@Param("currentTime") LocalDateTime currentTime);
 }
