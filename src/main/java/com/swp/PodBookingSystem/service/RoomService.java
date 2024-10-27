@@ -206,8 +206,7 @@ public class RoomService {
 
     public List<BookedRoomDto> getBookedRooms(String customerId) {
         LocalDateTime currentTime = LocalDateTime.now();
-        List<BookedRoomDto> bookedRoomDtos = roomRepository.findBookedRooms(currentTime, customerId);
-        return bookedRoomDtos;
+        return roomRepository.findBookedRooms(currentTime, customerId);
     }
 
     /*

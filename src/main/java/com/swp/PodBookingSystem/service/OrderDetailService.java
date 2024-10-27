@@ -5,11 +5,8 @@ import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationReque
 import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailUpdateRoomRequest;
 import com.swp.PodBookingSystem.dto.request.Room.RoomWithAmenitiesDTO;
 import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementResponse;
+import com.swp.PodBookingSystem.dto.respone.OrderDetail.*;
 import com.swp.PodBookingSystem.dto.respone.Order.NumberOrderByBuildingDto;
-import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailAmenityListResponse;
-import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailManagementResponse;
-import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
-import com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueByMonthDto;
 import com.swp.PodBookingSystem.dto.respone.OrderDetailAmenity.OrderDetailAmenityResponseDTO;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.entity.*;
@@ -60,6 +57,34 @@ public class OrderDetailService {
         return orders.stream()
                 .map(orderDetailMapper::toOrderDetailResponse)
                 .collect(Collectors.toList());
+    }
+
+    public OrderDetailFullInfoResponse getOrderDetailByOrderDetailId(String orderDetailId) {
+        OrderDetail orderDetail = orderDetailRepository.findById(orderDetailId).orElse(null);
+        if (orderDetail == null) {
+            throw new AppException(ErrorCode.ORDER_DETAIL_NOT_EXIST);
+        }
+        List<AmenityManagementResponse> amenities = orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(orderDetail.getId());
+        return OrderDetailFullInfoResponse.builder()
+                .id(orderDetail.getId())
+                .roomId(orderDetail.getRoom().getId())
+                .roomName(orderDetail.getRoom().getName())
+                .roomImage(orderDetail.getRoom().getImage())
+                .roomPrice(orderDetail.getPriceRoom())
+                .buildingAddress(orderDetail.getBuilding().getAddress())
+                .buildingId(orderDetail.getBuilding().getId())
+                .servicePackage(servicePackageService.toServicePackageResponse(orderDetail.getServicePackage()))
+                .status(orderDetail.getStatus().name())
+                .orderHandler(Optional.ofNullable(orderDetail.getOrderHandler())
+                        .map(accountService::toAccountResponse)
+                        .orElse(null))
+                .customer(Optional.ofNullable(orderDetail.getCustomer())
+                        .map(accountService::toAccountResponse)
+                        .orElse(null))
+                .startTime(orderDetail.getStartTime())
+                .endTime(orderDetail.getEndTime())
+                .amenities(amenities)
+                .build();
     }
 
     public List<OrderDetailManagementResponse> getOrderDetailById(String orderId) {
@@ -140,7 +165,14 @@ public class OrderDetailService {
                             .customerId(Optional.ofNullable(orderDetail.getCustomer())
                                     .map(Account::getId)
                                     .orElse(null))
+                            .customerName(Optional.ofNullable(orderDetail.getCustomer())
+                                    .map(Account::getName)
+                                    .orElse(null))
+                            .orderHandledId(Optional.ofNullable(orderDetail.getOrderHandler())
+                                    .map(Account::getId)
+                                    .orElse(null))
                             .buildingId(orderDetail.getBuilding().getId())
+                            .buildingAddress(orderDetail.getBuilding().getAddress())
                             .roomId(orderDetail.getRoom().getId())
                             .roomName(orderDetail.getRoom().getName())
                             .orderId(orderDetail.getOrder().getId())
@@ -374,6 +406,12 @@ public class OrderDetailService {
     [GET]: /order-detail/revenue?
      */
     public double calculateRevenue(LocalDateTime startTime, LocalDateTime endTime) {
+        if (startTime == null) {
+            startTime = LocalDate.now().atStartOfDay();
+        }
+        if (endTime == null) {
+            endTime = LocalDate.now().atTime(LocalTime.MAX);
+        }
         return orderDetailRepository.calculateRevenueBetweenDateTime(startTime, endTime);
     }
 

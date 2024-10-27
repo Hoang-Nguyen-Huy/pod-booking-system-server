@@ -59,7 +59,7 @@ public class OrderDetailAmenityService {
             throw new RuntimeException("Order detail or amenity not found");
         }
         OrderDetailAmenity orderDetailAmenity = new OrderDetailAmenity();
-        orderDetailAmenity.setStatus(OrderDetailAmenityStatus.Booked);
+        orderDetailAmenity.setStatus(OrderDetailAmenityStatus.Paid);
         orderDetailAmenity.setCreatedAt(LocalDateTime.now());
         orderDetailAmenity.setUpdatedAt(LocalDateTime.now());
         orderDetailAmenity.setId(UUID.randomUUID().toString());

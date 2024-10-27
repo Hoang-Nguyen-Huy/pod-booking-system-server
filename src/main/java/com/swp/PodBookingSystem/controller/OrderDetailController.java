@@ -2,11 +2,10 @@ package com.swp.PodBookingSystem.controller;
 
 import com.swp.PodBookingSystem.dto.request.Building.BuildingPaginationDTO;
 import com.swp.PodBookingSystem.dto.respone.Order.NumberOrderByBuildingDto;
+import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailFullInfoResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueByMonthDto;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
-import com.swp.PodBookingSystem.entity.Building;
-import com.swp.PodBookingSystem.enums.OrderStatus;
 import com.swp.PodBookingSystem.service.OrderDetailService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -50,8 +49,18 @@ public class OrderDetailController {
         }
     }
 
+    @GetMapping("/{orderDetailId}")
+    public ApiResponse<OrderDetailFullInfoResponse> getOrderDetail(@PathVariable String orderDetailId) {
+        OrderDetailFullInfoResponse orderDetail = orderDetailService.getOrderDetailByOrderDetailId(orderDetailId);
+        return ApiResponse.<OrderDetailFullInfoResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("Lấy order detail thành công")
+                .data(orderDetail)
+                .build();
 
-    @GetMapping("/{customerId}")
+    }
+
+    @GetMapping("/customer/{customerId}")
     PaginationResponse<List<OrderDetailResponse>> getBuildings(@RequestParam(defaultValue = "1", name = "page") int page,
                                                                @RequestParam(defaultValue = "3", name = "take") int take,
                                                                @RequestParam(defaultValue = "Successfully", name = "status") String status,
