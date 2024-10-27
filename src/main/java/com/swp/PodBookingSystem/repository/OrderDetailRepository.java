@@ -1,5 +1,6 @@
 package com.swp.PodBookingSystem.repository;
 
+import com.swp.PodBookingSystem.dto.respone.Order.NumberOrderByBuildingDto;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueByMonthDto;
 import com.swp.PodBookingSystem.entity.OrderDetail;
 import com.swp.PodBookingSystem.enums.OrderStatus;
@@ -96,4 +97,11 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, String
             "AND od.status = com.swp.PodBookingSystem.enums.OrderStatus.Successfully " +
             "GROUP BY YEAR(od.startTime), MONTH(od.startTime)")
     List<RevenueByMonthDto> calculateRevenueByMonthForCurrentYear();
+
+    @Query("SELECT NEW com.swp.PodBookingSystem.dto.respone.Order.NumberOrderByBuildingDto(" +
+            "od.building.id, od.building.address, COUNT(DISTINCT od.order.id)" +
+            ") " +
+            "FROM OrderDetail od " +
+            "GROUP BY od.building.id, od.building.address")
+    List<NumberOrderByBuildingDto> countOrdersByBuilding();
 }

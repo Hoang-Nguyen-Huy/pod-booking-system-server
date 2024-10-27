@@ -5,6 +5,7 @@ import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationReque
 import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailUpdateRoomRequest;
 import com.swp.PodBookingSystem.dto.request.Room.RoomWithAmenitiesDTO;
 import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementResponse;
+import com.swp.PodBookingSystem.dto.respone.Order.NumberOrderByBuildingDto;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailAmenityListResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
@@ -381,5 +382,12 @@ public class OrderDetailService {
      */
     public List<RevenueByMonthDto> calculateRevenueByMonth() {
         return orderDetailRepository.calculateRevenueByMonthForCurrentYear();
+    }
+
+    /*
+    [GET]: /order-detail/number-order-by-building
+     */
+    public List<NumberOrderByBuildingDto> getNumberOrderByBuilding() {
+        return orderDetailRepository.countOrdersByBuilding();
     }
 }

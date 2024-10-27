@@ -1,6 +1,7 @@
 package com.swp.PodBookingSystem.controller;
 
 import com.swp.PodBookingSystem.dto.request.Building.BuildingPaginationDTO;
+import com.swp.PodBookingSystem.dto.respone.Order.NumberOrderByBuildingDto;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueByMonthDto;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
@@ -101,6 +102,14 @@ public class OrderDetailController {
         return ApiResponse.<List<RevenueByMonthDto>>builder()
                 .message("Doanh thu các tháng năm hiện tại")
                 .data(orderDetailService.calculateRevenueByMonth())
+                .build();
+    }
+
+    @GetMapping("/number-order-by-building")
+    ApiResponse<List<NumberOrderByBuildingDto>> getNumberOrderByBuilding() {
+        return ApiResponse.<List<NumberOrderByBuildingDto>>builder()
+                .message("Số đơn hàng theo chi nhánh")
+                .data(orderDetailService.getNumberOrderByBuilding())
                 .build();
     }
 }
