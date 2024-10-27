@@ -1,13 +1,11 @@
 package com.swp.PodBookingSystem.controller;
 
 import com.swp.PodBookingSystem.dto.request.Building.BuildingPaginationDTO;
+import com.swp.PodBookingSystem.dto.respone.Order.NumberOrderByBuildingDto;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailFullInfoResponse;
-import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueByMonthDto;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
-import com.swp.PodBookingSystem.entity.Building;
-import com.swp.PodBookingSystem.enums.OrderStatus;
 import com.swp.PodBookingSystem.service.OrderDetailService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @RestController
@@ -61,7 +60,6 @@ public class OrderDetailController {
 
     }
 
-
     @GetMapping("/customer/{customerId}")
     PaginationResponse<List<OrderDetailResponse>> getBuildings(@RequestParam(defaultValue = "1", name = "page") int page,
                                                                @RequestParam(defaultValue = "3", name = "take") int take,
@@ -86,20 +84,41 @@ public class OrderDetailController {
         orders.forEach(order -> log.info("Order ID: {}, Customer ID: {}", order.getId(), order.getCustomerId()));
     }
 
-    @GetMapping("/revenue")
-    ApiResponse<Double> getRevenue(@RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm a") LocalDateTime startTime,
-                                   @RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm a") LocalDateTime endTime) {
+    @GetMapping("/revenue-current-day")
+    ApiResponse<Double> getRevenueCurrentDay() {
         return ApiResponse.<Double>builder()
-                .message("Doanh thu")
-                .data(orderDetailService.calculateRevenue(startTime, endTime))
+                .message("Doanh thu trong ngày")
+                .data(orderDetailService.calculateRevenueCurrentDay())
                 .build();
     }
 
-//    @GetMapping("/revenue-by-month")
-//    ApiResponse<List<RevenueByMonthDto>> getRevenueByMonth() {
-//        return ApiResponse.<List<RevenueByMonthDto>>builder()
-//                .message("Doanh thu các tháng năm hiện tại")
-//                .data(orderDetailService.calculateRevenueByMonth())
-//                .build();
-//    }
+    @GetMapping("/revenue")
+    ApiResponse<Double> getRevenue(@RequestParam(required = false) String startTime,
+                                   @RequestParam(required = false) String endTime) {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy'T'hh:mm'T'a");
+        LocalDateTime start = startTime != null ? LocalDateTime.parse(startTime, formatter) : null;
+        LocalDateTime end = endTime != null ? LocalDateTime.parse(endTime, formatter) : null;
+
+        return ApiResponse.<Double>builder()
+                .message("Doanh thu")
+                .data(orderDetailService.calculateRevenue(start, end))
+                .build();
+    }
+
+    @GetMapping("/revenue-by-month")
+    ApiResponse<List<RevenueByMonthDto>> getRevenueByMonth() {
+        return ApiResponse.<List<RevenueByMonthDto>>builder()
+                .message("Doanh thu các tháng năm hiện tại")
+                .data(orderDetailService.calculateRevenueByMonth())
+                .build();
+    }
+
+    @GetMapping("/number-order-by-building")
+    ApiResponse<List<NumberOrderByBuildingDto>> getNumberOrderByBuilding() {
+        return ApiResponse.<List<NumberOrderByBuildingDto>>builder()
+                .message("Số đơn hàng theo chi nhánh")
+                .data(orderDetailService.getNumberOrderByBuilding())
+                .build();
+    }
 }

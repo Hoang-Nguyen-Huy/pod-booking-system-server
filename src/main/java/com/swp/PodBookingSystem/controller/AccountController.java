@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
@@ -142,11 +143,16 @@ public class AccountController {
     }
 
     @GetMapping("/number-accounts")
-    ApiResponse<Integer> countCustomer(@RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm a") LocalDateTime startTime,
-                                       @RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy hh:mm a") LocalDateTime endTime) {
+    ApiResponse<Integer> countCustomer(@RequestParam(required = false) String startTime,
+                                       @RequestParam(required = false) String endTime) {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy'T'hh:mm'T'a");
+        LocalDateTime start = startTime != null ? LocalDateTime.parse(startTime, formatter) : null;
+        LocalDateTime end = endTime != null ? LocalDateTime.parse(endTime, formatter) : null;
+
         return ApiResponse.<Integer>builder()
                 .message("Số khách hàng từ " + startTime + " đến " + endTime)
-                .data(accountService.countCustomer(startTime, endTime))
+                .data(accountService.countCustomer(start, end))
                 .build();
     }
 }
