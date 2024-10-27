@@ -6,6 +6,7 @@ import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailUpdateRoomReq
 import com.swp.PodBookingSystem.dto.request.Room.RoomWithAmenitiesDTO;
 import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.*;
+import com.swp.PodBookingSystem.dto.respone.Order.NumberOrderByBuildingDto;
 import com.swp.PodBookingSystem.dto.respone.OrderDetailAmenity.OrderDetailAmenityResponseDTO;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.entity.*;
@@ -395,6 +396,13 @@ public class OrderDetailService {
     }
 
     /*
+    [GET]: /order-detail/revenue-current-day
+     */
+    public double calculateRevenueCurrentDay() {
+        return orderDetailRepository.calculateRevenueCurrentDay();
+    }
+
+    /*
     [GET]: /order-detail/revenue?
      */
     public double calculateRevenue(LocalDateTime startTime, LocalDateTime endTime) {
@@ -404,13 +412,20 @@ public class OrderDetailService {
         if (endTime == null) {
             endTime = LocalDate.now().atTime(LocalTime.MAX);
         }
-        return orderDetailRepository.calculateRevenue(startTime, endTime);
+        return orderDetailRepository.calculateRevenueBetweenDateTime(startTime, endTime);
     }
 
     /*
     [GET]: /order-detail/revenue-by-month
      */
-//    public List<RevenueByMonthDto> calculateRevenueByMonth() {
-//        return orderDetailRepository.calculateRevenueByMonthForCurrentYear();
-//    }
+    public List<RevenueByMonthDto> calculateRevenueByMonth() {
+        return orderDetailRepository.calculateRevenueByMonthForCurrentYear();
+    }
+
+    /*
+    [GET]: /order-detail/number-order-by-building
+     */
+    public List<NumberOrderByBuildingDto> getNumberOrderByBuilding() {
+        return orderDetailRepository.countOrdersByBuilding();
+    }
 }
