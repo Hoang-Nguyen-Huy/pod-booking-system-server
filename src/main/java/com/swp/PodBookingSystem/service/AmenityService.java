@@ -35,6 +35,13 @@ public class AmenityService {
                 .collect(Collectors.toList());
     }
 
+    public List<AmenityResponse> getAllActiveAmenities() {
+        List<Amenity> amenities = amenityRepository.findAllActiveAmenities(); // Fetch non-deleted amenities
+        return amenities.stream()
+                .map(amenityMapper::toAmenityResponse)
+                .collect(Collectors.toList());
+    }
+
     /*
     [GET]: /amenity/type?amenityType
      */
@@ -67,7 +74,7 @@ public class AmenityService {
         return "Delete amenity " + amenityId + " successfully";
     }
 
-    public Page<Amenity> getAmenities(int page, int take, Account account){
+    public Page<Amenity> getAmenitiesByRole(int page, int take, Account account){
         Pageable pageable = PageRequest.of(page - 1, take);
         if (account.getRole().equals(AccountRole.Admin)){
             return amenityRepository.findAll(pageable);

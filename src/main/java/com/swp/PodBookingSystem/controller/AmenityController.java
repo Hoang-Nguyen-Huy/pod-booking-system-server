@@ -41,11 +41,12 @@ public class AmenityController {
                 .build();
     }
 
-    @GetMapping("/type")
-    public ApiResponse<List<AmenityResponse>> getAmenitiesByType(@RequestParam(defaultValue = "Food", name = "type") String type){
-        List<AmenityResponse> amenityResponses = amenityService.getAmenitiesByType(AmenityType.valueOf(type));
+
+    @GetMapping("/allActive")
+    public ApiResponse<List<AmenityResponse>> getAllActiveAmenities() {
+        List<AmenityResponse> amenities = amenityService.getAllActiveAmenities();
         return ApiResponse.<List<AmenityResponse>>builder()
-                .data(amenityResponses)
+                .data(amenities)
                 .build();
     }
 
@@ -79,7 +80,7 @@ public class AmenityController {
                                                  @RequestHeader("Authorization") String token){
         AmenityPaginationDTO dto = new AmenityPaginationDTO(page, take);
         Account account = accountService.getAccountById(accountService.extractAccountIdFromToken(token));
-        Page<Amenity> amenityPage = amenityService.getAmenities(dto.page, dto.take, account);
+        Page<Amenity> amenityPage = amenityService.getAmenitiesByRole(dto.page, dto.take, account);
         return PaginationResponse.<List<Amenity>>builder()
                 .data(amenityPage.getContent())
                 .currentPage(amenityPage.getNumber() + 1)
