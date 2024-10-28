@@ -8,6 +8,7 @@ import com.swp.PodBookingSystem.dto.respone.Order.OrderManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderResponse;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.entity.*;
+import com.swp.PodBookingSystem.enums.OrderStatus;
 import com.swp.PodBookingSystem.service.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -48,14 +49,15 @@ public class OrderController {
             @RequestParam String startDate,
             @RequestParam String endDate,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) OrderStatus status) {
         String accountId = accountService.extractAccountIdFromToken(token);
         Account user = accountService.getAccountById(accountId);
         LocalDateTime startDateTime = orderService.parseDateTime(startDate);
         LocalDateTime endDateTime = orderService.parseDateTime(endDate);
 
         return ApiResponse.<PaginationResponse<List<OrderManagementResponse>>>builder()
-                .data(orderService.getOrdersByRole(page, size, startDateTime, endDateTime, user))
+                .data(orderService.getOrdersByRole(page, size, startDateTime, endDateTime, user, status))
                 .message("get paging order successfully")
                 .build();
     }
@@ -87,7 +89,7 @@ public class OrderController {
         try {
             String accountId = accountService.extractAccountIdFromToken(token);
             Account account = accountService.getAccountById(accountId);
-            Order orderCreated = orderService.createOrderByRequest(account);
+            Order orderCreated = orderService.createOrderByRequest(account, request);
             boolean isSomeRoomWasBook = orderDetailService.processOrderDetails(request, orderCreated, account);
 
             String status = isSomeRoomWasBook ? "Pending" : "Successfully";
