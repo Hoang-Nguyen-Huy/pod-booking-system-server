@@ -28,17 +28,39 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, String
 
     List<OrderDetail> findByEndTime(LocalDateTime endTime);
 
-    @Query(value = "SELECT od FROM OrderDetail od WHERE od.startTime >= :startTime AND od.endTime <= :endTime ORDER BY od.updatedAt DESC")
-    Page<OrderDetail> findAllWithTimeRange(@Param("startTime") LocalDateTime startTime,
-                                           @Param("endTime") LocalDateTime endTime,
-                                           Pageable pageable);
+    @Query("""
+    SELECT od FROM OrderDetail od
+    WHERE od.startTime >= :startTime 
+      AND od.endTime <= :endTime 
+      AND EXISTS (
+          SELECT 1 FROM OrderDetailAmenity oda 
+          WHERE oda.orderDetail.id = od.id
+      )
+    ORDER BY od.updatedAt DESC
+""")
+    Page<OrderDetail> findAllWithTimeRange(
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime,
+            Pageable pageable
+    );
 
-    @Query(value = "SELECT od FROM OrderDetail od WHERE od.startTime >= :startTime AND od.endTime <= :endTime AND od.building.id = :buildingNumber ORDER BY od.updatedAt DESC")
+    @Query("""
+    SELECT od FROM OrderDetail od 
+    WHERE od.startTime >= :startTime 
+      AND od.endTime <= :endTime 
+      AND od.building.id = :buildingNumber 
+      AND EXISTS (
+          SELECT 1 FROM OrderDetailAmenity oda 
+          WHERE oda.orderDetail.id = od.id
+      )
+    ORDER BY od.updatedAt DESC
+""")
     Page<OrderDetail> findOrdersByBuildingNumberAndTimeRange(
             @Param("buildingNumber") int buildingNumber,
             @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime,
-            Pageable pageable);
+            Pageable pageable
+    );
 
     Page<OrderDetail> findAll(Pageable pageable);
 
