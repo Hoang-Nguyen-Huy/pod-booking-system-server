@@ -3,6 +3,7 @@ package com.swp.PodBookingSystem.service;
 import com.swp.PodBookingSystem.dto.request.Order.OrderUpdateRequest;
 import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationRequest;
 import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailUpdateRoomRequest;
+import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenityUpdateReq;
 import com.swp.PodBookingSystem.dto.request.Room.RoomWithAmenitiesDTO;
 import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.*;
@@ -50,6 +51,7 @@ public class OrderDetailService {
     private final ServicePackageService servicePackageService;
     private final RoomService roomService;
     private final RoomRepository roomRepository;
+    private final OrderDetailAmenityRepository orderDetailAmenityRepository;
 
     //GET:
     public List<OrderDetailResponse> getAllOrders() {
@@ -363,6 +365,28 @@ public class OrderDetailService {
         for (OrderDetail od : orderDetails) {
             if (request.getStatus() != null) {
                 od.setStatus(request.getStatus());
+                if(request.getStatus().equals(OrderStatus.Rejected)){
+                    double total = 0;
+                    int countService = 0;
+                    if(od.getServicePackage().getId() == 1){
+                        countService = 4;
+                    } else if(od.getServicePackage().getId() == 2){
+                        countService = 30;
+                    } else {
+                        countService = 1;
+                    }
+                    total += od.getPriceRoom() * (100- od.getDiscountPercentage()) * countService/ 100;
+                    List <OrderDetailAmenity> listOda = orderDetailAmenityRepository.findByOrderDetailId(od.getId());
+                    for(OrderDetailAmenity oda : listOda){
+                        total += oda.getPrice() * oda.getQuantity() * (100- od.getDiscountPercentage())  * countService/ 100;
+                        orderDetailAmenityService.updateOrderDetailAmenityStatus( new OrderDetailAmenityUpdateReq(oda.getId(), OrderDetailAmenityStatus.Canceled));
+                    }
+                    Account customer = od.getCustomer();
+                    if(customer != null){
+                        customer.setBalance(customer.getBalance() + total);
+                        accountRepository.save(customer);
+                    }
+                }
             }
             if (request.getOrderHandler() != null) {
                 Account orderHandler = accountService.getAccountById(request.getOrderHandler().getId());

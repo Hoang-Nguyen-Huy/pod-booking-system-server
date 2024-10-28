@@ -24,6 +24,7 @@ public class RoomType {
     int price;
     int quantity;
     int capacity;
+    String image;
 
     @JsonIgnore
     @OneToMany(mappedBy = "roomType", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

@@ -176,7 +176,7 @@ public class AuthenticationService {
         // Nếu khách chưa có tài khoản trong db thì mình sẽ tạo tạm thời cho khách
         if (accountOptional.isEmpty()) {
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
-            AccountCreationRequest request = new AccountCreationRequest(name, email, passwordEncoder.encode("123123"), "Customer", 1);
+            AccountCreationRequest request = new AccountCreationRequest(name, email, passwordEncoder.encode("123123"), 0, "Customer", 1);
             account = accountMapper.toAccount(request);
             account.setAvatar(avatar);
             accountRepository.save(account);

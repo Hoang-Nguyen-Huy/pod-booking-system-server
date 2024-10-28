@@ -1,6 +1,7 @@
 package com.swp.PodBookingSystem.repository;
 
 import com.swp.PodBookingSystem.entity.Order;
+import com.swp.PodBookingSystem.enums.OrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,16 +23,37 @@ public interface OrderRepository extends JpaRepository<Order, String> {
 
     Page<Order> findAll(Pageable pageable);
 
-    @Query(value = "SELECT DISTINCT o FROM Order o JOIN OrderDetail od ON o.id = od.order.id WHERE o.createdAt >= :startTime AND o.createdAt <= :endTime ORDER BY o.createdAt DESC")
-    Page<Order> findAllWithTimeRange(@Param("startTime") LocalDateTime startTime,
-                                     @Param("endTime") LocalDateTime endTime,
-                                     Pageable pageable);
+    @Query("""
+    SELECT DISTINCT o FROM Order o
+    JOIN OrderDetail od ON o.id = od.order.id
+    WHERE o.createdAt >= :startTime 
+      AND o.createdAt <= :endTime
+      AND (:status IS NULL OR od.status = :status)
+    AND od.id IS NOT NULL
+    ORDER BY o.createdAt DESC
+    """)
+    Page<Order> findAllWithTimeRange(
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime,
+            @Param("status") OrderStatus status,
+            Pageable pageable);
+    ;
 
-    @Query(value = "SELECT DISTINCT o FROM Order o JOIN OrderDetail od ON o.id = od.order.id WHERE od.building.id = :buildingNumber AND o.createdAt >= :startTime AND o.createdAt <= :endTime ORDER BY o.createdAt DESC")
-    Page<Order> findOrdersByBuildingNumberAndTimeRange(@Param("buildingNumber") int buildingNumber,
-                                                       @Param("startTime") LocalDateTime startTime,
-                                                       @Param("endTime") LocalDateTime endTime,
-                                                       Pageable pageable);
+    @Query("""
+    SELECT DISTINCT o FROM Order o
+    JOIN OrderDetail od ON o.id = od.order.id
+    WHERE od.building.id = :buildingNumber
+      AND o.createdAt >= :startTime 
+      AND o.createdAt <= :endTime
+      AND (:status IS NULL OR od.status = :status)
+    ORDER BY o.createdAt DESC
+""")
+    Page<Order> findOrdersByBuildingNumberAndTimeRange(
+            @Param("buildingNumber") int buildingNumber,
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime,
+            @Param("status") OrderStatus status,
+            Pageable pageable);
 
     @Modifying
     @Transactional
