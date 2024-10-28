@@ -22,6 +22,8 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.ParseException;
 
 
@@ -35,12 +37,17 @@ public class AuthenticationController {
     SendEmailService sendEmailService;
 
     @GetMapping("/login/google")
-    public RedirectView loginGoogle(OAuth2AuthenticationToken token) throws ParseException {
-        var result = authenticationService.loginGoogle(token.getPrincipal().getAttribute("email"),
-                token.getPrincipal().getAttribute("name"),
-                token.getPrincipal().getAttribute("picture"));
-        return new RedirectView("http://localhost:3000/login/oauth?accessToken=" + result.getAccessToken()
-                + "&refreshToken=" + result.getRefreshToken() + "&status=" + 200);
+    public RedirectView loginGoogle(OAuth2AuthenticationToken token) throws ParseException, UnsupportedEncodingException {
+        try {
+            var result = authenticationService.loginGoogle(token.getPrincipal().getAttribute("email"),
+                    token.getPrincipal().getAttribute("name"),
+                    token.getPrincipal().getAttribute("picture"));
+            return new RedirectView("http://localhost:3000/login/oauth?accessToken=" + result.getAccessToken()
+                    + "&refreshToken=" + result.getRefreshToken() + "&status=" + 200);
+        } catch (Exception e) {
+            String message = URLEncoder.encode("Tài khoản đã bị cấm", "UTF-8");
+            return new RedirectView("http://localhost:3000/login/oauth?message=" + message + "&status=" + 500);
+        }
     }
 
     @PostMapping("/login")

@@ -83,6 +83,7 @@ public class AuthenticationService {
                 account.getPassword());
         if (!authenticated)
             throw new AppException(ErrorCode.INCORRECT_PASSWORD);
+        if (account.getStatus() == 0) throw new AppException(ErrorCode.ACCOUNT_NOT_ACTIVE);
 
         var accessToken = generateAccessToken(account);
         var refreshToken = generateRefreshToken(account);
@@ -181,6 +182,7 @@ public class AuthenticationService {
             accountRepository.save(account);
         } else {
             account = accountOptional.get(); // Lấy tài khoản từ Optional
+            if (account.getStatus() == 0) throw new AppException(ErrorCode.ACCOUNT_NOT_ACTIVE);
         }
 
         // Tạo access token và refresh token
