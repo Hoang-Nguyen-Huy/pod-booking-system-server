@@ -2,6 +2,7 @@ package com.swp.PodBookingSystem.controller;
 
 import com.swp.PodBookingSystem.dto.request.Account.*;
 import com.swp.PodBookingSystem.dto.request.CalendarRequest;
+import com.swp.PodBookingSystem.dto.respone.Account.AccountManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.Account.AccountOrderResponse;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.respone.AccountResponse;
@@ -53,15 +54,15 @@ public class AccountController {
     }
 
     @GetMapping
-    PaginationResponse<List<Account>> getAccounts(@RequestParam(defaultValue = "1", name = "page") int page,
-                                                  @RequestParam(defaultValue = "10", name = "take") int take) {
+    PaginationResponse<List<AccountManagementResponse>> getAccounts(@RequestParam(defaultValue = "1", name = "page") int page,
+                                                                    @RequestParam(defaultValue = "10", name = "take") int take) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         authentication.getAuthorities().forEach(grantedAuthority -> log.info(grantedAuthority.getAuthority()));
 
         AccountPaginationDTO dto = new AccountPaginationDTO(page, take);
-        Page<Account> accountPage = accountService.getAccounts(dto.page, dto.take);
+        Page<AccountManagementResponse> accountPage = accountService.getAccounts(dto.page, dto.take);
 
-        return PaginationResponse.<List<Account>>builder()
+        return PaginationResponse.<List<AccountManagementResponse>>builder()
                 .data(accountPage.getContent())
                 .currentPage(accountPage.getNumber() + 1)
                 .totalPage(accountPage.getTotalPages())
