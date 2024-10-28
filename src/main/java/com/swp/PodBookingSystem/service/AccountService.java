@@ -2,14 +2,19 @@ package com.swp.PodBookingSystem.service;
 
 import com.swp.PodBookingSystem.dto.request.Account.AccountCreationRequest;
 import com.swp.PodBookingSystem.dto.request.Account.AccountUpdateAdminRequest;
+import com.swp.PodBookingSystem.dto.respone.Account.AccountManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.Account.AccountOrderResponse;
 import com.swp.PodBookingSystem.dto.respone.AccountResponse;
+import com.swp.PodBookingSystem.dto.respone.Building.BuildingResponse;
 import com.swp.PodBookingSystem.entity.Account;
+import com.swp.PodBookingSystem.entity.Building;
 import com.swp.PodBookingSystem.enums.AccountRole;
 import com.swp.PodBookingSystem.exception.AppException;
 import com.swp.PodBookingSystem.exception.ErrorCode;
 import com.swp.PodBookingSystem.mapper.AccountMapper;
+import com.swp.PodBookingSystem.mapper.BuildingMapper;
 import com.swp.PodBookingSystem.repository.AccountRepository;
+import com.swp.PodBookingSystem.repository.BuildingRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -17,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,9 +42,14 @@ import java.util.stream.Collectors;
 public class AccountService {
     AccountRepository accountRepository;
     AccountMapper accountMapper;
+    BuildingMapper buildingMapper;
     JwtDecoder jwtDecoder;
+    BuildingRepository buildingRepository;
 
     public AccountResponse createAccount(AccountCreationRequest request) {
+        if (accountRepository.existsByEmail(request.getEmail())) {
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
+        }
         Account account = accountMapper.toAccount(request);
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         account.setPassword(passwordEncoder.encode(account.getPassword()));
@@ -49,9 +60,10 @@ public class AccountService {
     [GET]: /accounts/page&take
      */
     @PreAuthorize("hasRole('Admin')")
-    public Page<Account> getAccounts(int page, int take) {
-        Pageable pageable = PageRequest.of(page - 1, take);
-        return accountRepository.findAll(pageable);
+    public Page<AccountManagementResponse> getAccounts(int page, int take) {
+        Pageable pageable = PageRequest.of(page - 1, take, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Account> accountPage = accountRepository.findAll(pageable);
+        return accountPage.map(this::convertToAccountManagementResponse);
     }
 
     public Account getAccountById(String id) {
@@ -95,6 +107,30 @@ public class AccountService {
                 .role(account.getRole())
                 .buildingNumber(account.getBuildingNumber())
                 .rankingName(account.getRankingName())
+                .build();
+    }
+
+    private AccountManagementResponse convertToAccountManagementResponse(Account account) {
+        BuildingResponse buildingResponse = null;
+        if (account.getBuildingNumber() != 0) {
+            Building building = buildingRepository.findById(account.getBuildingNumber())
+                    .orElseThrow(() -> null);
+            buildingResponse = buildingMapper.toBuildingResponse(building);
+        }
+
+        return AccountManagementResponse.builder()
+                .id(account.getId())
+                .name(account.getName())
+                .email(account.getEmail())
+                .password(account.getPassword())
+                .avatar(account.getAvatar())
+                .point(account.getPoint())
+                .role(account.getRole())
+                .balance(account.getBalance())
+                .building(buildingResponse)
+                .rankingName(account.getRankingName())
+                .createdAt(account.getCreatedAt())
+                .status(account.getStatus())
                 .build();
     }
 

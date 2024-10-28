@@ -13,6 +13,7 @@ import lombok.experimental.FieldDefaults;
 public class PaginationResponse<T> {
     @Builder.Default
     private int code = 200;
+    private String message;
     private T data;
     private int currentPage;
     private int totalPage;
