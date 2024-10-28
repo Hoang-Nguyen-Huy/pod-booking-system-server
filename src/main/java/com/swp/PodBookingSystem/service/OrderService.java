@@ -7,6 +7,7 @@ import com.swp.PodBookingSystem.dto.respone.OrderResponse;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.entity.*;
 import com.swp.PodBookingSystem.enums.AccountRole;
+import com.swp.PodBookingSystem.enums.OrderStatus;
 import com.swp.PodBookingSystem.mapper.OrderMapper;
 import com.swp.PodBookingSystem.repository.OrderRepository;
 import org.slf4j.Logger;
@@ -51,15 +52,15 @@ public class OrderService {
     }
 
     public PaginationResponse<List<OrderManagementResponse>> getOrdersByRole(
-            int page, int size, LocalDateTime startDate, LocalDateTime endDate, Account user) {
+            int page, int size, LocalDateTime startDate, LocalDateTime endDate, Account user, OrderStatus status) {
         Page<Order> ordersPage;
         if (user.getRole().equals(AccountRole.Admin)) {
             ordersPage = orderRepository.findAllWithTimeRange(
-                    startDate, endDate, PageRequest.of(page, size));
+                    startDate, endDate, status, PageRequest.of(page, size));
         } else if (user.getRole().equals(AccountRole.Staff) || user.getRole().equals(AccountRole.Manager)) {
             int buildingNumber = user.getBuildingNumber();
             ordersPage = orderRepository.findOrdersByBuildingNumberAndTimeRange(
-                    buildingNumber, startDate, endDate, PageRequest.of(page, size));
+                    buildingNumber, startDate, endDate, status, PageRequest.of(page, size));
         } else {
             throw new IllegalArgumentException("User role not authorized to access orders.");
         }
