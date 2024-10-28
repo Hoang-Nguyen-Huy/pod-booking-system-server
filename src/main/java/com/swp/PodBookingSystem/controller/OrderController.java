@@ -5,6 +5,7 @@ import com.swp.PodBookingSystem.dto.request.Order.OrderUpdateStaffRequest;
 import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.respone.Order.OrderManagementResponse;
+import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderResponse;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.entity.*;
@@ -69,14 +70,11 @@ public class OrderController {
                 .build();
     }
 
-//    @GetMapping("/{accountId}")
-//    public ApiResponse<List<OrderResponse>> getOrdersByAccountId(@PathVariable String accountId) {
-//        List<OrderResponse> orders = orderService.getOrdersByAccountId(accountId);
-//        logOrders(orders);
-//        return ApiResponse.<List<OrderResponse>>builder()
-//                .data(orders)
-//                .build();
-//    }
+    @GetMapping("/{accountId}")
+    public PaginationResponse<List<OrderManagementResponse>> getOrdersByAccountId(@PathVariable String accountId, @RequestParam(defaultValue = "0") int page,
+                                                                                  @RequestParam(defaultValue = "5") int take, @RequestParam(defaultValue = "Successfully") String status) {
+        return orderService.getOrdersByAccountCustomerId(page, take, accountId, status);
+    }
 
     //Check room available -> yes: create order Status: Successfully
     //                     -> no: create order Status: Pending

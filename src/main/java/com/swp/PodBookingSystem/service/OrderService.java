@@ -1,4 +1,5 @@
 package com.swp.PodBookingSystem.service;
+
 import com.swp.PodBookingSystem.dto.request.Order.OrderUpdateRequest;
 import com.swp.PodBookingSystem.dto.request.Order.OrderUpdateStaffRequest;
 import com.swp.PodBookingSystem.dto.respone.Order.OrderManagementResponse;
@@ -15,9 +16,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -48,6 +51,12 @@ public class OrderService {
         return orders.stream()
                 .map(orderMapper::toOrderResponse)
                 .collect(Collectors.toList());
+    }
+
+    public PaginationResponse<List<OrderManagementResponse>> getOrdersByAccountCustomerId(int page, int take, String accountId, String status) {
+        Page<Order> ordersPage;
+        ordersPage = orderRepository.findByAccountCustomerId(accountId, PageRequest.of(page, take));
+        return convertToPaginationQueryResponse(ordersPage, status);
     }
 
     public PaginationResponse<List<OrderManagementResponse>> getOrdersByRole(
@@ -101,7 +110,7 @@ public class OrderService {
                 .build();
     }
 
-    public OrderResponse updateOrderHandlerWithOrder(String id, OrderUpdateStaffRequest request){
+    public OrderResponse updateOrderHandlerWithOrder(String id, OrderUpdateStaffRequest request) {
         Order existingOrder = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
         if (request.getOrderHandler() == null) {
             throw new RuntimeException("Account handler cannot be null");
@@ -116,7 +125,7 @@ public class OrderService {
                 .build();
     }
 
-    public void updateOrderUpdateAt(String orderId){
+    public void updateOrderUpdateAt(String orderId) {
         orderRepository.updateOrderUpdatedAt(orderId, LocalDateTime.now());
     }
 
@@ -140,12 +149,34 @@ public class OrderService {
                     .build();
         }).collect(Collectors.toList());
         return PaginationResponse.<List<OrderManagementResponse>>builder()
+                .message("Lấy danh sách hóa đơn thành công")
                 .data(orderResponses)
                 .currentPage(ordersPage.getNumber())
                 .totalPage(ordersPage.getTotalPages())
                 .recordPerPage(ordersPage.getSize())
                 .totalRecord((int) ordersPage.getTotalElements())
                 .build();
+    }
+
+    private PaginationResponse<List<OrderManagementResponse>> convertToPaginationQueryResponse(Page<Order> ordersPage, String status) {
+        List<OrderManagementResponse> orderResponses = ordersPage.getContent().stream().map(order -> {
+            List<OrderDetailManagementResponse> orderDetailDTOs = orderDetailService.getOrderDetailByOrderId(order.getId(), status);
+            return OrderManagementResponse.builder()
+                    .id(order.getId())
+                    .createdAt(order.getCreatedAt())
+                    .updatedAt(order.getUpdatedAt())
+                    .orderDetails(orderDetailDTOs)
+                    .build();
+        }).filter(orderResponse -> !orderResponse.getOrderDetails().isEmpty()).collect(Collectors.toList());
+        return PaginationResponse.<List<OrderManagementResponse>>builder()
+                .message("Lấy danh sách hóa đơn thành công")
+                .data(orderResponses)
+                .currentPage(ordersPage.getNumber())
+                .totalPage(ordersPage.getTotalPages())
+                .recordPerPage(ordersPage.getSize())
+                .totalRecord(orderResponses.size())
+                .build();
+
     }
 
     public LocalDateTime parseDateTime(String dateTime) {
@@ -156,14 +187,14 @@ public class OrderService {
     /*
     [GET]: /order/number-order-current-day
      */
-    public int countCurrentlyOrder () {
+    public int countCurrentlyOrder() {
         return orderRepository.countCurrentlyOrder();
     }
 
     /*
     [GET]: /order/number-order
      */
-    public int countOrder (LocalDateTime startTime, LocalDateTime endTime) {
+    public int countOrder(LocalDateTime startTime, LocalDateTime endTime) {
         return orderRepository.countOrdersBetweenDatetime(startTime, endTime);
     }
 }

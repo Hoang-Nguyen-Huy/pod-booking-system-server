@@ -9,12 +9,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface OrderRepository  extends JpaRepository<Order, String> {
+public interface OrderRepository extends JpaRepository<Order, String> {
     List<Order> findByAccountId(String accountId);
+
+    @Query("SELECT o FROM Order o WHERE o.account.id = :accountId")
+    Page<Order> findByAccountCustomerId(@Param("accountId") String accountId, Pageable pageable);
 
     Page<Order> findAll(Pageable pageable);
 
@@ -39,11 +43,11 @@ public interface OrderRepository  extends JpaRepository<Order, String> {
     void updateOrderUpdatedAt(String orderId, LocalDateTime updatedAt);
 
     @Query("""
-            SELECT o FROM Order o
-            JOIN o.account a
-            WHERE LOWER(o.id) LIKE LOWER(CONCAT('%', :keyword, '%'))
-               OR LOWER(a.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
-           """)
+             SELECT o FROM Order o
+             JOIN o.account a
+             WHERE LOWER(o.id) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                OR LOWER(a.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            """)
     Page<Order> searchByKeyword(String keyword, Pageable pageable);
 
     @Query("SELECT COUNT(DISTINCT o.id) FROM Order o " +
@@ -58,5 +62,5 @@ public interface OrderRepository  extends JpaRepository<Order, String> {
             "AND :endTime >= od.startTime " +
             "AND od.status = com.swp.PodBookingSystem.enums.OrderStatus.Successfully")
     int countOrdersBetweenDatetime(@Param("startTime") LocalDateTime startTime,
-                                    @Param("endTime") LocalDateTime endTime);
+                                   @Param("endTime") LocalDateTime endTime);
 }

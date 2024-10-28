@@ -26,6 +26,12 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, String
 
     List<OrderDetail> findByOrderId(String orderId);
 
+    @Query("SELECT od FROM OrderDetail od " +
+            "WHERE (od.order.id = :orderId)" +
+            "AND (od.status = :status)" +
+            "ORDER BY od.startTime DESC")
+    List<OrderDetail> findByOrderIdAndStatus(@Param("orderId") String orderId, @Param("status") OrderStatus status);
+
     List<OrderDetail> findByEndTime(LocalDateTime endTime);
 
     @Query(value = "SELECT od FROM OrderDetail od WHERE od.createdAt BETWEEN :startTime AND :endTime ORDER BY od.createdAt DESC")

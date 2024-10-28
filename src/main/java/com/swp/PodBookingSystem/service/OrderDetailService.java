@@ -87,6 +87,32 @@ public class OrderDetailService {
                 .build();
     }
 
+    public List<OrderDetailManagementResponse> getOrderDetailByOrderId(String orderId, String status) {
+        return orderDetailRepository.findByOrderIdAndStatus(orderId, OrderStatus.valueOf(status)).stream().map(orderDetail -> {
+            List<AmenityManagementResponse> amenities = orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(orderDetail.getId());
+            return OrderDetailManagementResponse.builder()
+                    .id(orderDetail.getId())
+                    .roomId(orderDetail.getRoom().getId())
+                    .roomName(orderDetail.getRoom().getName())
+                    .roomPrice(orderDetail.getPriceRoom())
+                    .buildingAddress(orderDetail.getBuilding().getAddress())
+                    .buildingId(orderDetail.getBuilding().getId())
+                    .roomId(orderDetail.getRoom().getId())
+                    .orderHandler(Optional.ofNullable(orderDetail.getOrderHandler())
+                            .map(accountService::toAccountResponse)
+                            .orElse(null))
+                    .customer(Optional.ofNullable(orderDetail.getCustomer())
+                            .map(accountService::toAccountResponse)
+                            .orElse(null))
+                    .servicePackage(servicePackageService.toServicePackageResponse(orderDetail.getServicePackage()))
+                    .status(orderDetail.getStatus().name())
+                    .startTime(orderDetail.getStartTime())
+                    .endTime(orderDetail.getEndTime())
+                    .amenities(amenities)
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
     public List<OrderDetailManagementResponse> getOrderDetailById(String orderId) {
         return orderDetailRepository.findByOrderId(orderId).stream().map(orderDetail -> {
             List<AmenityManagementResponse> amenities = orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(orderDetail.getId());
