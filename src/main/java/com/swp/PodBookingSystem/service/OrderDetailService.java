@@ -430,13 +430,7 @@ public class OrderDetailService {
     [GET]: /order-detail/revenue?
      */
     public double calculateRevenue(LocalDateTime startTime, LocalDateTime endTime) {
-        if (startTime == null) {
-            startTime = LocalDate.now().atStartOfDay();
-        }
-        if (endTime == null) {
-            endTime = LocalDate.now().atTime(LocalTime.MAX);
-        }
-        return orderDetailRepository.calculateRevenueBetweenDateTime(startTime, endTime);
+        return orderDetailRepository.calculateRevenueBetweenDateTime(startTime, endTime).orElse(0.0);
     }
 
     /*

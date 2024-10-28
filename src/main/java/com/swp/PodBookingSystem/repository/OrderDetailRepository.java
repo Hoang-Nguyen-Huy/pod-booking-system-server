@@ -102,7 +102,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, String
             "ON od.id = amenityTotal.orderDetailId " +
             "WHERE od.startTime >= :startTime AND od.endTime <= :endTime " +
             "AND od.status = com.swp.PodBookingSystem.enums.OrderStatus.Successfully")
-    Double calculateRevenueBetweenDateTime(@Param("startTime") LocalDateTime startTime,
+    Optional<Double> calculateRevenueBetweenDateTime(@Param("startTime") LocalDateTime startTime,
                                            @Param("endTime") LocalDateTime endTime);
 
     @Query("SELECT NEW com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueByMonthDto(" +
