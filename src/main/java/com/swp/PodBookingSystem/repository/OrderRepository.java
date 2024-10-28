@@ -18,36 +18,44 @@ import java.util.List;
 public interface OrderRepository extends JpaRepository<Order, String> {
     List<Order> findByAccountId(String accountId);
 
-    @Query("SELECT o FROM Order o WHERE o.account.id = :accountId")
-    Page<Order> findByAccountCustomerId(@Param("accountId") String accountId, Pageable pageable);
+    @Query("""
+            SELECT DISTINCT o FROM Order o
+            JOIN OrderDetail od ON o.id = od.order.id
+            WHERE o.account.id = :accountId
+              AND od.status = :status
+            AND od.id IS NOT NULL
+            ORDER BY o.createdAt DESC
+            """)
+    Page<Order> findByAccountCustomerId(@Param("accountId") String accountId, @Param("status") OrderStatus status, Pageable pageable);
 
     Page<Order> findAll(Pageable pageable);
 
     @Query("""
-    SELECT DISTINCT o FROM Order o
-    JOIN OrderDetail od ON o.id = od.order.id
-    WHERE o.createdAt >= :startTime 
-      AND o.createdAt <= :endTime
-      AND (:status IS NULL OR od.status = :status)
-    AND od.id IS NOT NULL
-    ORDER BY o.createdAt DESC
-    """)
+            SELECT DISTINCT o FROM Order o
+            JOIN OrderDetail od ON o.id = od.order.id
+            WHERE o.createdAt >= :startTime 
+              AND o.createdAt <= :endTime
+              AND (:status IS NULL OR od.status = :status)
+            AND od.id IS NOT NULL
+            ORDER BY o.createdAt DESC
+            """)
     Page<Order> findAllWithTimeRange(
             @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime,
             @Param("status") OrderStatus status,
             Pageable pageable);
+
     ;
 
     @Query("""
-    SELECT DISTINCT o FROM Order o
-    JOIN OrderDetail od ON o.id = od.order.id
-    WHERE od.building.id = :buildingNumber
-      AND o.createdAt >= :startTime 
-      AND o.createdAt <= :endTime
-      AND (:status IS NULL OR od.status = :status)
-    ORDER BY o.createdAt DESC
-""")
+                SELECT DISTINCT o FROM Order o
+                JOIN OrderDetail od ON o.id = od.order.id
+                WHERE od.building.id = :buildingNumber
+                  AND o.createdAt >= :startTime 
+                  AND o.createdAt <= :endTime
+                  AND (:status IS NULL OR od.status = :status)
+                ORDER BY o.createdAt DESC
+            """)
     Page<Order> findOrdersByBuildingNumberAndTimeRange(
             @Param("buildingNumber") int buildingNumber,
             @Param("startTime") LocalDateTime startTime,

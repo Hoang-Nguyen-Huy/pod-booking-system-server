@@ -61,8 +61,8 @@ public class OrderService {
 
     public PaginationResponse<List<OrderManagementResponse>> getOrdersByAccountCustomerId(int page, int take, String accountId, String status) {
         Page<Order> ordersPage;
-        ordersPage = orderRepository.findByAccountCustomerId(accountId, PageRequest.of(page, take));
-        return convertToPaginationQueryResponse(ordersPage, status);
+        ordersPage = orderRepository.findByAccountCustomerId(accountId, OrderStatus.valueOf(status), PageRequest.of(page, take));
+        return convertToPaginationResponse(ordersPage);
     }
 
     public PaginationResponse<List<OrderManagementResponse>> getOrdersByRole(
@@ -202,7 +202,7 @@ public class OrderService {
                 .map(room -> room.getName().replace(" ", ""))
                 .collect(Collectors.joining("-"));
         String uuid = UUID.randomUUID().toString();
-        return "OD-" + roomNames.toLowerCase() + "-CUS-" + customerName.replace(" ","").toString().substring(0,3).toLowerCase() + "-D-"
+        return "OD-" + roomNames.toLowerCase() + "-CUS-" + customerName.replace(" ", "").toString().substring(0, 3).toLowerCase() + "-D-"
                 + request.getStartTime().getFirst().getDayOfMonth() + "-"
                 + request.getStartTime().getFirst().getMonthValue() + "-"
                 + uuid.substring(0, 6);

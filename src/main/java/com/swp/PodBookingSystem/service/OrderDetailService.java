@@ -121,6 +121,7 @@ public class OrderDetailService {
             return OrderDetailManagementResponse.builder()
                     .id(orderDetail.getId())
                     .roomId(orderDetail.getRoom().getId())
+                    .roomImage(orderDetail.getRoom().getImage())
                     .roomName(orderDetail.getRoom().getName())
                     .roomPrice(orderDetail.getPriceRoom())
                     .buildingAddress(orderDetail.getBuilding().getAddress())
@@ -365,24 +366,24 @@ public class OrderDetailService {
         for (OrderDetail od : orderDetails) {
             if (request.getStatus() != null) {
                 od.setStatus(request.getStatus());
-                if(request.getStatus().equals(OrderStatus.Rejected)){
+                if (request.getStatus().equals(OrderStatus.Rejected)) {
                     double total = 0;
                     int countService = 0;
-                    if(od.getServicePackage().getId() == 1){
+                    if (od.getServicePackage().getId() == 1) {
                         countService = 4;
-                    } else if(od.getServicePackage().getId() == 2){
+                    } else if (od.getServicePackage().getId() == 2) {
                         countService = 30;
                     } else {
                         countService = 1;
                     }
-                    total += od.getPriceRoom() * (100- od.getDiscountPercentage()) * countService/ 100;
-                    List <OrderDetailAmenity> listOda = orderDetailAmenityRepository.findByOrderDetailId(od.getId());
-                    for(OrderDetailAmenity oda : listOda){
-                        total += oda.getPrice() * oda.getQuantity() * (100- od.getDiscountPercentage())  * countService/ 100;
-                        orderDetailAmenityService.updateOrderDetailAmenityStatus( new OrderDetailAmenityUpdateReq(oda.getId(), OrderDetailAmenityStatus.Canceled));
+                    total += od.getPriceRoom() * (100 - od.getDiscountPercentage()) * countService / 100;
+                    List<OrderDetailAmenity> listOda = orderDetailAmenityRepository.findByOrderDetailId(od.getId());
+                    for (OrderDetailAmenity oda : listOda) {
+                        total += oda.getPrice() * oda.getQuantity() * (100 - od.getDiscountPercentage()) * countService / 100;
+                        orderDetailAmenityService.updateOrderDetailAmenityStatus(new OrderDetailAmenityUpdateReq(oda.getId(), OrderDetailAmenityStatus.Canceled));
                     }
                     Account customer = od.getCustomer();
-                    if(customer != null){
+                    if (customer != null) {
                         customer.setBalance(customer.getBalance() + total);
                         accountRepository.save(customer);
                     }
