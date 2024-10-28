@@ -16,6 +16,10 @@ public class AccountResponseClient {
     String name;
     String email;
     String avatar;
+    String phoneNumber;
+    double balance;
+    String rankingName;
+    int point;
     @Enumerated(EnumType.STRING)
     AccountRole role;
     int buildingNumber;

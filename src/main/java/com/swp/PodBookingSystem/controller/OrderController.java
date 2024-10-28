@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -68,14 +69,14 @@ public class OrderController {
                 .build();
     }
 
-    @GetMapping("/{accountId}")
-    public ApiResponse<List<OrderResponse>> getOrdersByAccountId(@PathVariable String accountId) {
-        List<OrderResponse> orders = orderService.getOrdersByAccountId(accountId);
-        logOrders(orders);
-        return ApiResponse.<List<OrderResponse>>builder()
-                .data(orders)
-                .build();
-    }
+//    @GetMapping("/{accountId}")
+//    public ApiResponse<List<OrderResponse>> getOrdersByAccountId(@PathVariable String accountId) {
+//        List<OrderResponse> orders = orderService.getOrdersByAccountId(accountId);
+//        logOrders(orders);
+//        return ApiResponse.<List<OrderResponse>>builder()
+//                .data(orders)
+//                .build();
+//    }
 
     //Check room available -> yes: create order Status: Successfully
     //                     -> no: create order Status: Pending
@@ -108,7 +109,7 @@ public class OrderController {
     }
 
     @PutMapping
-    ApiResponse<OrderResponse> updateOrder(@RequestBody OrderUpdateRequest request){
+    ApiResponse<OrderResponse> updateOrder(@RequestBody OrderUpdateRequest request) {
         orderService.updateOrderUpdateAt(request.getId());
         return ApiResponse.<OrderResponse>builder()
                 .data(orderService.updateOrder(request))
@@ -117,9 +118,9 @@ public class OrderController {
     }
 
     @PutMapping("/staff")
-    ApiResponse<OrderResponse> updateStaffWithOrder(@RequestBody OrderUpdateStaffRequest request){
-        return ApiResponse.<OrderResponse> builder()
-                .data(orderService.updateOrderHandlerWithOrder(request.getId(),request))
+    ApiResponse<OrderResponse> updateStaffWithOrder(@RequestBody OrderUpdateStaffRequest request) {
+        return ApiResponse.<OrderResponse>builder()
+                .data(orderService.updateOrderHandlerWithOrder(request.getId(), request))
                 .message("Update order successfully")
                 .build();
     }
