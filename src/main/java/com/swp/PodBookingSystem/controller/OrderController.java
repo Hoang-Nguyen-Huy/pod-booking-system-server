@@ -151,7 +151,7 @@ public class OrderController {
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime) {
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy'T'hh:mm'T'a");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy'T'HH:mm");
         LocalDateTime start = startTime != null ? LocalDateTime.parse(startTime, formatter) : null;
         LocalDateTime end = endTime != null ? LocalDateTime.parse(endTime, formatter) : null;
 
