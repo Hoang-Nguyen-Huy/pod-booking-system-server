@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -57,7 +58,7 @@ public class AccountService {
      */
     @PreAuthorize("hasRole('Admin')")
     public Page<AccountManagementResponse> getAccounts(int page, int take) {
-        Pageable pageable = PageRequest.of(page - 1, take);
+        Pageable pageable = PageRequest.of(page - 1, take, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Account> accountPage = accountRepository.findAll(pageable);
         return accountPage.map(this::convertToAccountManagementResponse);
     }
