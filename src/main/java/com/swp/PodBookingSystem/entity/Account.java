@@ -25,8 +25,11 @@ public class Account {
     String id;
 
     String name;
+
     @Email
+    @Column(unique = true)
     String email;
+
     String password;
     String avatar;
     int point;
