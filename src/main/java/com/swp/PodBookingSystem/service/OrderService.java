@@ -1,6 +1,7 @@
 package com.swp.PodBookingSystem.service;
 import com.swp.PodBookingSystem.dto.request.Order.OrderUpdateRequest;
 import com.swp.PodBookingSystem.dto.request.Order.OrderUpdateStaffRequest;
+import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.Order.OrderManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderResponse;
@@ -16,10 +17,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -74,14 +79,14 @@ public class OrderService {
     }
 
     //CREATE:
-    public Order createOrderByRequest(Account account) {
+    public Order createOrderByRequest(Account account, OrderDetailCreationRequest request) {
         try {
             Order order = new Order();
             order.setAccount(account);
-            order.setId(UUID.randomUUID().toString());
+            order.setId(renderOrderID(request));
             order.setCreatedAt(LocalDateTime.now());
             order.setUpdatedAt(LocalDateTime.now());
-            order = orderRepository.save(order);
+            orderRepository.save(order);
             return order;
         } catch (Exception e) {
             log.error("Error creating order: ", e);
@@ -151,6 +156,25 @@ public class OrderService {
     public LocalDateTime parseDateTime(String dateTime) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
         return LocalDateTime.parse(dateTime, formatter);
+    }
+
+    public static String removeDiacritics(String input) {
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        return pattern.matcher(normalized).replaceAll("").replaceAll("[^\\p{L}]", "");
+    }
+
+    public String renderOrderID(OrderDetailCreationRequest request) {
+        String customerName = removeDiacritics(request.getCustomer().getName());
+        String roomNames = request.getSelectedRooms()
+                .stream()
+                .map(room -> room.getName().replace(" ", ""))
+                .collect(Collectors.joining("-"));
+        String uuid = UUID.randomUUID().toString();
+        return "OD-" + roomNames.toLowerCase() + "-CUS-" + customerName.replace(" ","").toString().substring(0,3).toLowerCase() + "-D-"
+                + request.getStartTime().getFirst().getDayOfMonth() + "-"
+                + request.getStartTime().getFirst().getMonthValue() + "-"
+                + uuid.substring(0, 6);
     }
 
     /*

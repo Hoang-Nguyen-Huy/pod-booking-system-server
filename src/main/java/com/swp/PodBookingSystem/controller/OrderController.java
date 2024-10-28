@@ -89,7 +89,7 @@ public class OrderController {
         try {
             String accountId = accountService.extractAccountIdFromToken(token);
             Account account = accountService.getAccountById(accountId);
-            Order orderCreated = orderService.createOrderByRequest(account);
+            Order orderCreated = orderService.createOrderByRequest(account, request);
             boolean isSomeRoomWasBook = orderDetailService.processOrderDetails(request, orderCreated, account);
 
             String status = isSomeRoomWasBook ? "Pending" : "Successfully";
