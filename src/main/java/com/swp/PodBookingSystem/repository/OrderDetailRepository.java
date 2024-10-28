@@ -1,7 +1,7 @@
 package com.swp.PodBookingSystem.repository;
 
 import com.swp.PodBookingSystem.dto.respone.Order.NumberOrderByBuildingDto;
-import com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueByMonthDto;
+import com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueChartDto;
 import com.swp.PodBookingSystem.entity.OrderDetail;
 import com.swp.PodBookingSystem.enums.OrderStatus;
 import org.springframework.data.domain.Page;
@@ -105,20 +105,48 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, String
     Optional<Double> calculateRevenueBetweenDateTime(@Param("startTime") LocalDateTime startTime,
                                            @Param("endTime") LocalDateTime endTime);
 
-    @Query("SELECT NEW com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueByMonthDto(" +
-            "CONCAT(YEAR(MIN(od.startTime)), '-', LPAD(CAST(MONTH(MIN(od.startTime)) AS string), 2, '0'), '-01'), " +
+    @Query("SELECT NEW com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueChartDto(" +
+            "CONCAT(YEAR(:startTime), '-', LPAD(CAST(MONTH(:startTime) AS string), 2, '0'), '-', LPAD(CAST(DAY(:startTime) AS string), 2, '0')), " +
             "SUM((od.priceRoom + COALESCE(amenityTotal.totalAmenityPrice, 0)) * " +
-            "(1 - COALESCE(od.discountPercentage, 0) / 100.0) * " +
-            "(1 - COALESCE(sp.discountPercentage, 0) / 100.0))) " +
+            "(1 - COALESCE(od.discountPercentage, 0) / 100.0) * (1 - COALESCE(sp.discountPercentage, 0) / 100.0))) " +
             "FROM OrderDetail od " +
             "LEFT JOIN od.servicePackage sp " +
             "LEFT JOIN (SELECT oda.orderDetail.id as orderDetailId, SUM(oda.price * oda.quantity) as totalAmenityPrice " +
             "           FROM OrderDetailAmenity oda GROUP BY oda.orderDetail.id) amenityTotal " +
             "ON od.id = amenityTotal.orderDetailId " +
-            "WHERE FUNCTION('YEAR', od.startTime) = FUNCTION('YEAR', CURRENT_DATE) " +
+            "WHERE DATE(od.startTime) = DATE(:startTime) " +
+            "AND od.status = com.swp.PodBookingSystem.enums.OrderStatus.Successfully")
+    RevenueChartDto calculateRevenueForSingleDay(@Param("startTime") LocalDateTime startTime);
+
+    @Query("SELECT NEW com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueChartDto(" +
+            "CONCAT(YEAR(MIN(od.startTime)), '-', LPAD(CAST(MONTH(MIN(od.startTime)) AS string), 2, '0'), '-01'), " +
+            "SUM((od.priceRoom + COALESCE(amenityTotal.totalAmenityPrice, 0)) * " +
+            "(1 - COALESCE(od.discountPercentage, 0) / 100.0) * (1 - COALESCE(sp.discountPercentage, 0) / 100.0))) " +
+            "FROM OrderDetail od " +
+            "LEFT JOIN od.servicePackage sp " +
+            "LEFT JOIN (SELECT oda.orderDetail.id as orderDetailId, SUM(oda.price * oda.quantity) as totalAmenityPrice " +
+            "           FROM OrderDetailAmenity oda GROUP BY oda.orderDetail.id) amenityTotal " +
+            "ON od.id = amenityTotal.orderDetailId " +
+            "WHERE od.startTime BETWEEN :startTime AND :endTime " +
             "AND od.status = com.swp.PodBookingSystem.enums.OrderStatus.Successfully " +
-            "GROUP BY YEAR(od.startTime), MONTH(od.startTime)")
-    List<RevenueByMonthDto> calculateRevenueByMonthForCurrentYear();
+            "GROUP BY YEAR(od.startTime), MONTH(od.startTime) " +
+            "ORDER BY YEAR(od.startTime), MONTH(od.startTime)")
+    List<RevenueChartDto> calculateRevenueByMonth(@Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
+
+    @Query("SELECT NEW com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueChartDto(" +
+            "CONCAT(YEAR(MIN(od.startTime)), '-Q', CEILING(MONTH(MIN(od.startTime)) / 3.0)), " +
+            "SUM((od.priceRoom + COALESCE(amenityTotal.totalAmenityPrice, 0)) * " +
+            "(1 - COALESCE(od.discountPercentage, 0) / 100.0) * (1 - COALESCE(sp.discountPercentage, 0) / 100.0))) " +
+            "FROM OrderDetail od " +
+            "LEFT JOIN od.servicePackage sp " +
+            "LEFT JOIN (SELECT oda.orderDetail.id as orderDetailId, SUM(oda.price * oda.quantity) as totalAmenityPrice " +
+            "           FROM OrderDetailAmenity oda GROUP BY oda.orderDetail.id) amenityTotal " +
+            "ON od.id = amenityTotal.orderDetailId " +
+            "WHERE od.startTime BETWEEN :startTime AND :endTime " +
+            "AND od.status = com.swp.PodBookingSystem.enums.OrderStatus.Successfully " +
+            "GROUP BY YEAR(od.startTime), CEILING(MONTH(od.startTime) / 3.0) " +
+            "ORDER BY YEAR(od.startTime), CEILING(MONTH(od.startTime) / 3.0)")
+    List<RevenueChartDto> calculateRevenueByQuarter(@Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 
     @Query("SELECT NEW com.swp.PodBookingSystem.dto.respone.Order.NumberOrderByBuildingDto(" +
             "od.building.id, od.building.address, COUNT(DISTINCT od.order.id)" +

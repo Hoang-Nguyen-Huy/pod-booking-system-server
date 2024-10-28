@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -434,10 +435,22 @@ public class OrderDetailService {
     }
 
     /*
-    [GET]: /order-detail/revenue-by-month
+    [GET]: /order-detail/revenue-chart
      */
-    public List<RevenueByMonthDto> calculateRevenueByMonth() {
-        return orderDetailRepository.calculateRevenueByMonthForCurrentYear();
+    public List<RevenueChartDto> calculateRevenueByMonth(LocalDateTime startTime, LocalDateTime endTime, String viewWith) {
+        if (viewWith == null) {
+            return Collections.singletonList(orderDetailRepository.calculateRevenueForSingleDay(startTime));
+        }
+        switch (viewWith.toLowerCase()) {
+            case "day":
+                return Collections.singletonList(orderDetailRepository.calculateRevenueForSingleDay(startTime));
+            case "month":
+                return orderDetailRepository.calculateRevenueByMonth(startTime, endTime);
+            case "quarter":
+                return orderDetailRepository.calculateRevenueByQuarter(startTime, endTime);
+            default:
+                return Collections.singletonList(orderDetailRepository.calculateRevenueForSingleDay(startTime));
+        }
     }
 
     /*
