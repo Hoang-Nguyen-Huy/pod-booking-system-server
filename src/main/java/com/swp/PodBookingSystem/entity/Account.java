@@ -30,6 +30,7 @@ public class Account {
     String password;
     String avatar;
     int point;
+    String phoneNumber;
 
     @Enumerated(EnumType.STRING)
     AccountRole role;
