@@ -30,6 +30,8 @@ public interface AccountMapper {
     }
 
     @Mapping(source = "role", target = "role", qualifiedByName = "stringToAccountRole")
+    @Mapping(source = "phoneNumber", target = "phoneNumber")
+    @Mapping(source = "rankingName", target = "rankingName")
     AccountResponseClient toAccountResponseClient(Account account);
 
     @Mapping(target = "id", ignore = true)

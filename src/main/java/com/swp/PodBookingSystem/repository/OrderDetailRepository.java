@@ -21,7 +21,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, String
     @Query("SELECT od FROM OrderDetail od " +
             "WHERE (od.customer.id = :customerId)" +
             "AND (od.status = :status)" +
-            "ORDER BY od.createdAt DESC")
+            "ORDER BY od.startTime DESC")
     Page<OrderDetail> findByCustomer_Id(@Param("customerId") String customerId, @Param("status") OrderStatus status, Pageable pageable);
 
     List<OrderDetail> findByOrderId(String orderId);
@@ -81,7 +81,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, String
             "WHERE od.startTime >= :startTime AND od.endTime <= :endTime " +
             "AND od.status = com.swp.PodBookingSystem.enums.OrderStatus.Successfully")
     Double calculateRevenueBetweenDateTime(@Param("startTime") LocalDateTime startTime,
-                            @Param("endTime") LocalDateTime endTime);
+                                           @Param("endTime") LocalDateTime endTime);
 
     @Query("SELECT NEW com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueByMonthDto(" +
             "CONCAT(YEAR(MIN(od.startTime)), '-', LPAD(CAST(MONTH(MIN(od.startTime)) AS string), 2, '0'), '-01'), " +
