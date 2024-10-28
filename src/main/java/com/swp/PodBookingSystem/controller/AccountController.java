@@ -50,6 +50,7 @@ public class AccountController {
     ApiResponse<AccountResponse> createAccount(@RequestBody @Valid AccountCreationRequest request) {
         return ApiResponse.<AccountResponse>builder()
                 .data(accountService.createAccount(request))
+                .message("Thêm tài khoản mới thành công")
                 .build();
     }
 
