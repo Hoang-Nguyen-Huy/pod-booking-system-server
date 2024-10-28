@@ -93,7 +93,6 @@ public class OrderService {
     public OrderResponse updateOrder(OrderUpdateRequest request) {
         Order existingOrder = orderRepository.findById(request.getId()).orElseThrow(() -> new RuntimeException("Order not found with id: " + request.getId()));
         orderDetailService.updateOrderDetail(request);
-        updateOrderUpdateAt(request.getId());
         return OrderResponse.builder()
                 .id(existingOrder.getId())
                 .accountId(existingOrder.getAccount().getId())
