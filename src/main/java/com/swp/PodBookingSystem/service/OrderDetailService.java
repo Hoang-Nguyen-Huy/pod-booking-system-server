@@ -123,6 +123,7 @@ public class OrderDetailService {
                     .roomId(orderDetail.getRoom().getId())
                     .roomImage(orderDetail.getRoom().getImage())
                     .roomName(orderDetail.getRoom().getName())
+                    .roomTypeName(orderDetail.getRoom().getRoomType().getName())
                     .roomPrice(orderDetail.getPriceRoom())
                     .buildingAddress(orderDetail.getBuilding().getAddress())
                     .buildingId(orderDetail.getBuilding().getId())
