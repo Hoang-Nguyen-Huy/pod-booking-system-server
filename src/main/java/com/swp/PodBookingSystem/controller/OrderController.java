@@ -122,7 +122,7 @@ public class OrderController {
         orderService.updateOrderUpdateAt(request.getId());
         return ApiResponse.<OrderResponse>builder()
                 .data(orderService.updateOrder(request))
-                .message("Update order successfully")
+                .message("Cập nhật hóa đơn thành công")
                 .build();
     }
 
