@@ -438,6 +438,12 @@ public class OrderDetailService {
     [GET]: /order-detail/revenue-chart
      */
     public List<RevenueChartDto> calculateRevenueByMonth(LocalDateTime startTime, LocalDateTime endTime, String viewWith) {
+        if (startTime == null) {
+            startTime = LocalDate.now().atStartOfDay();
+        }
+        if (endTime == null) {
+            endTime = LocalDate.now().atTime(LocalTime.MAX);
+        }
         if (viewWith == null) {
             return Collections.singletonList(orderDetailRepository.calculateRevenueForSingleDay(startTime));
         }
