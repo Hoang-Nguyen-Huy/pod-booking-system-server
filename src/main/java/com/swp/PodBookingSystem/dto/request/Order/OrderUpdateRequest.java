@@ -17,6 +17,7 @@ import java.util.List;
 public class OrderUpdateRequest {
     String id;
     OrderStatus status;
+    String cancelReason;
     Account orderHandler;
     List<OrderDetailUpdateRoomRequest> orderDetails;
 }
