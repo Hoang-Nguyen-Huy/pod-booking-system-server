@@ -394,6 +394,9 @@ public class OrderDetailService {
                 Account orderHandler = accountService.getAccountById(request.getOrderHandler().getId());
                 od.setOrderHandler(orderHandler);
             }
+            if (request.getCancelReason() != null) {
+                od.setCancelReason(request.getCancelReason());
+            }
             if (request.getOrderDetails() != null && !request.getOrderDetails().isEmpty()) {
                 for (OrderDetailUpdateRoomRequest odr : request.getOrderDetails()) {
                     if (odr.getId().equals(od.getId())) {
