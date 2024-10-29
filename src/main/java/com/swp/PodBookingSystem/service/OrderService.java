@@ -10,6 +10,8 @@ import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.entity.*;
 import com.swp.PodBookingSystem.enums.AccountRole;
 import com.swp.PodBookingSystem.enums.OrderStatus;
+import com.swp.PodBookingSystem.exception.AppException;
+import com.swp.PodBookingSystem.exception.ErrorCode;
 import com.swp.PodBookingSystem.mapper.OrderMapper;
 import com.swp.PodBookingSystem.repository.OrderRepository;
 import org.slf4j.Logger;
@@ -19,14 +21,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
+import java.util.*;
 import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Locale;
 
-import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -50,6 +49,21 @@ public class OrderService {
         return orders.stream()
                 .map(orderMapper::toOrderResponse)
                 .collect(Collectors.toList());
+    }
+
+    public OrderManagementResponse getInfoOrder(String id) {
+        OrderManagementResponse order = new OrderManagementResponse();
+        Optional<Order> orderOptional = orderRepository.findById(id);
+        if (orderOptional.isEmpty()) {
+            throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+        } else {
+            order.setId(orderOptional.get().getId());
+            order.setCreatedAt(orderOptional.get().getCreatedAt());
+            order.setUpdatedAt(orderOptional.get().getUpdatedAt());
+        }
+        List<OrderDetailManagementResponse> orderDetailDTOs = orderDetailService.getOrderDetailById(order.getId());
+        order.setOrderDetails(orderDetailDTOs);
+        return order;
     }
 
     public List<OrderResponse> getOrdersByAccountId(String accountId) {

@@ -44,6 +44,15 @@ public class OrderController {
                 .build();
     }
 
+    @GetMapping("/order-info/{orderId}")
+    public ApiResponse<OrderManagementResponse> getInfoOrder(@PathVariable String orderId) {
+        return ApiResponse.<OrderManagementResponse>builder()
+                .message("Lấy thông tin đơn hàng thành công")
+                .data(orderService.getInfoOrder(orderId))
+                .build();
+    }
+
+
     @GetMapping("/page")
     public ApiResponse<PaginationResponse<List<OrderManagementResponse>>> getOrdersByRole(
             @RequestHeader("Authorization") String token,
