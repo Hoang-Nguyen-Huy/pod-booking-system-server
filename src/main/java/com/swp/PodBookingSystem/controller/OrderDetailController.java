@@ -4,7 +4,7 @@ import com.swp.PodBookingSystem.dto.request.Building.BuildingPaginationDTO;
 import com.swp.PodBookingSystem.dto.respone.Order.NumberOrderByBuildingDto;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailFullInfoResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
-import com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueByMonthDto;
+import com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueChartDto;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.service.OrderDetailService;
 import lombok.AccessLevel;
@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 
 import org.springframework.data.domain.Page;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -96,7 +95,7 @@ public class OrderDetailController {
     ApiResponse<Double> getRevenue(@RequestParam(required = false) String startTime,
                                    @RequestParam(required = false) String endTime) {
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy'T'hh:mm'T'a");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy'T'HH:mm");
         LocalDateTime start = startTime != null ? LocalDateTime.parse(startTime, formatter) : null;
         LocalDateTime end = endTime != null ? LocalDateTime.parse(endTime, formatter) : null;
 
@@ -106,11 +105,18 @@ public class OrderDetailController {
                 .build();
     }
 
-    @GetMapping("/revenue-by-month")
-    ApiResponse<List<RevenueByMonthDto>> getRevenueByMonth() {
-        return ApiResponse.<List<RevenueByMonthDto>>builder()
-                .message("Doanh thu các tháng năm hiện tại")
-                .data(orderDetailService.calculateRevenueByMonth())
+    @GetMapping("/revenue-chart")
+    ApiResponse<List<RevenueChartDto>> getRevenueChart(@RequestParam(required = false) String startTime,
+                                                       @RequestParam(required = false) String endTime,
+                                                       @RequestParam(required = false) String viewWith) {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy'T'HH:mm");
+        LocalDateTime start = startTime != null ? LocalDateTime.parse(startTime, formatter) : null;
+        LocalDateTime end = endTime != null ? LocalDateTime.parse(endTime, formatter) : null;
+
+        return ApiResponse.<List<RevenueChartDto>>builder()
+                .message("Doanh thu theo " + (viewWith != null ? viewWith : "ngày"))
+                .data(orderDetailService.calculateRevenueByMonth(start, end, viewWith))
                 .build();
     }
 

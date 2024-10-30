@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class RevenueByMonthDto {
+public class RevenueChartDto {
     String date;
     Double revenue;
 }

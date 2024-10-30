@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -461,20 +462,32 @@ public class OrderDetailService {
     [GET]: /order-detail/revenue?
      */
     public double calculateRevenue(LocalDateTime startTime, LocalDateTime endTime) {
+        return orderDetailRepository.calculateRevenueBetweenDateTime(startTime, endTime).orElse(0.0);
+    }
+
+    /*
+    [GET]: /order-detail/revenue-chart
+     */
+    public List<RevenueChartDto> calculateRevenueByMonth(LocalDateTime startTime, LocalDateTime endTime, String viewWith) {
         if (startTime == null) {
             startTime = LocalDate.now().atStartOfDay();
         }
         if (endTime == null) {
             endTime = LocalDate.now().atTime(LocalTime.MAX);
         }
-        return orderDetailRepository.calculateRevenueBetweenDateTime(startTime, endTime);
-    }
-
-    /*
-    [GET]: /order-detail/revenue-by-month
-     */
-    public List<RevenueByMonthDto> calculateRevenueByMonth() {
-        return orderDetailRepository.calculateRevenueByMonthForCurrentYear();
+        if (viewWith == null) {
+            return Collections.singletonList(orderDetailRepository.calculateRevenueForSingleDay(startTime));
+        }
+        switch (viewWith.toLowerCase()) {
+            case "day":
+                return Collections.singletonList(orderDetailRepository.calculateRevenueForSingleDay(startTime));
+            case "month":
+                return orderDetailRepository.calculateRevenueByMonth(startTime, endTime);
+            case "quarter":
+                return orderDetailRepository.calculateRevenueByQuarter(startTime, endTime);
+            default:
+                return Collections.singletonList(orderDetailRepository.calculateRevenueForSingleDay(startTime));
+        }
     }
 
     /*
