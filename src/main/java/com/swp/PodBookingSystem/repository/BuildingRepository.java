@@ -16,7 +16,8 @@ public interface BuildingRepository extends JpaRepository<Building, Integer> {
     List<Building> searchByKeyword(String keyword);
 
     @Query("SELECT b FROM Building b " +
-            "WHERE (b.address LIKE %:address%)")
+            "WHERE (b.address LIKE %:address%)" +
+            "ORDER BY b.createdAt DESC")
     Page<Building> findFilteredBuildings(@Param("address") String address,
                                          Pageable pageable);
 }

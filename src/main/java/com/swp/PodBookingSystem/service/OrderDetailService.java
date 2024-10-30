@@ -90,13 +90,41 @@ public class OrderDetailService {
                 .build();
     }
 
+    public List<OrderDetailManagementResponse> getOrderDetailByOrderId(String orderId, String status) {
+        return orderDetailRepository.findByOrderIdAndStatus(orderId, OrderStatus.valueOf(status)).stream().map(orderDetail -> {
+            List<AmenityManagementResponse> amenities = orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(orderDetail.getId());
+            return OrderDetailManagementResponse.builder()
+                    .id(orderDetail.getId())
+                    .roomId(orderDetail.getRoom().getId())
+                    .roomName(orderDetail.getRoom().getName())
+                    .roomPrice(orderDetail.getPriceRoom())
+                    .buildingAddress(orderDetail.getBuilding().getAddress())
+                    .buildingId(orderDetail.getBuilding().getId())
+                    .roomId(orderDetail.getRoom().getId())
+                    .orderHandler(Optional.ofNullable(orderDetail.getOrderHandler())
+                            .map(accountService::toAccountResponse)
+                            .orElse(null))
+                    .customer(Optional.ofNullable(orderDetail.getCustomer())
+                            .map(accountService::toAccountResponse)
+                            .orElse(null))
+                    .servicePackage(servicePackageService.toServicePackageResponse(orderDetail.getServicePackage()))
+                    .status(orderDetail.getStatus().name())
+                    .startTime(orderDetail.getStartTime())
+                    .endTime(orderDetail.getEndTime())
+                    .amenities(amenities)
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
     public List<OrderDetailManagementResponse> getOrderDetailById(String orderId) {
         return orderDetailRepository.findByOrderId(orderId).stream().map(orderDetail -> {
             List<AmenityManagementResponse> amenities = orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(orderDetail.getId());
             return OrderDetailManagementResponse.builder()
                     .id(orderDetail.getId())
                     .roomId(orderDetail.getRoom().getId())
+                    .roomImage(orderDetail.getRoom().getImage())
                     .roomName(orderDetail.getRoom().getName())
+                    .roomTypeName(orderDetail.getRoom().getRoomType().getName())
                     .roomPrice(orderDetail.getPriceRoom())
                     .buildingAddress(orderDetail.getBuilding().getAddress())
                     .buildingId(orderDetail.getBuilding().getId())
@@ -340,24 +368,24 @@ public class OrderDetailService {
         for (OrderDetail od : orderDetails) {
             if (request.getStatus() != null) {
                 od.setStatus(request.getStatus());
-                if(request.getStatus().equals(OrderStatus.Rejected)){
+                if (request.getStatus().equals(OrderStatus.Rejected)) {
                     double total = 0;
                     int countService = 0;
-                    if(od.getServicePackage().getId() == 1){
+                    if (od.getServicePackage().getId() == 1) {
                         countService = 4;
-                    } else if(od.getServicePackage().getId() == 2){
+                    } else if (od.getServicePackage().getId() == 2) {
                         countService = 30;
                     } else {
                         countService = 1;
                     }
-                    total += od.getPriceRoom() * (100- od.getDiscountPercentage()) * countService/ 100;
-                    List <OrderDetailAmenity> listOda = orderDetailAmenityRepository.findByOrderDetailId(od.getId());
-                    for(OrderDetailAmenity oda : listOda){
-                        total += oda.getPrice() * oda.getQuantity() * (100- od.getDiscountPercentage())  * countService/ 100;
-                        orderDetailAmenityService.updateOrderDetailAmenityStatus( new OrderDetailAmenityUpdateReq(oda.getId(), OrderDetailAmenityStatus.Canceled));
+                    total += od.getPriceRoom() * (100 - od.getDiscountPercentage()) * countService / 100;
+                    List<OrderDetailAmenity> listOda = orderDetailAmenityRepository.findByOrderDetailId(od.getId());
+                    for (OrderDetailAmenity oda : listOda) {
+                        total += oda.getPrice() * oda.getQuantity() * (100 - od.getDiscountPercentage()) * countService / 100;
+                        orderDetailAmenityService.updateOrderDetailAmenityStatus(new OrderDetailAmenityUpdateReq(oda.getId(), OrderDetailAmenityStatus.Canceled));
                     }
                     Account customer = od.getCustomer();
-                    if(customer != null){
+                    if (customer != null) {
                         customer.setBalance(customer.getBalance() + total);
                         accountRepository.save(customer);
                     }
@@ -366,6 +394,9 @@ public class OrderDetailService {
             if (request.getOrderHandler() != null) {
                 Account orderHandler = accountService.getAccountById(request.getOrderHandler().getId());
                 od.setOrderHandler(orderHandler);
+            }
+            if (request.getCancelReason() != null) {
+                od.setCancelReason(request.getCancelReason());
             }
             if (request.getOrderDetails() != null && !request.getOrderDetails().isEmpty()) {
                 for (OrderDetailUpdateRoomRequest odr : request.getOrderDetails()) {

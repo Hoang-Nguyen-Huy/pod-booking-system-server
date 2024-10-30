@@ -17,6 +17,8 @@ public class OrderDetailManagementResponse {
     private String id;
     private int roomId;
     private String roomName;
+    private String roomImage;
+    private String roomTypeName;
     private double roomPrice;
     private String status;
     private LocalDateTime startTime;

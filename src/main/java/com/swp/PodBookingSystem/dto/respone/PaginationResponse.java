@@ -12,11 +12,11 @@ import lombok.experimental.FieldDefaults;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PaginationResponse<T> {
     @Builder.Default
-    private int code = 200;
-    private String message;
-    private T data;
-    private int currentPage;
-    private int totalPage;
-    private int recordPerPage;
-    private int totalRecord;
+    int code = 200;
+    String message;
+    T data;
+    int currentPage;
+    int totalPage;
+    int recordPerPage;
+    int totalRecord;
 }
