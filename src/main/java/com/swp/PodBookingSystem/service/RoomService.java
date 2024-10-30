@@ -215,4 +215,10 @@ public class RoomService {
     public int countCurrentlyServedRooms() {
         return roomRepository.countCurrentlyServedRooms(LocalDateTime.now());
     }
+
+    public List<Room> getRoomsByTypeAndDate(Integer typeId, LocalDate date) {
+        LocalDateTime startTime = date.atStartOfDay();
+        LocalDateTime endTime = date.atTime(23, 59, 59);
+        return roomRepository.getRoomsByTypeAndDate(typeId, startTime, endTime);
+    }
 }
