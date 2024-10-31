@@ -83,6 +83,7 @@ public class AuthenticationService {
                 account.getPassword());
         if (!authenticated)
             throw new AppException(ErrorCode.INCORRECT_PASSWORD);
+        if (account.getStatus() == 0) throw new AppException(ErrorCode.ACCOUNT_NOT_ACTIVE);
 
         var accessToken = generateAccessToken(account);
         var refreshToken = generateRefreshToken(account);
@@ -118,8 +119,8 @@ public class AuthenticationService {
         // Sign access token và refresh token mới đồng thời xóa refresh token cũ trong db
         var accessToken = generateAccessToken(refreshToken.getAccount());
         var newRefreshToken = generateRefreshToken(refreshToken.getAccount());
-        refreshTokenRepository.save(new RefreshToken(null, newRefreshToken, refreshToken.getAccount(), decodeRefreshToken.getJWTClaimsSet().getIssueTime(), decodeRefreshToken.getJWTClaimsSet().getExpirationTime()));
         refreshTokenRepository.deleteByToken(request.getRefreshToken());
+        refreshTokenRepository.save(new RefreshToken(null, newRefreshToken, refreshToken.getAccount(), decodeRefreshToken.getJWTClaimsSet().getIssueTime(), decodeRefreshToken.getJWTClaimsSet().getExpirationTime()));
         return RefreshTokenResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(newRefreshToken)
@@ -133,7 +134,7 @@ public class AuthenticationService {
                 .claim("scope", account.getRole()) // ở đây thằng Spring hiểu role là scope để map vào authorization header
                 .issueTime(new Date())
                 .expirationTime(new Date(
-                        Instant.now().plus(30, ChronoUnit.MINUTES).toEpochMilli()
+                        Instant.now().plus(60, ChronoUnit.MINUTES).toEpochMilli()
                 ))
                 .build();
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
@@ -175,12 +176,13 @@ public class AuthenticationService {
         // Nếu khách chưa có tài khoản trong db thì mình sẽ tạo tạm thời cho khách
         if (accountOptional.isEmpty()) {
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
-            AccountCreationRequest request = new AccountCreationRequest(name, email, passwordEncoder.encode("123123"), "Customer", 1);
+            AccountCreationRequest request = new AccountCreationRequest(name, email, passwordEncoder.encode("123123"), 0, "Customer", 1);
             account = accountMapper.toAccount(request);
             account.setAvatar(avatar);
             accountRepository.save(account);
         } else {
             account = accountOptional.get(); // Lấy tài khoản từ Optional
+            if (account.getStatus() == 0) throw new AppException(ErrorCode.ACCOUNT_NOT_ACTIVE);
         }
 
         // Tạo access token và refresh token

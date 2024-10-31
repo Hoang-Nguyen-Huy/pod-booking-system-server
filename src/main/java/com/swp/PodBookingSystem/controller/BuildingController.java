@@ -81,7 +81,7 @@ public class BuildingController {
                                                  @RequestBody BuildingCreationRequest request) {
         return ApiResponse.<BuildingResponse>builder()
                 .data(buildingService.updateBuilding(buildingId, request))
-                .message("Update building successfully")
+                .message("Cập nhật chi nhánh thành công")
                 .build();
     }
 

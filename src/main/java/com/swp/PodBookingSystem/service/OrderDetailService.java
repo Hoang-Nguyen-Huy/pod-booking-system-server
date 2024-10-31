@@ -3,11 +3,11 @@ package com.swp.PodBookingSystem.service;
 import com.swp.PodBookingSystem.dto.request.Order.OrderUpdateRequest;
 import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationRequest;
 import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailUpdateRoomRequest;
+import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenityUpdateReq;
 import com.swp.PodBookingSystem.dto.request.Room.RoomWithAmenitiesDTO;
 import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementResponse;
-import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailAmenityListResponse;
-import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailManagementResponse;
-import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
+import com.swp.PodBookingSystem.dto.respone.OrderDetail.*;
+import com.swp.PodBookingSystem.dto.respone.Order.NumberOrderByBuildingDto;
 import com.swp.PodBookingSystem.dto.respone.OrderDetailAmenity.OrderDetailAmenityResponseDTO;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.entity.*;
@@ -31,9 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -51,6 +50,7 @@ public class OrderDetailService {
     private final ServicePackageService servicePackageService;
     private final RoomService roomService;
     private final RoomRepository roomRepository;
+    private final OrderDetailAmenityRepository orderDetailAmenityRepository;
 
     //GET:
     public List<OrderDetailResponse> getAllOrders() {
@@ -60,8 +60,36 @@ public class OrderDetailService {
                 .collect(Collectors.toList());
     }
 
-    public List<OrderDetailManagementResponse> getOrderDetailById(String orderId) {
-        return orderDetailRepository.findByOrderId(orderId).stream().map(orderDetail -> {
+    public OrderDetailFullInfoResponse getOrderDetailByOrderDetailId(String orderDetailId) {
+        OrderDetail orderDetail = orderDetailRepository.findById(orderDetailId).orElse(null);
+        if (orderDetail == null) {
+            throw new AppException(ErrorCode.ORDER_DETAIL_NOT_EXIST);
+        }
+        List<AmenityManagementResponse> amenities = orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(orderDetail.getId());
+        return OrderDetailFullInfoResponse.builder()
+                .id(orderDetail.getId())
+                .roomId(orderDetail.getRoom().getId())
+                .roomName(orderDetail.getRoom().getName())
+                .roomImage(orderDetail.getRoom().getImage())
+                .roomPrice(orderDetail.getPriceRoom())
+                .buildingAddress(orderDetail.getBuilding().getAddress())
+                .buildingId(orderDetail.getBuilding().getId())
+                .servicePackage(servicePackageService.toServicePackageResponse(orderDetail.getServicePackage()))
+                .status(orderDetail.getStatus().name())
+                .orderHandler(Optional.ofNullable(orderDetail.getOrderHandler())
+                        .map(accountService::toAccountResponse)
+                        .orElse(null))
+                .customer(Optional.ofNullable(orderDetail.getCustomer())
+                        .map(accountService::toAccountResponse)
+                        .orElse(null))
+                .startTime(orderDetail.getStartTime())
+                .endTime(orderDetail.getEndTime())
+                .amenities(amenities)
+                .build();
+    }
+
+    public List<OrderDetailManagementResponse> getOrderDetailByOrderId(String orderId, String status) {
+        return orderDetailRepository.findByOrderIdAndStatus(orderId, OrderStatus.valueOf(status)).stream().map(orderDetail -> {
             List<AmenityManagementResponse> amenities = orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(orderDetail.getId());
             return OrderDetailManagementResponse.builder()
                     .id(orderDetail.getId())
@@ -86,11 +114,39 @@ public class OrderDetailService {
         }).collect(Collectors.toList());
     }
 
+    public List<OrderDetailManagementResponse> getOrderDetailById(String orderId) {
+        return orderDetailRepository.findByOrderId(orderId).stream().map(orderDetail -> {
+            List<AmenityManagementResponse> amenities = orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(orderDetail.getId());
+            return OrderDetailManagementResponse.builder()
+                    .id(orderDetail.getId())
+                    .roomId(orderDetail.getRoom().getId())
+                    .roomImage(orderDetail.getRoom().getImage())
+                    .roomName(orderDetail.getRoom().getName())
+                    .roomTypeName(orderDetail.getRoom().getRoomType().getName())
+                    .roomPrice(orderDetail.getPriceRoom())
+                    .buildingAddress(orderDetail.getBuilding().getAddress())
+                    .buildingId(orderDetail.getBuilding().getId())
+                    .roomId(orderDetail.getRoom().getId())
+                    .orderHandler(Optional.ofNullable(orderDetail.getOrderHandler())
+                            .map(accountService::toAccountResponse)
+                            .orElse(null))
+                    .customer(Optional.ofNullable(orderDetail.getCustomer())
+                            .map(accountService::toAccountResponse)
+                            .orElse(null))
+                    .servicePackage(servicePackageService.toServicePackageResponse(orderDetail.getServicePackage()))
+                    .status(orderDetail.getStatus().name())
+                    .startTime(orderDetail.getStartTime())
+                    .endTime(orderDetail.getEndTime())
+                    .amenities(amenities)
+                    .build();
+        }).collect(Collectors.toList());
+    }
 
-    public Page<OrderDetailResponse> getOrdersByCustomerId(String customerId, int page, int take) {
+
+    public Page<OrderDetailResponse> getOrdersByCustomerId(String customerId, String status, int page, int take) {
         Pageable pageable = PageRequest.of(page - 1, take);
 
-        Page<OrderDetail> orderDetails = orderDetailRepository.findByCustomer_Id(customerId, pageable);
+        Page<OrderDetail> orderDetails = orderDetailRepository.findByCustomer_Id(customerId, OrderStatus.valueOf(status), pageable);
 
         return orderDetails.map(orderDetail -> {
             OrderDetailResponse response = orderDetailMapper.toOrderDetailResponse(orderDetail);
@@ -138,7 +194,14 @@ public class OrderDetailService {
                             .customerId(Optional.ofNullable(orderDetail.getCustomer())
                                     .map(Account::getId)
                                     .orElse(null))
+                            .customerName(Optional.ofNullable(orderDetail.getCustomer())
+                                    .map(Account::getName)
+                                    .orElse(null))
+                            .orderHandledId(Optional.ofNullable(orderDetail.getOrderHandler())
+                                    .map(Account::getId)
+                                    .orElse(null))
                             .buildingId(orderDetail.getBuilding().getId())
+                            .buildingAddress(orderDetail.getBuilding().getAddress())
                             .roomId(orderDetail.getRoom().getId())
                             .roomName(orderDetail.getRoom().getName())
                             .orderId(orderDetail.getOrder().getId())
@@ -311,10 +374,35 @@ public class OrderDetailService {
         for (OrderDetail od : orderDetails) {
             if (request.getStatus() != null) {
                 od.setStatus(request.getStatus());
+                if (request.getStatus().equals(OrderStatus.Rejected)) {
+                    double total = 0;
+                    int countService = 0;
+                    if (od.getServicePackage().getId() == 1) {
+                        countService = 4;
+                    } else if (od.getServicePackage().getId() == 2) {
+                        countService = 30;
+                    } else {
+                        countService = 1;
+                    }
+                    total += od.getPriceRoom() * (100 - od.getDiscountPercentage()) * countService / 100;
+                    List<OrderDetailAmenity> listOda = orderDetailAmenityRepository.findByOrderDetailId(od.getId());
+                    for (OrderDetailAmenity oda : listOda) {
+                        total += oda.getPrice() * oda.getQuantity() * (100 - od.getDiscountPercentage()) * countService / 100;
+                        orderDetailAmenityService.updateOrderDetailAmenityStatus(new OrderDetailAmenityUpdateReq(oda.getId(), OrderDetailAmenityStatus.Canceled));
+                    }
+                    Account customer = od.getCustomer();
+                    if (customer != null) {
+                        customer.setBalance(customer.getBalance() + total);
+                        accountRepository.save(customer);
+                    }
+                }
             }
             if (request.getOrderHandler() != null) {
                 Account orderHandler = accountService.getAccountById(request.getOrderHandler().getId());
                 od.setOrderHandler(orderHandler);
+            }
+            if (request.getCancelReason() != null) {
+                od.setCancelReason(request.getCancelReason());
             }
             if (request.getOrderDetails() != null && !request.getOrderDetails().isEmpty()) {
                 for (OrderDetailUpdateRoomRequest odr : request.getOrderDetails()) {
@@ -367,5 +455,83 @@ public class OrderDetailService {
         for (OrderDetail od : expiredOrderDetails) {
             orderDetailAmenityService.restoreAmenityQuantity(od.getId());
         }
+    }
+
+    /*
+    [GET]: /order-detail/revenue-current-day
+     */
+    public double calculateRevenueCurrentDay() {
+        return orderDetailRepository.calculateRevenueCurrentDay();
+    }
+
+    /*
+    [GET]: /order-detail/revenue?
+     */
+    public double calculateRevenue(LocalDateTime startTime, LocalDateTime endTime) {
+        return orderDetailRepository.calculateRevenueBetweenDateTime(startTime, endTime).orElse(0.0);
+    }
+
+    /*
+    [GET]: /order-detail/revenue-chart
+     */
+    public List<RevenueChartDto> calculateRevenueByMonth(LocalDateTime startTime, LocalDateTime endTime, String viewWith) {
+        if (startTime == null) {
+            startTime = LocalDate.now().atStartOfDay();
+        }
+        if (endTime == null) {
+            endTime = LocalDate.now().atTime(LocalTime.MAX);
+        }
+        if (viewWith == null) {
+            return Collections.singletonList(orderDetailRepository.calculateRevenueForSingleDay(startTime));
+        }
+        switch (viewWith.toLowerCase()) {
+            case "day":
+                return Collections.singletonList(orderDetailRepository.calculateRevenueForSingleDay(startTime));
+            case "month":
+                return calculateRevenueByMonth(startTime, endTime);
+            case "quarter":
+                return orderDetailRepository.calculateRevenueByQuarter(startTime, endTime);
+            default:
+                return Collections.singletonList(orderDetailRepository.calculateRevenueForSingleDay(startTime));
+        }
+    }
+
+    public List<RevenueChartDto> calculateRevenueByMonth(LocalDateTime startTime, LocalDateTime endTime) {
+        if (startTime == null) {
+            startTime = LocalDate.now().atStartOfDay();
+        }
+        if (endTime == null) {
+            endTime = LocalDate.now().atTime(LocalTime.MAX);
+        }
+
+        // Step 1: Generate all dates from startTime to endTime
+        List<LocalDate> dateRange = startTime.toLocalDate()
+                .datesUntil(endTime.toLocalDate().plusDays(1))
+                .collect(Collectors.toList());
+
+        // Step 2: Fetch actual revenue data from the repository
+        List<RevenueChartDto> actualRevenueData = orderDetailRepository.calculateRevenueByMonth(startTime, endTime);
+
+        // Step 3: Convert actual revenue data to a map for fast lookup
+        Map<String, Double> revenueMap = actualRevenueData.stream()
+                .collect(Collectors.toMap(RevenueChartDto::getDate, RevenueChartDto::getRevenue));
+
+        // Step 4: Populate the result with all dates in range, setting missing data to zero
+        List<RevenueChartDto> result = dateRange.stream()
+                .map(date -> {
+                    String formattedDate = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                    return new RevenueChartDto(formattedDate, revenueMap.getOrDefault(formattedDate, 0.0));
+                })
+                .collect(Collectors.toList());
+
+        return result;
+    }
+
+
+    /*
+    [GET]: /order-detail/number-order-by-building
+     */
+    public List<NumberOrderByBuildingDto> getNumberOrderByBuilding() {
+        return orderDetailRepository.countOrdersByBuilding();
     }
 }
