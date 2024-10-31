@@ -4,9 +4,12 @@ import biweekly.Biweekly;
 import biweekly.ICalendar;
 import biweekly.component.VEvent;
 import biweekly.property.Method;
+import biweekly.property.RecurrenceRule;
 import biweekly.util.Duration;
+import biweekly.util.Frequency;
 import com.swp.PodBookingSystem.dto.request.CalendarRequest;
 import com.swp.PodBookingSystem.dto.respone.Order.OrderManagementResponse;
+import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailFullInfoResponse;
 import com.swp.PodBookingSystem.entity.OrderDetail;
 import jakarta.activation.DataHandler;
 import jakarta.activation.DataSource;
@@ -30,9 +33,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -108,6 +108,40 @@ public class SendEmailService {
                 .replace("{{roomName}}", order.getOrderDetails().getFirst().getRoomTypeName())
                 .replace("{{status}}", status)
                 .replace("{{amenity}}", roomHaveAmenities.isEmpty() ? "Không có" : "Có")
+                .replace("{{totalPrice}}", formattedAmount + " VND");
+
+        helper.setFrom(fromEmailId);
+        helper.setTo(recipient);
+        helper.setSubject(subject);
+        helper.setText(content, true);
+
+        javaMailSender.send(mimeMessage);
+        log.info("Send email successfully");
+    }
+
+    public void sendMailAmenityOrder(String recipient, OrderDetailFullInfoResponse order, String subject) throws MessagingException, IOException {
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+        ClassPathResource resource = new ClassPathResource("templates/emailTemplate.html");
+        String content;
+        try (var inputStream = resource.getInputStream()) {
+            content = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        }
+
+        var roomHaveAmenities = order.getAmenities().stream().map(amenity -> amenity.getName()).collect(Collectors.toList());
+
+        double totalPriceAmenity = order.getAmenities().stream()
+                .mapToDouble(amenity -> amenity.getPrice() * amenity.getQuantity())
+                .sum();
+        double finalPrice = totalPriceAmenity * (1 - order.getServicePackage().getDiscountPercentage() / 100);
+
+        int integerAmount = (int) Math.round(finalPrice);
+        String formattedAmount = String.format("%,d", integerAmount).replace(",", ".");
+        content = content.replace("{{orderId}}", order.getId())
+                .replace("{{orderStartTime}}", order.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy")))
+                .replace("{{roomName}}", order.getRoomName())
+                .replace("{{status}}", order.getStatus())
+                .replace("{{amenity}}", roomHaveAmenities.isEmpty() ? "Không có" : String.join(",", roomHaveAmenities))
                 .replace("{{totalPrice}}", formattedAmount + " VND");
 
         helper.setFrom(fromEmailId);
