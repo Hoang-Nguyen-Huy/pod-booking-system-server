@@ -71,10 +71,10 @@ public class AmenityService {
         return "Delete amenity " + amenityId + " successfully";
     }
 
-    public Page<Amenity> getAmenities(int page, int take, Account account){
+    public Page<Amenity> getAmenities(String searchParams, int page, int take, Account account){
         Pageable pageable = PageRequest.of(page - 1, take);
         if (account.getRole().equals(AccountRole.Admin)){
-            return amenityRepository.findAll(pageable);
+            return amenityRepository.findFilteredAmenities(searchParams, pageable);
         }
 
         if (account.getRole().equals(AccountRole.Staff) || account.getRole().equals(AccountRole.Manager)) {

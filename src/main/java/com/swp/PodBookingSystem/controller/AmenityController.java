@@ -89,12 +89,13 @@ public class AmenityController {
     }
 
     @GetMapping
-    PaginationResponse<List<Amenity>> getAmenity(@RequestParam(defaultValue = "1", name = "page") int page,
+    PaginationResponse<List<Amenity>> getAmenity(@RequestParam(required = false) String searchParams,
+                                                 @RequestParam(defaultValue = "1", name = "page") int page,
                                                  @RequestParam(defaultValue = "10", name = "take") int take,
                                                  @RequestHeader("Authorization") String token){
         AmenityPaginationDTO dto = new AmenityPaginationDTO(page, take);
         Account account = accountService.getAccountById(accountService.extractAccountIdFromToken(token));
-        Page<Amenity> amenityPage = amenityService.getAmenities(dto.page, dto.take, account);
+        Page<Amenity> amenityPage = amenityService.getAmenities(searchParams, dto.page, dto.take, account);
         return PaginationResponse.<List<Amenity>>builder()
                 .data(amenityPage.getContent())
                 .currentPage(amenityPage.getNumber() + 1)
