@@ -106,7 +106,7 @@ public class OrderService {
         try {
             Order order = new Order();
             order.setAccount(account);
-            order.setId(renderOrderID(request));
+            order.setId(renderOrderID(request,account));
             order.setCreatedAt(LocalDateTime.now());
             order.setUpdatedAt(LocalDateTime.now());
             orderRepository.save(order);
@@ -209,8 +209,13 @@ public class OrderService {
         return pattern.matcher(normalized).replaceAll("").replaceAll("[^\\p{L}]", "");
     }
 
-    public String renderOrderID(OrderDetailCreationRequest request) {
-        String customerName = removeDiacritics(request.getCustomer().getName());
+    public String renderOrderID(OrderDetailCreationRequest request, Account account) {
+        String customerName;
+        if(request.getCustomer() == null) {
+            customerName = removeDiacritics(account.getName());
+        }else {
+            customerName = removeDiacritics(request.getCustomer().getName());
+        }
         String roomNames = request.getSelectedRooms()
                 .stream()
                 .map(room -> room.getName().replace(" ", ""))
