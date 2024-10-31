@@ -7,6 +7,7 @@ import com.swp.PodBookingSystem.dto.respone.Account.AccountOrderResponse;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.respone.AccountResponse;
 import com.swp.PodBookingSystem.dto.respone.Order.OrderManagementResponse;
+import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailFullInfoResponse;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.entity.Account;
 import com.swp.PodBookingSystem.enums.AccountRole;
@@ -14,6 +15,7 @@ import com.swp.PodBookingSystem.exception.AppException;
 import com.swp.PodBookingSystem.exception.ErrorCode;
 import com.swp.PodBookingSystem.mapper.AccountMapper;
 import com.swp.PodBookingSystem.service.AccountService;
+import com.swp.PodBookingSystem.service.OrderDetailService;
 import com.swp.PodBookingSystem.service.OrderService;
 import com.swp.PodBookingSystem.service.SendEmailService;
 import jakarta.mail.MessagingException;
@@ -48,6 +50,7 @@ public class AccountController {
     SendEmailService sendEmailService;
     JwtDecoder jwtDecoder;
     OrderService orderService;
+    OrderDetailService orderDetailService;
 
     @PostMapping
     ApiResponse<AccountResponse> createAccount(@RequestBody @Valid AccountCreationRequest request) {
@@ -131,6 +134,16 @@ public class AccountController {
     ApiResponse sendEmailOrder(@RequestBody SendMailOrderRequest request) throws MessagingException, IOException {
         OrderManagementResponse order = orderService.getInfoOrder(request.getOrderId());
         sendEmailService.sendMailTemplate(request.getEmail(), order, "Hóa đơn tại FlexiPod");
+        return ApiResponse.builder()
+                .message("Gửi lời mời đặt lịch thành công")
+                .code(200)
+                .build();
+    }
+
+    @PostMapping("/send-email-order-amenity")
+    ApiResponse sendEmailOrderAmenity(@RequestBody SendOrderAmenityRequest request) throws MessagingException, IOException {
+        OrderDetailFullInfoResponse orderDetail = orderDetailService.getOrderDetailByOrderDetailId(request.getOrderDetailId());
+        sendEmailService.sendMailAmenityOrder(request.getEmail(), orderDetail, "Hóa đơn tại FlexiPod");
         return ApiResponse.builder()
                 .message("Gửi lời mời đặt lịch thành công")
                 .code(200)
