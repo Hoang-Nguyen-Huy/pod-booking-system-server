@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface RoomTypeRepository extends JpaRepository<RoomType, Integer> {
     @Query("SELECT rt FROM RoomType rt " +
@@ -29,4 +30,9 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Integer> {
                                          @Param("startTime") LocalDateTime startTime,
                                          @Param("endTime") LocalDateTime endTime,
                                          Pageable pageable);
+
+    @Query("SELECT rt " +
+            "FROM RoomType rt " +
+            "WHERE rt.building.address = :buildingAddress")
+    List<RoomType> findByBuildingAddress(String buildingAddress);
 }
