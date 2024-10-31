@@ -1,6 +1,6 @@
 package com.swp.PodBookingSystem.repository;
 
-import com.swp.PodBookingSystem.dto.request.Slot.SlotCreationRequest;
+import com.swp.PodBookingSystem.dto.request.Slot.SlotDTO;
 import com.swp.PodBookingSystem.dto.respone.Room.BookedRoomDto;
 import com.swp.PodBookingSystem.entity.OrderDetail;
 import com.swp.PodBookingSystem.entity.Room;
@@ -70,21 +70,28 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
             "AND r.status = com.swp.PodBookingSystem.enums.RoomStatus.Available " +
             "AND od.startTime >= :startTime " +
             "AND od.endTime <= :endTime " +
-            "And od.status = com.swp.PodBookingSystem.enums.OrderStatus.Successfully "
+            "AND (od.status = com.swp.PodBookingSystem.enums.OrderStatus.Successfully " +
+            "OR od.status = com.swp.PodBookingSystem.enums.OrderStatus.Pending) "
     )
     List<Room> getRoomsByTypeAndDate(@Param("typeId") Integer typeId,
                                      @Param("startTime") LocalDateTime startTime,
                                      @Param("endTime") LocalDateTime endTime);
 
-    @Query("SELECT DISTINCT NEW com.swp.PodBookingSystem.dto.request.Slot.SlotCreationRequest(od.startTime,od.endTime) " +
+    @Query("SELECT DISTINCT NEW com.swp.PodBookingSystem.dto.request.Slot.SlotDTO(od.startTime,od.endTime) " +
             "FROM OrderDetail od " +
             "WHERE od.room.id = :roomId " +
             "AND od.room.status = com.swp.PodBookingSystem.enums.RoomStatus.Available " +
             "AND od.startTime >= :startTime " +
             "AND od.endTime <= :endTime " +
             "AND (od.status = com.swp.PodBookingSystem.enums.OrderStatus.Successfully " +
-            "OR od.status = com.swp.PodBookingSystem.enums.OrderStatus.Pending) " +
-            "ORDER BY od.startTime"
+            "OR od.status = com.swp.PodBookingSystem.enums.OrderStatus.Pending) "
     )
-    List<SlotCreationRequest> getSlotsByRoomAndDate(Integer roomId, LocalDateTime startTime, LocalDateTime endTime);
+    List<SlotDTO> getSlotsByRoomAndDate(@Param("roomId")Integer roomId,
+                                        @Param("startTime") LocalDateTime startTime,
+                                        @Param("endTime") LocalDateTime endTime);
+
+    @Query("SELECT r FROM Room r " +
+            "JOIN r.roomType rt " +
+            "WHERE rt.id = :typeId")
+    List<Room> findAllByTypeId(@Param("typeId") Integer typeId);
 }

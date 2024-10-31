@@ -1,9 +1,10 @@
 package com.swp.PodBookingSystem.dto.request.Room;
 
+import com.swp.PodBookingSystem.dto.request.Slot.SlotDTO;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -13,6 +14,5 @@ import java.time.LocalDateTime;
 public class RoomAvailabilityDTO {
      Integer roomId;
      String name;
-     LocalDateTime startTime;
-     LocalDateTime endTime;
+     List<SlotDTO> slots;
 }
