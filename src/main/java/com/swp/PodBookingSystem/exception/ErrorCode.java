@@ -24,6 +24,8 @@ public enum ErrorCode {
     ORDER_DETAIL_NOT_EXIST(404, "Order detail không tồn tại", HttpStatus.NOT_FOUND, "orderDetailId"),
     ACCOUNT_NOT_ACTIVE(403, "Tài khoản đã bị cấm", HttpStatus.FORBIDDEN, "system"),
     ORDER_NOT_FOUND(404, "Order không tồn tại", HttpStatus.NOT_FOUND, "orderId"),
+    BUILDING_ID_REQUIRED(400, "Yêu cầu số chi nhánh", HttpStatus.BAD_REQUEST, "buildingId"),
+    AMENITY_NOT_EXIST(404, "Không tìm thấy tiện tích", HttpStatus.NOT_FOUND, "amenity")
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode, String field) {

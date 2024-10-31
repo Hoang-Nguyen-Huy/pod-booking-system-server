@@ -44,6 +44,13 @@ public class AmenityService {
                 .collect(Collectors.toList());
     }
 
+    public List<AmenityResponse> getAvailableAmenitiesByBuildingId(Integer buildingId) {
+        List<Amenity> amenities = amenityRepository.findAllAvailableByBuildingId(buildingId);
+        return amenities.stream()
+                .map(amenityMapper::toAmenityResponse)
+                .collect(Collectors.toList());
+    }
+
     public AmenityResponse createAmenity(AmenityCreationRequest request){
         Amenity newAmenity = amenityMapper.toAmenity(request);
         return amenityMapper.toAmenityResponse(amenityRepository.save(newAmenity));
