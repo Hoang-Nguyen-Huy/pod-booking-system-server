@@ -63,6 +63,22 @@ public interface OrderRepository extends JpaRepository<Order, String> {
             @Param("status") OrderStatus status,
             Pageable pageable);
 
+    @Query("""
+                SELECT DISTINCT o FROM Order o
+                JOIN OrderDetail od ON o.id = od.order.id
+                WHERE od.orderHandler.id = :staffId
+                  AND o.createdAt >= :startTime 
+                  AND o.createdAt <= :endTime
+                  AND (:status IS NULL OR od.status = :status)
+                ORDER BY o.createdAt DESC
+            """)
+    Page<Order> findOrdersByStaffIdAndTimeRange(
+            @Param("staffId") String staffId,
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime,
+            @Param("status") OrderStatus status,
+            Pageable pageable);
+
     @Modifying
     @Transactional
     void deleteById(String id);

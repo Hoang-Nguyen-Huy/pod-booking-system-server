@@ -85,11 +85,16 @@ public class OrderService {
         if (user.getRole().equals(AccountRole.Admin)) {
             ordersPage = orderRepository.findAllWithTimeRange(
                     startDate, endDate, status, PageRequest.of(page, size));
-        } else if (user.getRole().equals(AccountRole.Staff) || user.getRole().equals(AccountRole.Manager)) {
+        } else if (user.getRole().equals(AccountRole.Manager)) {
             int buildingNumber = user.getBuildingNumber();
             ordersPage = orderRepository.findOrdersByBuildingNumberAndTimeRange(
                     buildingNumber, startDate, endDate, status, PageRequest.of(page, size));
-        } else {
+        }else if (user.getRole().equals(AccountRole.Staff)) {
+            String staffId = user.getId();
+            ordersPage = orderRepository.findOrdersByStaffIdAndTimeRange(
+                    staffId, startDate, endDate, status, PageRequest.of(page, size));
+        }
+        else {
             throw new IllegalArgumentException("User role not authorized to access orders.");
         }
         return convertToPaginationResponse(ordersPage);

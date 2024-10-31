@@ -312,6 +312,9 @@ public class OrderDetailService {
         for (Amenity amenity : amenities) {
             OrderDetailAmenity orderDetailAmenity = new OrderDetailAmenity();
             orderDetailAmenity.setId(UUID.randomUUID().toString());
+            orderDetailAmenity.setStatus(OrderDetailAmenityStatus.Paid);
+            orderDetailAmenity.setCreatedAt(LocalDateTime.now());
+            orderDetailAmenity.setUpdatedAt(LocalDateTime.now());
             orderDetailAmenity.setQuantity(amenity.getQuantity());
             orderDetailAmenity.setPrice(amenity.getPrice());
             orderDetailAmenity.setOrderDetail(orderDetail);
