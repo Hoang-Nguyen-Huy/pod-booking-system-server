@@ -8,12 +8,15 @@ import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.entity.Account;
 import com.swp.PodBookingSystem.entity.Amenity;
 import com.swp.PodBookingSystem.enums.AmenityType;
+import com.swp.PodBookingSystem.exception.AppException;
+import com.swp.PodBookingSystem.exception.ErrorCode;
 import com.swp.PodBookingSystem.service.AccountService;
 import com.swp.PodBookingSystem.service.AmenityService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
@@ -45,6 +48,18 @@ public class AmenityController {
     public ApiResponse<List<AmenityResponse>> getAmenitiesByType(@RequestParam(defaultValue = "Food", name = "type") String type){
         List<AmenityResponse> amenityResponses = amenityService.getAmenitiesByType(AmenityType.valueOf(type));
         return ApiResponse.<List<AmenityResponse>>builder()
+                .data(amenityResponses)
+                .build();
+    }
+
+    @GetMapping("/available-amenity")
+    public ApiResponse<List<AmenityResponse>> getAvailableAmenitiesByBuildingId(@RequestParam (required = false) Integer buildingId){
+        if (buildingId == null){
+            throw new AppException(ErrorCode.BUILDING_ID_REQUIRED);
+        }
+        List<AmenityResponse> amenityResponses = amenityService.getAvailableAmenitiesByBuildingId(buildingId);
+        return ApiResponse.<List<AmenityResponse>>builder()
+                .message("Lấy danh sách tiện ích của chi nhánh thứ " + buildingId)
                 .data(amenityResponses)
                 .build();
     }
