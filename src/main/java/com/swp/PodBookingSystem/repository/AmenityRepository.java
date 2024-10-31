@@ -12,6 +12,9 @@ import java.util.List;
 
 @Repository
 public interface AmenityRepository extends JpaRepository<Amenity, Integer> {
+    @Query("SELECT a " +
+            "FROM Amenity a " +
+            "WHERE a.type = :type AND a.isDeleted = 0 AND a.quantity > 0")
     List<Amenity> findAllByType(AmenityType type);
 
     Page<Amenity> findAllByBuildingId(Integer buildingId, Pageable pageable);
