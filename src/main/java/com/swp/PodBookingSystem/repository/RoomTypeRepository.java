@@ -16,6 +16,7 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Integer> {
             "LEFT JOIN Room r ON r.roomType.id = rt.id " +
             "LEFT JOIN OrderDetail od ON r.id = od.room.id " +
             "WHERE (:address IS NULL OR b.address LIKE %:address%) " +
+            "AND b.status = com.swp.PodBookingSystem.enums.BuildingStatus.Active " +
             "AND (:capacity IS NULL OR rt.capacity = :capacity) " +
             "AND ((:startTime IS NULL AND :endTime IS NULL) " +
             "     OR NOT EXISTS (SELECT 1 FROM OrderDetail od2 " +
