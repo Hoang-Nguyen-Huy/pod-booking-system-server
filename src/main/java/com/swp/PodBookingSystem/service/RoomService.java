@@ -57,9 +57,9 @@ public class RoomService {
     /*
     [GET]: /rooms/page&take
      */
-    public Page<Room> getRooms(int page, int take) {
+    public Page<Room> getRooms(String searchParams, int page, int take) {
         Pageable pageable = PageRequest.of(page - 1, take);
-        return roomRepository.findAll(pageable);
+        return roomRepository.findFilteredManagementRoom(searchParams, pageable);
     }
 
     public List<Room> getRoomsByType(int typeId) {
