@@ -166,11 +166,22 @@ public class RoomController {
                 .build();
     }
     @GetMapping("/available-by-type-and-date")
-    ApiResponse<List<Room>> getAvailableRoomsByRoomTypeId(@RequestParam  Integer typeId, @RequestParam String date) {
+    ApiResponse<List<Room>> getRoomsByTypeAndDate(@RequestParam  Integer typeId, @RequestParam String date) {
         LocalDate selectedDate = LocalDate.parse(date);
         return ApiResponse.<List<Room>>builder()
                 .data(roomService.getRoomsByTypeAndDate(typeId, selectedDate))
                 .message("Get rooms by typeId and date successfully")
                 .build();
     }
+
+    @GetMapping("/slots-by-rooms-and-date")
+    ApiResponse<List<SlotCreationRequest>> getSlotsByRoomsAndDate(@RequestParam List<Integer> roomIds, @RequestParam String date) {
+        LocalDate selectedDate = LocalDate.parse(date);
+        return ApiResponse.<List<SlotCreationRequest>>builder()
+                .data(roomService.getSlotsByRoomsAndDate(roomIds, selectedDate))
+                .message("Get slots by rooms and date successfully")
+                .build();
+    }
+
+
 }

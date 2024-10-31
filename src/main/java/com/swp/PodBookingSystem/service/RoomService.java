@@ -221,4 +221,24 @@ public class RoomService {
         LocalDateTime endTime = date.atTime(23, 59, 59);
         return roomRepository.getRoomsByTypeAndDate(typeId, startTime, endTime);
     }
+
+    public List<SlotCreationRequest> getSlotsByRoomsAndDate(List<Integer> roomIds, LocalDate selectedDate) {
+        LocalDateTime startTime = LocalDateTime.now().toLocalDate().equals(selectedDate) ? LocalDateTime.now() : selectedDate.atStartOfDay();
+        LocalDateTime endTime = selectedDate.atTime(23, 59, 59);
+        List<SlotCreationRequest> listSlotConstants = new ArrayList<>();
+        LocalDateTime current = selectedDate.atTime(7, 0, 0);
+        while (current.isBefore(selectedDate.atTime(21, 0, 0))) {
+            if(current.isBefore(LocalDateTime.now())) {
+                current = current.plusHours(2);
+                continue;
+            }
+            listSlotConstants.add(new SlotCreationRequest(current, current.plusHours(2)));
+            current = current.plusHours(2);
+        }
+        for (Integer roomId : roomIds) {
+            List<SlotCreationRequest> listSlotDateTime = roomRepository.getSlotsByRoomAndDate(roomId, startTime, endTime);
+            listSlotConstants.removeAll(listSlotDateTime);
+        }
+        return listSlotConstants;
+    }
 }

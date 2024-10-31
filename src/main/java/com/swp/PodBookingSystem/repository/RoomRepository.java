@@ -1,5 +1,6 @@
 package com.swp.PodBookingSystem.repository;
 
+import com.swp.PodBookingSystem.dto.request.Slot.SlotCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.Room.BookedRoomDto;
 import com.swp.PodBookingSystem.entity.OrderDetail;
 import com.swp.PodBookingSystem.entity.Room;
@@ -66,6 +67,7 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
     @Query("SELECT r FROM Room r " +
             "JOIN OrderDetail od ON r.id = od.room.id " +
             "WHERE r.roomType.id = :typeId " +
+            "AND r.status = com.swp.PodBookingSystem.enums.RoomStatus.Available " +
             "AND od.startTime >= :startTime " +
             "AND od.endTime <= :endTime " +
             "And od.status = com.swp.PodBookingSystem.enums.OrderStatus.Successfully "
@@ -73,4 +75,16 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
     List<Room> getRoomsByTypeAndDate(@Param("typeId") Integer typeId,
                                      @Param("startTime") LocalDateTime startTime,
                                      @Param("endTime") LocalDateTime endTime);
+
+    @Query("SELECT DISTINCT NEW com.swp.PodBookingSystem.dto.request.Slot.SlotCreationRequest(od.startTime,od.endTime) " +
+            "FROM OrderDetail od " +
+            "WHERE od.room.id = :roomId " +
+            "AND od.room.status = com.swp.PodBookingSystem.enums.RoomStatus.Available " +
+            "AND od.startTime >= :startTime " +
+            "AND od.endTime <= :endTime " +
+            "AND (od.status = com.swp.PodBookingSystem.enums.OrderStatus.Successfully " +
+            "OR od.status = com.swp.PodBookingSystem.enums.OrderStatus.Pending) " +
+            "ORDER BY od.startTime"
+    )
+    List<SlotCreationRequest> getSlotsByRoomAndDate(Integer roomId, LocalDateTime startTime, LocalDateTime endTime);
 }
