@@ -58,13 +58,14 @@ public class AccountController {
     }
 
     @GetMapping
-    PaginationResponse<List<AccountManagementResponse>> getAccounts(@RequestParam(defaultValue = "1", name = "page") int page,
+    PaginationResponse<List<AccountManagementResponse>> getAccounts(@RequestParam(required = false) String searchParams,
+                                                                    @RequestParam(defaultValue = "1", name = "page") int page,
                                                                     @RequestParam(defaultValue = "10", name = "take") int take) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         authentication.getAuthorities().forEach(grantedAuthority -> log.info(grantedAuthority.getAuthority()));
 
         AccountPaginationDTO dto = new AccountPaginationDTO(page, take);
-        Page<AccountManagementResponse> accountPage = accountService.getAccounts(dto.page, dto.take);
+        Page<AccountManagementResponse> accountPage = accountService.getAccounts(searchParams, dto.page, dto.take);
 
         return PaginationResponse.<List<AccountManagementResponse>>builder()
                 .data(accountPage.getContent())
