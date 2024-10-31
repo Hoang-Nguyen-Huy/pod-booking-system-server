@@ -466,7 +466,7 @@ public class OrderDetailService {
     /*
     [GET]: /order-detail/revenue-chart
      */
-    public List<RevenueChartDto> calculateRevenueByMonth(LocalDateTime startTime, LocalDateTime endTime, String viewWith) {
+    public List<RevenueChartDto> calculateRevenueChart(LocalDateTime startTime, LocalDateTime endTime, String viewWith) {
         if (startTime == null) {
             startTime = LocalDate.now().atStartOfDay();
         }
