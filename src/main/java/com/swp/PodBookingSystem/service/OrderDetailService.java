@@ -31,10 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -482,13 +480,45 @@ public class OrderDetailService {
             case "day":
                 return Collections.singletonList(orderDetailRepository.calculateRevenueForSingleDay(startTime));
             case "month":
-                return orderDetailRepository.calculateRevenueByMonth(startTime, endTime);
+                return calculateRevenueByMonth(startTime, endTime);
             case "quarter":
                 return orderDetailRepository.calculateRevenueByQuarter(startTime, endTime);
             default:
                 return Collections.singletonList(orderDetailRepository.calculateRevenueForSingleDay(startTime));
         }
     }
+
+    public List<RevenueChartDto> calculateRevenueByMonth(LocalDateTime startTime, LocalDateTime endTime) {
+        if (startTime == null) {
+            startTime = LocalDate.now().atStartOfDay();
+        }
+        if (endTime == null) {
+            endTime = LocalDate.now().atTime(LocalTime.MAX);
+        }
+
+        // Step 1: Generate all dates from startTime to endTime
+        List<LocalDate> dateRange = startTime.toLocalDate()
+                .datesUntil(endTime.toLocalDate().plusDays(1))
+                .collect(Collectors.toList());
+
+        // Step 2: Fetch actual revenue data from the repository
+        List<RevenueChartDto> actualRevenueData = orderDetailRepository.calculateRevenueByMonth(startTime, endTime);
+
+        // Step 3: Convert actual revenue data to a map for fast lookup
+        Map<String, Double> revenueMap = actualRevenueData.stream()
+                .collect(Collectors.toMap(RevenueChartDto::getDate, RevenueChartDto::getRevenue));
+
+        // Step 4: Populate the result with all dates in range, setting missing data to zero
+        List<RevenueChartDto> result = dateRange.stream()
+                .map(date -> {
+                    String formattedDate = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                    return new RevenueChartDto(formattedDate, revenueMap.getOrDefault(formattedDate, 0.0));
+                })
+                .collect(Collectors.toList());
+
+        return result;
+    }
+
 
     /*
     [GET]: /order-detail/number-order-by-building
