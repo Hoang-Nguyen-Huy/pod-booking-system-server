@@ -41,10 +41,11 @@ public class RoomController {
 
     @GetMapping
     PaginationResponse<List<Room>> getRooms(@RequestParam(required = false) String searchParams,
+                                            @RequestParam(required = false,defaultValue = "0") int buildingId,
                                             @RequestParam(defaultValue = "1", name = "page") int page,
                                             @RequestParam(defaultValue = "10", name = "take") int take) {
         RoomPaginationDTO dto = new RoomPaginationDTO(page, take);
-        Page<Room> roomPage = roomService.getRooms(searchParams, dto.page, dto.take);
+        Page<Room> roomPage = roomService.getRooms(buildingId,searchParams, dto.page, dto.take);
 
         return PaginationResponse.<List<Room>>builder()
                 .data(roomPage.getContent())
