@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -57,6 +58,17 @@ public class RoomTypeService {
     public Page<RoomType> getFilteredRoomTypes(String address, Integer capacity, LocalDateTime startTime, LocalDateTime endTime, int page, int take) {
         Pageable pageable = PageRequest.of(page - 1, take);
         return roomTypeRepository.findFilteredRoomTypes(address, capacity, startTime, endTime, pageable);
+    }
+
+    /*
+    [GET]: /room-types/room-type-within-address
+     */
+    public List<RoomType> getRoomTypeByBuildingAddress(String buildingAddress) {
+        System.out.println("building address la: " + buildingAddress);
+        if (buildingAddress == null || buildingAddress.equals("")) {
+            return roomTypeRepository.findAll();
+        }
+        return roomTypeRepository.findByBuildingAddress(buildingAddress);
     }
 
     /*

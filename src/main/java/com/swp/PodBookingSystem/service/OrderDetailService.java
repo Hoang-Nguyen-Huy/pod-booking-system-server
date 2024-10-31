@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -474,7 +475,7 @@ public class OrderDetailService {
     /*
     [GET]: /order-detail/revenue-chart
      */
-    public List<RevenueChartDto> calculateRevenueByMonth(LocalDateTime startTime, LocalDateTime endTime, String viewWith) {
+    public List<RevenueChartDto> calculateRevenueChart(LocalDateTime startTime, LocalDateTime endTime, String viewWith) {
         if (startTime == null) {
             startTime = LocalDate.now().atStartOfDay();
         }
@@ -490,7 +491,7 @@ public class OrderDetailService {
             case "month":
                 return calculateRevenueByMonth(startTime, endTime);
             case "quarter":
-                return orderDetailRepository.calculateRevenueByQuarter(startTime, endTime);
+                return calculateRevenueByQuarter(startTime, endTime);
             default:
                 return Collections.singletonList(orderDetailRepository.calculateRevenueForSingleDay(startTime));
         }
@@ -524,6 +525,25 @@ public class OrderDetailService {
                 })
                 .collect(Collectors.toList());
 
+        return result;
+    }
+
+    public List<RevenueChartDto> calculateRevenueByQuarter(LocalDateTime startTime, LocalDateTime endTime) {
+        List<RevenueChartDto> revenueData = orderDetailRepository.calculateRevenueByQuarter(startTime, endTime);
+
+        Map<String, Double> revenueMap = revenueData.stream()
+                .collect(Collectors.toMap(RevenueChartDto::getDate, RevenueChartDto::getRevenue));
+
+        List<RevenueChartDto> result = new ArrayList<>();
+        YearMonth start = YearMonth.from(startTime);
+        YearMonth end = YearMonth.from(endTime);
+
+        while(!start.isAfter(end)) {
+            String monthKey = start.toString() + "-01";
+            double revenue = revenueMap.getOrDefault(monthKey, 0.0);
+            result.add(new RevenueChartDto(monthKey, revenue));
+            start = start.plusMonths(1);
+        }
         return result;
     }
 
