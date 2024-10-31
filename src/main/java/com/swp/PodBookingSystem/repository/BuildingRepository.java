@@ -20,4 +20,7 @@ public interface BuildingRepository extends JpaRepository<Building, Integer> {
             "ORDER BY b.createdAt DESC")
     Page<Building> findFilteredBuildings(@Param("address") String address,
                                          Pageable pageable);
+
+    @Query("SELECT b FROM Building b WHERE b.status = com.swp.PodBookingSystem.enums.BuildingStatus.Active")
+    List<Building> findAll();
 }
