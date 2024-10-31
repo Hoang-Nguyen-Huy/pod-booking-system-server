@@ -58,9 +58,6 @@ public class AmenityController {
             throw new AppException(ErrorCode.BUILDING_ID_REQUIRED);
         }
         List<AmenityResponse> amenityResponses = amenityService.getAvailableAmenitiesByBuildingId(buildingId);
-        if (amenityResponses.isEmpty()){
-            throw new AppException(ErrorCode.AMENITY_NOT_EXIST);
-        }
         return ApiResponse.<List<AmenityResponse>>builder()
                 .message("Lấy danh sách tiện ích của chi nhánh thứ " + buildingId)
                 .data(amenityResponses)
