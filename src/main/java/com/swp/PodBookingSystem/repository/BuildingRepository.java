@@ -20,5 +20,5 @@ public interface BuildingRepository extends JpaRepository<Building, Integer> {
                                          Pageable pageable);
 
     @Query("SELECT b FROM Building b WHERE b.status = com.swp.PodBookingSystem.enums.BuildingStatus.Active")
-    List<Building> findAll();
+    List<Building> findAllBuildingForHomPage();
 }
