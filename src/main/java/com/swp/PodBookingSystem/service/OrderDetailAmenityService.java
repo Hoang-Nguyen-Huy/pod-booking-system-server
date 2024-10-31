@@ -108,7 +108,7 @@ public class OrderDetailAmenityService {
         OrderDetailAmenity newOrderDetailAmenity = orderDetailAmenityMapper.toOrderDetailAmenity(request);
         newOrderDetailAmenity.setAmenity(updatedAmenity);
         newOrderDetailAmenity.setOrderDetail(savedOrderDetail);
-
+        newOrderDetailAmenity.setStatus(OrderDetailAmenityStatus.Paid);
 
         OrderDetailAmenity savedOrderDetailAmenity = orderDetailAmenityRepository.save(newOrderDetailAmenity);
 
