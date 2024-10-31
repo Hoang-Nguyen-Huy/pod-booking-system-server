@@ -36,4 +36,9 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Integer> {
             "FROM RoomType rt " +
             "WHERE rt.building.address = :buildingAddress")
     List<RoomType> findByBuildingAddress(String buildingAddress);
+
+    @Query("SELECT rt " +
+            "FROM RoomType rt " +
+            "WHERE rt.building.id = :buildingId")
+    List<RoomType> findByBuildingId(Integer buildingId);
 }

@@ -99,4 +99,11 @@ public class RoomTypeService {
         roomTypeRepository.deleteById(roomTypeId);
         return "Delete room type " + roomTypeId + " successfully";
     }
+
+    public List<RoomType> getRoomTypeByBuildingId(Integer buildingId) {
+        if (buildingId == null) {
+            return roomTypeRepository.findAll();
+        }
+        return roomTypeRepository.findByBuildingId(buildingId);
+    }
 }
