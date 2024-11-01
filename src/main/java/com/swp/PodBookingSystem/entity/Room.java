@@ -24,7 +24,7 @@ public class Room {
     String name;
     String description;
 
-    @Column(nullable = true)
+    @Column(nullable = true, length = 1000)
     String image;
 
     @Enumerated(EnumType.STRING)
