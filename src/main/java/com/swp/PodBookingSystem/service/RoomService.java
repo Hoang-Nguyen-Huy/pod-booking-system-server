@@ -2,13 +2,9 @@ package com.swp.PodBookingSystem.service;
 
 import com.swp.PodBookingSystem.dto.request.Room.RoomAvailabilityDTO;
 import com.swp.PodBookingSystem.dto.request.Room.RoomCreationRequest;
-import com.swp.PodBookingSystem.dto.request.Slot.SlotCreationRequest;
-import com.swp.PodBookingSystem.dto.respone.Calendar.DateResponse;
-import com.swp.PodBookingSystem.dto.respone.Calendar.RoomDTO;
-import com.swp.PodBookingSystem.dto.respone.Calendar.SlotDTO;
+import com.swp.PodBookingSystem.dto.request.Slot.SlotDTO;
 import com.swp.PodBookingSystem.dto.respone.Room.BookedRoomDto;
 import com.swp.PodBookingSystem.dto.respone.Room.RoomResponse;
-import com.swp.PodBookingSystem.entity.OrderDetail;
 import com.swp.PodBookingSystem.entity.Room;
 import com.swp.PodBookingSystem.entity.RoomType;
 import com.swp.PodBookingSystem.exception.AppException;
@@ -29,7 +25,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -62,9 +57,12 @@ public class RoomService {
     /*
     [GET]: /rooms/page&take
      */
-    public Page<Room> getRooms(int page, int take) {
+    public Page<Room> getRooms(int buildingId, String searchParams, int page, int take) {
         Pageable pageable = PageRequest.of(page - 1, take);
-        return roomRepository.findAll(pageable);
+        if(buildingId == 0) {
+            return roomRepository.findFilteredManagementRoom(searchParams, pageable);
+        }
+        return roomRepository.findFilteredManagementRoomByBuildingId(buildingId,searchParams, pageable);
     }
 
     public List<Room> getRoomsByType(int typeId) {
@@ -86,13 +84,13 @@ public class RoomService {
         return roomRepository.isRoomAvailable(roomId, startTime, endTime);
     }
 
-    public List<Room> getRoomByTypeAndSlot(Integer typeId,List<SlotCreationRequest> slots ) {
+    public List<Room> getRoomByTypeAndSlot(Integer typeId,List<SlotDTO> slots ) {
         List<Room> roomList = roomRepository.findRoomsByTypeId(typeId);
         List<Room> availableRooms = new ArrayList<>();
         for (Room room : roomList) {
             boolean isAvailableForAllSlots = true;
 
-            for (SlotCreationRequest slot : slots) {
+            for (SlotDTO slot : slots) {
 
                 if (!isRoomAvailable(room.getId(), slot.getStartTime(), slot.getEndTime())) {
                     isAvailableForAllSlots = false;
@@ -144,64 +142,27 @@ public class RoomService {
         return "Delete room " + roomId + " successfully";
     }
 
-    public List<DateResponse> getCalendar(List<Integer> roomIds, Integer servicePackageId, LocalDate selectedDate, List<String> slots)
-    {
-        List<DateResponse> response = new ArrayList<>();
-        List<LocalDate> dates = new ArrayList<>();
 
-        if(servicePackageId!= null && servicePackageId == 1) {
-            LocalDateTime currentDate = selectedDate.atStartOfDay();
-            int count = 1;
-            do {
-                dates.add(currentDate.toLocalDate());
-                currentDate.plusDays(7);
-            } while(count++<=3);
-        } else if (servicePackageId!= null && servicePackageId == 2) {
-            LocalDateTime currentDate = selectedDate.atStartOfDay();
-            int count = 1;
-            do {
-                dates.add(currentDate.toLocalDate());
-                currentDate.plusDays(1);
-            } while(count++<=29);
-        } else {
-            LocalDateTime currentDate = selectedDate.atStartOfDay();
-            dates.add(currentDate.toLocalDate());
+
+    public List<RoomAvailabilityDTO> getUnavailableRooms(List<Integer> roomIds,LocalDateTime startTime, LocalDateTime endTime) {
+        if(roomIds == null || roomIds.isEmpty()) {
+            return new ArrayList<>();
         }
-        for(LocalDate date: dates) {
-            List<RoomDTO> rooms = roomIds.parallelStream().map(roomId -> {
-                RoomDTO room = new RoomDTO();
-                Optional<Room> findRoom = roomRepository.findById((roomId));
-                Room roomFromDB = findRoom.orElseThrow(() -> new RuntimeException("Room not found"));
-                room.setRoomId(roomFromDB.getId());
-                room.setRoomName(roomFromDB.getName());
-                LocalDateTime currentDate = date.atStartOfDay();
-
-                List<SlotDTO> slotResponse = slots.parallelStream().map(slot->{
-                    String[] parts = slot.split("-");
-                    LocalDateTime startTime = currentDate.withHour(Integer.parseInt(parts[0].split(":")[0].trim()));
-                    LocalDateTime endTime = currentDate.withHour(Integer.parseInt(parts[1].split(":")[0].trim()));
-                    return new SlotDTO(startTime, endTime, roomRepository.isRoomAvailable(roomFromDB.getId(),startTime, endTime));
-                }).collect(Collectors.toList());
-                room.setSlots(slotResponse);
-                return room;
-            }).collect(Collectors.toList());
-            response.add(new DateResponse(date,rooms));
+        if(startTime == null || endTime == null) {
+            throw new RuntimeException("Invalid date");
         }
-        return response;
-    }
 
-
-    public List<RoomAvailabilityDTO> getUnavailableRooms(LocalDateTime startTime, LocalDateTime endTime) {
-        List<OrderDetail> orders = roomRepository.findRoomAvailabilityWithinDateRange(startTime, endTime);
-        System.out.println(orders.toString());
-        return orders.stream()
-                .map(order -> RoomAvailabilityDTO.builder()
-                        .roomId(order.getRoom().getId()) // Assuming Room has an 'id' field
-                        .name(order.getRoom().getName()) // Assuming Room has a 'name' field
-                        .startTime(order.getStartTime())
-                        .endTime(order.getEndTime())
-                        .build())
-                .collect(Collectors.toList());
+        List<RoomAvailabilityDTO> roomAvailabilityDTOList = new ArrayList<>();
+        for(Integer roomId: roomIds) {
+            List<SlotDTO> slotList = roomRepository.getSlotsByRoomAndDate(roomId, startTime, endTime);
+            Room room = roomRepository.findById(roomId).orElseThrow(() -> new RuntimeException("Room not found"));
+            roomAvailabilityDTOList.add(RoomAvailabilityDTO.builder()
+                    .roomId(roomId)
+                    .name(room.getName())
+                    .slots(slotList)
+                    .build());
+        }
+        return roomAvailabilityDTOList;
     }
 
     public List<BookedRoomDto> getBookedRooms(String customerId) {
@@ -214,5 +175,63 @@ public class RoomService {
      */
     public int countCurrentlyServedRooms() {
         return roomRepository.countCurrentlyServedRooms(LocalDateTime.now());
+    }
+
+    public List<Room> getRoomsByTypeAndDate(Integer typeId, LocalDate date) {
+        List<Room> result = new ArrayList<>();
+        List<SlotDTO> listSlotConstants = new ArrayList<>();
+        LocalDateTime current = date.atTime(7, 0, 0);
+        while (current.isBefore(date.atTime(21, 0, 0))) {
+            if(current.isBefore(LocalDateTime.now())) {
+                current = current.plusHours(2);
+                continue;
+            }
+            listSlotConstants.add(new SlotDTO(current, current.plusHours(2)));
+            current = current.plusHours(2);
+        }
+        LocalDateTime startTime = date.atStartOfDay();
+        LocalDateTime endTime = date.atTime(23, 59, 59);
+        List<Room> rooms =roomRepository.findAllByTypeId(typeId);
+        for(Room room: rooms) {
+            List<SlotDTO> slotList = roomRepository.getSlotsByRoomAndDate(room.getId(), startTime, endTime);
+            List<SlotDTO> tmp = new ArrayList<>(listSlotConstants);
+            tmp.removeAll(slotList);
+            if(!tmp.isEmpty()) {
+                result.add(room);
+            }
+        }
+
+        return result;
+    }
+
+    public List<SlotDTO> getSlotsByRoomsAndDate(List<Integer> roomIds, String date) {
+        LocalDate selectedDate = date == null? LocalDate.now() : LocalDate.parse(date);
+        if(selectedDate.isBefore(LocalDate.now())) {
+            throw new RuntimeException("Invalid date");
+        }
+        if(selectedDate.isEqual(LocalDate.now()) && LocalDateTime.now().getHour() >= 21) {
+            throw new RuntimeException("Invalid date");
+        }
+
+        LocalDateTime startTime = LocalDateTime.now().toLocalDate().equals(selectedDate) ? LocalDateTime.now() : selectedDate.atStartOfDay();
+        LocalDateTime endTime = selectedDate.atTime(23, 59, 59);
+        List<SlotDTO> listSlotConstants = new ArrayList<>();
+        LocalDateTime current = selectedDate.atTime(7, 0, 0);
+        while (current.isBefore(selectedDate.atTime(21, 0, 0))) {
+            if(current.isBefore(LocalDateTime.now())) {
+                current = current.plusHours(2);
+                continue;
+            }
+            listSlotConstants.add(new SlotDTO(current, current.plusHours(2)));
+            current = current.plusHours(2);
+        }
+        if(roomIds == null || roomIds.isEmpty()) {
+            return listSlotConstants;
+        }
+        for (Integer roomId : roomIds) {
+            List<SlotDTO> listSlotDateTime = roomRepository.getSlotsByRoomAndDate(roomId, startTime, endTime);
+            listSlotConstants.removeAll(listSlotDateTime);
+        }
+        return listSlotConstants;
     }
 }

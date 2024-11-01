@@ -1,10 +1,9 @@
-package com.swp.PodBookingSystem.dto.respone.Calendar;
+package com.swp.PodBookingSystem.dto.request.Slot;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -13,5 +12,4 @@ import java.time.LocalDateTime;
 public class SlotDTO {
     LocalDateTime startTime;
     LocalDateTime endTime;
-    boolean available;
 }

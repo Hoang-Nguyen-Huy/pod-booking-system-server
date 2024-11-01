@@ -1,5 +1,6 @@
 package com.swp.PodBookingSystem.repository;
 
+import com.swp.PodBookingSystem.dto.request.Slot.SlotDTO;
 import com.swp.PodBookingSystem.dto.respone.Room.BookedRoomDto;
 import com.swp.PodBookingSystem.entity.OrderDetail;
 import com.swp.PodBookingSystem.entity.Room;
@@ -62,4 +63,48 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
             "WHERE :currentTime BETWEEN od.startTime AND od.endTime " +
             "AND od.status = com.swp.PodBookingSystem.enums.OrderStatus.Successfully")
     int countCurrentlyServedRooms(@Param("currentTime") LocalDateTime currentTime);
+
+    @Query("SELECT r FROM Room r " +
+            "JOIN OrderDetail od ON r.id = od.room.id " +
+            "WHERE r.roomType.id = :typeId " +
+            "AND r.status = com.swp.PodBookingSystem.enums.RoomStatus.Available " +
+            "AND od.startTime >= :startTime " +
+            "AND od.endTime <= :endTime " +
+            "AND (od.status = com.swp.PodBookingSystem.enums.OrderStatus.Successfully " +
+            "OR od.status = com.swp.PodBookingSystem.enums.OrderStatus.Pending) "
+    )
+    List<Room> getRoomsByTypeAndDate(@Param("typeId") Integer typeId,
+                                     @Param("startTime") LocalDateTime startTime,
+                                     @Param("endTime") LocalDateTime endTime);
+
+    @Query("SELECT DISTINCT NEW com.swp.PodBookingSystem.dto.request.Slot.SlotDTO(od.startTime,od.endTime) " +
+            "FROM OrderDetail od " +
+            "WHERE od.room.id = :roomId " +
+            "AND od.room.status = com.swp.PodBookingSystem.enums.RoomStatus.Available " +
+            "AND od.startTime >= :startTime " +
+            "AND od.endTime <= :endTime " +
+            "AND (od.status = com.swp.PodBookingSystem.enums.OrderStatus.Successfully " +
+            "OR od.status = com.swp.PodBookingSystem.enums.OrderStatus.Pending) "
+    )
+    List<SlotDTO> getSlotsByRoomAndDate(@Param("roomId")Integer roomId,
+                                        @Param("startTime") LocalDateTime startTime,
+                                        @Param("endTime") LocalDateTime endTime);
+
+    @Query("SELECT r FROM Room r " +
+            "JOIN r.roomType rt " +
+            "WHERE rt.id = :typeId")
+    List<Room> findAllByTypeId(@Param("typeId") Integer typeId);
+
+    @Query("SELECT r FROM Room r WHERE r.name LIKE %:searchParams% OR r.roomType.name LIKE %:searchParams% " +
+            "ORDER BY r.createdAt DESC")
+    Page<Room> findFilteredManagementRoom(@Param("searchParams") String searchParams, Pageable pageable);
+
+    @Query ("SELECT r FROM Room r " +
+            "JOIN r.roomType rt " +
+            "JOIN rt.building b " +
+            "WHERE b.id = :buildingId " +
+            "AND (r.name LIKE %:searchParams% OR r.roomType.name LIKE %:searchParams%) " +
+            "ORDER BY r.createdAt DESC")
+    Page<Room> findFilteredManagementRoomByBuildingId(@Param("buildingId") Integer buildingId,
+                                                      @Param("searchParams") String searchParams, Pageable pageable);
 }

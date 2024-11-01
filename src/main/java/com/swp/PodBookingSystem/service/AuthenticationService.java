@@ -119,8 +119,8 @@ public class AuthenticationService {
         // Sign access token và refresh token mới đồng thời xóa refresh token cũ trong db
         var accessToken = generateAccessToken(refreshToken.getAccount());
         var newRefreshToken = generateRefreshToken(refreshToken.getAccount());
-        refreshTokenRepository.save(new RefreshToken(null, newRefreshToken, refreshToken.getAccount(), decodeRefreshToken.getJWTClaimsSet().getIssueTime(), decodeRefreshToken.getJWTClaimsSet().getExpirationTime()));
         refreshTokenRepository.deleteByToken(request.getRefreshToken());
+        refreshTokenRepository.save(new RefreshToken(null, newRefreshToken, refreshToken.getAccount(), decodeRefreshToken.getJWTClaimsSet().getIssueTime(), decodeRefreshToken.getJWTClaimsSet().getExpirationTime()));
         return RefreshTokenResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(newRefreshToken)
@@ -134,7 +134,7 @@ public class AuthenticationService {
                 .claim("scope", account.getRole()) // ở đây thằng Spring hiểu role là scope để map vào authorization header
                 .issueTime(new Date())
                 .expirationTime(new Date(
-                        Instant.now().plus(30, ChronoUnit.MINUTES).toEpochMilli()
+                        Instant.now().plus(60, ChronoUnit.MINUTES).toEpochMilli()
                 ))
                 .build();
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());

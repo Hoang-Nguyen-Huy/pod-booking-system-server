@@ -85,11 +85,16 @@ public class OrderService {
         if (user.getRole().equals(AccountRole.Admin)) {
             ordersPage = orderRepository.findAllWithTimeRange(
                     startDate, endDate, status, PageRequest.of(page, size));
-        } else if (user.getRole().equals(AccountRole.Staff) || user.getRole().equals(AccountRole.Manager)) {
+        } else if (user.getRole().equals(AccountRole.Manager)) {
             int buildingNumber = user.getBuildingNumber();
             ordersPage = orderRepository.findOrdersByBuildingNumberAndTimeRange(
                     buildingNumber, startDate, endDate, status, PageRequest.of(page, size));
-        } else {
+        }else if (user.getRole().equals(AccountRole.Staff)) {
+            String staffId = user.getId();
+            ordersPage = orderRepository.findOrdersByStaffIdAndTimeRange(
+                    staffId, startDate, endDate, status, PageRequest.of(page, size));
+        }
+        else {
             throw new IllegalArgumentException("User role not authorized to access orders.");
         }
         return convertToPaginationResponse(ordersPage);
@@ -106,7 +111,7 @@ public class OrderService {
         try {
             Order order = new Order();
             order.setAccount(account);
-            order.setId(renderOrderID(request));
+            order.setId(renderOrderID(request,account));
             order.setCreatedAt(LocalDateTime.now());
             order.setUpdatedAt(LocalDateTime.now());
             orderRepository.save(order);
@@ -209,8 +214,13 @@ public class OrderService {
         return pattern.matcher(normalized).replaceAll("").replaceAll("[^\\p{L}]", "");
     }
 
-    public String renderOrderID(OrderDetailCreationRequest request) {
-        String customerName = removeDiacritics(request.getCustomer().getName());
+    public String renderOrderID(OrderDetailCreationRequest request, Account account) {
+        String customerName;
+        if(request.getCustomer() == null) {
+            customerName = removeDiacritics(account.getName());
+        }else {
+            customerName = removeDiacritics(request.getCustomer().getName());
+        }
         String roomNames = request.getSelectedRooms()
                 .stream()
                 .map(room -> room.getName().replace(" ", ""))

@@ -116,7 +116,7 @@ public class OrderDetailController {
 
         return ApiResponse.<List<RevenueChartDto>>builder()
                 .message("Doanh thu theo " + (viewWith != null ? viewWith : "ngày"))
-                .data(orderDetailService.calculateRevenueByMonth(start, end, viewWith))
+                .data(orderDetailService.calculateRevenueChart(start, end, viewWith))
                 .build();
     }
 

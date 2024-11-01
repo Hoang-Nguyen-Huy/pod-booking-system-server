@@ -76,4 +76,8 @@ public class BuildingService {
     public List<Building> getAllBuildings() {
         return buildingRepository.findAll();
     }
+
+    public List<Building> getAllBuildingsForHomePage() {
+        return buildingRepository.findAllBuildingForHomPage();
+    }
 }

@@ -8,12 +8,15 @@ import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.entity.Account;
 import com.swp.PodBookingSystem.entity.Amenity;
 import com.swp.PodBookingSystem.enums.AmenityType;
+import com.swp.PodBookingSystem.exception.AppException;
+import com.swp.PodBookingSystem.exception.ErrorCode;
 import com.swp.PodBookingSystem.service.AccountService;
 import com.swp.PodBookingSystem.service.AmenityService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
@@ -49,6 +52,18 @@ public class AmenityController {
                 .build();
     }
 
+    @GetMapping("/available-amenity")
+    public ApiResponse<List<AmenityResponse>> getAvailableAmenitiesByBuildingId(@RequestParam (required = false) Integer buildingId){
+        if (buildingId == null){
+            throw new AppException(ErrorCode.BUILDING_ID_REQUIRED);
+        }
+        List<AmenityResponse> amenityResponses = amenityService.getAvailableAmenitiesByBuildingId(buildingId);
+        return ApiResponse.<List<AmenityResponse>>builder()
+                .message("Lấy danh sách tiện ích của chi nhánh thứ " + buildingId)
+                .data(amenityResponses)
+                .build();
+    }
+
     @PostMapping
     ApiResponse<AmenityResponse> createAmenity(@RequestBody AmenityCreationRequest request){
         return ApiResponse.<AmenityResponse>builder()
@@ -74,12 +89,13 @@ public class AmenityController {
     }
 
     @GetMapping
-    PaginationResponse<List<Amenity>> getAmenity(@RequestParam(defaultValue = "1", name = "page") int page,
+    PaginationResponse<List<Amenity>> getAmenity(@RequestParam(required = false) String searchParams,
+                                                 @RequestParam(defaultValue = "1", name = "page") int page,
                                                  @RequestParam(defaultValue = "10", name = "take") int take,
                                                  @RequestHeader("Authorization") String token){
         AmenityPaginationDTO dto = new AmenityPaginationDTO(page, take);
         Account account = accountService.getAccountById(accountService.extractAccountIdFromToken(token));
-        Page<Amenity> amenityPage = amenityService.getAmenities(dto.page, dto.take, account);
+        Page<Amenity> amenityPage = amenityService.getAmenities(searchParams, dto.page, dto.take, account);
         return PaginationResponse.<List<Amenity>>builder()
                 .data(amenityPage.getContent())
                 .currentPage(amenityPage.getNumber() + 1)

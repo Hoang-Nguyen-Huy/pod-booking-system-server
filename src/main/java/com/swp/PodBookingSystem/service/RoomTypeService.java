@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -60,6 +61,17 @@ public class RoomTypeService {
     }
 
     /*
+    [GET]: /room-types/room-type-within-address
+     */
+    public List<RoomType> getRoomTypeByBuildingAddress(String buildingAddress) {
+        System.out.println("building address la: " + buildingAddress);
+        if (buildingAddress == null || buildingAddress.equals("")) {
+            return roomTypeRepository.findAll();
+        }
+        return roomTypeRepository.findByBuildingAddress(buildingAddress);
+    }
+
+    /*
     [PUT]: /room-types/roomTypeId
      */
     public RoomTypeResponse updateRoomType(int roomTypeId, RoomTypeCreationRequest request) {
@@ -86,5 +98,12 @@ public class RoomTypeService {
     public String deleteRoomType(int roomTypeId) {
         roomTypeRepository.deleteById(roomTypeId);
         return "Delete room type " + roomTypeId + " successfully";
+    }
+
+    public List<RoomType> getRoomTypeByBuildingId(Integer buildingId) {
+        if (buildingId == null) {
+            return roomTypeRepository.findAll();
+        }
+        return roomTypeRepository.findByBuildingId(buildingId);
     }
 }

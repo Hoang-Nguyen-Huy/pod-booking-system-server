@@ -75,7 +75,11 @@ public class OrderDetailAmenityService {
     }
 
     public void updateAmenityQuantityAfterCreateODA(OrderDetailAmenity orderDetailAmenity) {
-        Amenity amenity = orderDetailAmenity.getAmenity();
+        Optional<Amenity> amenityOptional = amenityRepository.findById(orderDetailAmenity.getAmenity().getId());
+        if(amenityOptional.isEmpty()) {
+            throw new RuntimeException("Amenity not found");
+        }
+        Amenity amenity = amenityOptional.get();
         if(amenity.getQuantity() < orderDetailAmenity.getQuantity()) {
             throw new RuntimeException("Not enough quantity");
         }
@@ -108,7 +112,7 @@ public class OrderDetailAmenityService {
         OrderDetailAmenity newOrderDetailAmenity = orderDetailAmenityMapper.toOrderDetailAmenity(request);
         newOrderDetailAmenity.setAmenity(updatedAmenity);
         newOrderDetailAmenity.setOrderDetail(savedOrderDetail);
-
+        newOrderDetailAmenity.setStatus(OrderDetailAmenityStatus.Paid);
 
         OrderDetailAmenity savedOrderDetailAmenity = orderDetailAmenityRepository.save(newOrderDetailAmenity);
 

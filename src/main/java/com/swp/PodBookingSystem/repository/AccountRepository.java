@@ -2,6 +2,8 @@ package com.swp.PodBookingSystem.repository;
 
 import com.swp.PodBookingSystem.entity.Account;
 import com.swp.PodBookingSystem.enums.AccountRole;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -41,4 +43,8 @@ public interface AccountRepository extends JpaRepository<Account, String> {
             "AND od.status = com.swp.PodBookingSystem.enums.OrderStatus.Successfully")
     int countCustomerBetweenDatetime(@Param("startTime") LocalDateTime startTime,
                                      @Param("endTime") LocalDateTime endTime);
+
+    @Query("SELECT a FROM Account a WHERE a.name LIKE %:searchParams% OR a.email LIKE %:searchParams% " +
+            "ORDER BY a.createdAt DESC")
+    Page<Account> findFilteredAccount(@Param("searchParams") String searchParams, Pageable pageable);
 }
