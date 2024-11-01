@@ -44,6 +44,13 @@ public class AmenityService {
                 .collect(Collectors.toList());
     }
 
+    public List<AmenityResponse> getAvailableAmenitiesByBuildingId(Integer buildingId) {
+        List<Amenity> amenities = amenityRepository.findAllAvailableByBuildingId(buildingId);
+        return amenities.stream()
+                .map(amenityMapper::toAmenityResponse)
+                .collect(Collectors.toList());
+    }
+
     public AmenityResponse createAmenity(AmenityCreationRequest request){
         Amenity newAmenity = amenityMapper.toAmenity(request);
         return amenityMapper.toAmenityResponse(amenityRepository.save(newAmenity));
@@ -59,15 +66,15 @@ public class AmenityService {
     public String deleteAmenity(int amenityId){
         Amenity existingAmenity = amenityRepository.findById(amenityId)
                 .orElseThrow(() -> new EntityNotFoundException("Amenity not found"));
-        existingAmenity.setIsDeleted(1);
+        existingAmenity.setIsDeleted(existingAmenity.getIsDeleted() == 1 ? 0 : 1);
         amenityRepository.save(existingAmenity);
         return "Delete amenity " + amenityId + " successfully";
     }
 
-    public Page<Amenity> getAmenities(int page, int take, Account account){
+    public Page<Amenity> getAmenities(String searchParams, int page, int take, Account account){
         Pageable pageable = PageRequest.of(page - 1, take);
         if (account.getRole().equals(AccountRole.Admin)){
-            return amenityRepository.findAll(pageable);
+            return amenityRepository.findFilteredAmenities(searchParams, pageable);
         }
 
         if (account.getRole().equals(AccountRole.Staff) || account.getRole().equals(AccountRole.Manager)) {

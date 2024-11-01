@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface RoomTypeRepository extends JpaRepository<RoomType, Integer> {
     @Query("SELECT rt FROM RoomType rt " +
@@ -15,6 +16,7 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Integer> {
             "LEFT JOIN Room r ON r.roomType.id = rt.id " +
             "LEFT JOIN OrderDetail od ON r.id = od.room.id " +
             "WHERE (:address IS NULL OR b.address LIKE %:address%) " +
+            "AND b.status = com.swp.PodBookingSystem.enums.BuildingStatus.Active " +
             "AND (:capacity IS NULL OR rt.capacity = :capacity) " +
             "AND ((:startTime IS NULL AND :endTime IS NULL) " +
             "     OR NOT EXISTS (SELECT 1 FROM OrderDetail od2 " +
@@ -29,4 +31,14 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Integer> {
                                          @Param("startTime") LocalDateTime startTime,
                                          @Param("endTime") LocalDateTime endTime,
                                          Pageable pageable);
+
+    @Query("SELECT rt " +
+            "FROM RoomType rt " +
+            "WHERE rt.building.address = :buildingAddress")
+    List<RoomType> findByBuildingAddress(String buildingAddress);
+
+    @Query("SELECT rt " +
+            "FROM RoomType rt " +
+            "WHERE rt.building.id = :buildingId")
+    List<RoomType> findByBuildingId(Integer buildingId);
 }

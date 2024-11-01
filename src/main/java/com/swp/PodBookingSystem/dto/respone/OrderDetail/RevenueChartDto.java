@@ -1,4 +1,4 @@
-package com.swp.PodBookingSystem.dto.request.Account;
+package com.swp.PodBookingSystem.dto.respone.OrderDetail;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SendMailRequest {
-    String email;
-    String startTime;
+public class RevenueChartDto {
+    String date;
+    Double revenue;
 }

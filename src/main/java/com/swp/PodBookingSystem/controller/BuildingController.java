@@ -81,7 +81,7 @@ public class BuildingController {
                                                  @RequestBody BuildingCreationRequest request) {
         return ApiResponse.<BuildingResponse>builder()
                 .data(buildingService.updateBuilding(buildingId, request))
-                .message("Update building successfully")
+                .message("Cập nhật chi nhánh thành công")
                 .build();
     }
 
@@ -104,6 +104,14 @@ public class BuildingController {
     ApiResponse<List<Building>> getAllBuildings() {
         return ApiResponse.<List<Building>>builder()
                 .data(buildingService.getAllBuildings())
+                .message("Get all buildings successfully")
+                .build();
+    }
+
+    @GetMapping("/buildings-option")
+    ApiResponse<List<Building>> getAllBuildingsForHomePage() {
+        return ApiResponse.<List<Building>>builder()
+                .data(buildingService.getAllBuildingsForHomePage())
                 .message("Get all buildings successfully")
                 .build();
     }

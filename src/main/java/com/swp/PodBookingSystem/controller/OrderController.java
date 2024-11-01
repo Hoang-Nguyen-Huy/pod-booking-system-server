@@ -5,19 +5,24 @@ import com.swp.PodBookingSystem.dto.request.Order.OrderUpdateStaffRequest;
 import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.respone.Order.OrderManagementResponse;
+import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderResponse;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.entity.*;
+import com.swp.PodBookingSystem.enums.OrderStatus;
 import com.swp.PodBookingSystem.service.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
@@ -39,20 +44,30 @@ public class OrderController {
                 .build();
     }
 
+    @GetMapping("/order-info/{orderId}")
+    public ApiResponse<OrderManagementResponse> getInfoOrder(@PathVariable String orderId) {
+        return ApiResponse.<OrderManagementResponse>builder()
+                .message("Lấy thông tin đơn hàng thành công")
+                .data(orderService.getInfoOrder(orderId))
+                .build();
+    }
+
+
     @GetMapping("/page")
     public ApiResponse<PaginationResponse<List<OrderManagementResponse>>> getOrdersByRole(
             @RequestHeader("Authorization") String token,
             @RequestParam String startDate,
             @RequestParam String endDate,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) OrderStatus status) {
         String accountId = accountService.extractAccountIdFromToken(token);
         Account user = accountService.getAccountById(accountId);
         LocalDateTime startDateTime = orderService.parseDateTime(startDate);
         LocalDateTime endDateTime = orderService.parseDateTime(endDate);
 
         return ApiResponse.<PaginationResponse<List<OrderManagementResponse>>>builder()
-                .data(orderService.getOrdersByRole(page, size, startDateTime, endDateTime, user))
+                .data(orderService.getOrdersByRole(page, size, startDateTime, endDateTime, user, status))
                 .message("get paging order successfully")
                 .build();
     }
@@ -67,12 +82,9 @@ public class OrderController {
     }
 
     @GetMapping("/{accountId}")
-    public ApiResponse<List<OrderResponse>> getOrdersByAccountId(@PathVariable String accountId) {
-        List<OrderResponse> orders = orderService.getOrdersByAccountId(accountId);
-        logOrders(orders);
-        return ApiResponse.<List<OrderResponse>>builder()
-                .data(orders)
-                .build();
+    public PaginationResponse<List<OrderManagementResponse>> getOrdersByAccountId(@PathVariable String accountId, @RequestParam(defaultValue = "0") int page,
+                                                                                  @RequestParam(defaultValue = "5") int take, @RequestParam(defaultValue = "Successfully") String status) {
+        return orderService.getOrdersByAccountCustomerId(page, take, accountId, status);
     }
 
     //Check room available -> yes: create order Status: Successfully
@@ -84,7 +96,7 @@ public class OrderController {
         try {
             String accountId = accountService.extractAccountIdFromToken(token);
             Account account = accountService.getAccountById(accountId);
-            Order orderCreated = orderService.createOrderByRequest(account);
+            Order orderCreated = orderService.createOrderByRequest(account, request);
             boolean isSomeRoomWasBook = orderDetailService.processOrderDetails(request, orderCreated, account);
 
             String status = isSomeRoomWasBook ? "Pending" : "Successfully";
@@ -106,18 +118,18 @@ public class OrderController {
     }
 
     @PutMapping
-    ApiResponse<OrderResponse> updateOrder(@RequestBody OrderUpdateRequest request){
+    ApiResponse<OrderResponse> updateOrder(@RequestBody OrderUpdateRequest request) {
         orderService.updateOrderUpdateAt(request.getId());
         return ApiResponse.<OrderResponse>builder()
                 .data(orderService.updateOrder(request))
-                .message("Update order successfully")
+                .message("Cập nhật hóa đơn thành công")
                 .build();
     }
 
     @PutMapping("/staff")
-    ApiResponse<OrderResponse> updateStaffWithOrder(@RequestBody OrderUpdateStaffRequest request){
-        return ApiResponse.<OrderResponse> builder()
-                .data(orderService.updateOrderHandlerWithOrder(request.getId(),request))
+    ApiResponse<OrderResponse> updateStaffWithOrder(@RequestBody OrderUpdateStaffRequest request) {
+        return ApiResponse.<OrderResponse>builder()
+                .data(orderService.updateOrderHandlerWithOrder(request.getId(), request))
                 .message("Update order successfully")
                 .build();
     }
@@ -133,5 +145,28 @@ public class OrderController {
         log.info("Username: {}", authentication.getName());
         log.info("Number of orders retrieved: {}", orders.size());
         orders.forEach(order -> log.info("Order ID: {}, Account ID: {}", order.getId(), order.getAccountId()));
+    }
+
+    @GetMapping("/number-order-current-day")
+    ApiResponse<Integer> countCurrentlyOrder() {
+        return ApiResponse.<Integer>builder()
+                .message("Số đơn hàng trong ngày")
+                .data(orderService.countCurrentlyOrder())
+                .build();
+    }
+
+    @GetMapping("/number-order")
+    ApiResponse<Integer> countOrder(
+            @RequestParam(required = false) String startTime,
+            @RequestParam(required = false) String endTime) {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy'T'HH:mm");
+        LocalDateTime start = startTime != null ? LocalDateTime.parse(startTime, formatter) : null;
+        LocalDateTime end = endTime != null ? LocalDateTime.parse(endTime, formatter) : null;
+
+        return ApiResponse.<Integer>builder()
+                .message("Số đơn hàng từ " + start + " đến " + end)
+                .data(orderService.countOrder(start, end))
+                .build();
     }
 }

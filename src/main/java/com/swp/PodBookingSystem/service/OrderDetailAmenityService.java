@@ -5,6 +5,7 @@ import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenit
 import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenityUpdateReq;
 import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetailAmenity.OrderDetailAmenityResponse;
+import com.swp.PodBookingSystem.entity.Account;
 import com.swp.PodBookingSystem.entity.Amenity;
 import com.swp.PodBookingSystem.entity.OrderDetail;
 import com.swp.PodBookingSystem.entity.OrderDetailAmenity;
@@ -12,6 +13,7 @@ import com.swp.PodBookingSystem.enums.AmenityType;
 import com.swp.PodBookingSystem.enums.OrderDetailAmenityStatus;
 import com.swp.PodBookingSystem.mapper.AmenityMapper;
 import com.swp.PodBookingSystem.mapper.OrderDetailAmenityMapper;
+import com.swp.PodBookingSystem.repository.AccountRepository;
 import com.swp.PodBookingSystem.repository.AmenityRepository;
 import com.swp.PodBookingSystem.repository.OrderDetailAmenityRepository;
 import com.swp.PodBookingSystem.repository.OrderDetailRepository;
@@ -36,6 +38,7 @@ public class OrderDetailAmenityService {
     OrderDetailRepository orderDetailRepository;
     OrderDetailAmenityMapper orderDetailAmenityMapper;
     AmenityMapper amenityMapper;
+    private final AccountRepository accountRepository;
 
     //GET:
     public List<AmenityManagementResponse> getOrderDetailAmenitiesByOrderDetailId(String orderDetailId) {
@@ -59,7 +62,7 @@ public class OrderDetailAmenityService {
             throw new RuntimeException("Order detail or amenity not found");
         }
         OrderDetailAmenity orderDetailAmenity = new OrderDetailAmenity();
-        orderDetailAmenity.setStatus(OrderDetailAmenityStatus.Booked);
+        orderDetailAmenity.setStatus(OrderDetailAmenityStatus.Paid);
         orderDetailAmenity.setCreatedAt(LocalDateTime.now());
         orderDetailAmenity.setUpdatedAt(LocalDateTime.now());
         orderDetailAmenity.setId(UUID.randomUUID().toString());
@@ -72,7 +75,11 @@ public class OrderDetailAmenityService {
     }
 
     public void updateAmenityQuantityAfterCreateODA(OrderDetailAmenity orderDetailAmenity) {
-        Amenity amenity = orderDetailAmenity.getAmenity();
+        Optional<Amenity> amenityOptional = amenityRepository.findById(orderDetailAmenity.getAmenity().getId());
+        if(amenityOptional.isEmpty()) {
+            throw new RuntimeException("Amenity not found");
+        }
+        Amenity amenity = amenityOptional.get();
         if(amenity.getQuantity() < orderDetailAmenity.getQuantity()) {
             throw new RuntimeException("Not enough quantity");
         }
@@ -105,7 +112,7 @@ public class OrderDetailAmenityService {
         OrderDetailAmenity newOrderDetailAmenity = orderDetailAmenityMapper.toOrderDetailAmenity(request);
         newOrderDetailAmenity.setAmenity(updatedAmenity);
         newOrderDetailAmenity.setOrderDetail(savedOrderDetail);
-
+        newOrderDetailAmenity.setStatus(OrderDetailAmenityStatus.Paid);
 
         OrderDetailAmenity savedOrderDetailAmenity = orderDetailAmenityRepository.save(newOrderDetailAmenity);
 
@@ -125,6 +132,14 @@ public class OrderDetailAmenityService {
             throw new RuntimeException("Order detail amenity not found");
         }
         OrderDetailAmenity updateOrderDetailAmenity = orderDetailAmenity.get();
+        OrderDetail od = updateOrderDetailAmenity.getOrderDetail();
+        od.setUpdatedAt(LocalDateTime.now());
+        orderDetailRepository.save(od);
+        if(request.getStatus() == OrderDetailAmenityStatus.Canceled){
+            Account customer = od.getCustomer();
+            customer.setBalance(customer.getBalance() + updateOrderDetailAmenity.getPrice() * updateOrderDetailAmenity.getQuantity());
+            accountRepository.save(customer);
+        }
         updateOrderDetailAmenity.setStatus(request.getStatus());
         orderDetailAmenityRepository.save(updateOrderDetailAmenity);
     }

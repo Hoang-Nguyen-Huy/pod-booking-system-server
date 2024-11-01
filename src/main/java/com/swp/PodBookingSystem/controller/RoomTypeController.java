@@ -74,6 +74,23 @@ public class RoomTypeController {
                 .build();
     }
 
+    @GetMapping("/room-type-within-address")
+    ApiResponse<List<RoomType>> getRoomTypeByBuildingAddress(@RequestParam (required = false) String address) {
+        List<RoomType> roomTypeResponse = roomTypeService.getRoomTypeByBuildingAddress(address);
+        return ApiResponse.<List<RoomType>>builder()
+                .message("Lấy loại phòng theo địa chỉ thành công")
+                .data(roomTypeResponse)
+                .build();
+    }
+    @GetMapping("/get-by-building-id")
+    ApiResponse<List<RoomType>> getRoomTypeByBuildingId(@RequestParam (required = false) Integer buildingId) {
+        List<RoomType> roomTypeResponse = roomTypeService.getRoomTypeByBuildingId(buildingId);
+        return ApiResponse.<List<RoomType>>builder()
+                .message("Lấy loại phòng theo id chi nhánh thành công")
+                .data(roomTypeResponse)
+                .build();
+    }
+
     @PutMapping("/{roomTypeId}")
     ApiResponse<RoomTypeResponse> updatedRoomType(@PathVariable("roomTypeId") int roomTypeId,
                                                   @RequestBody RoomTypeCreationRequest request) {

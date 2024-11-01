@@ -1,11 +1,10 @@
 package com.swp.PodBookingSystem.controller;
 
 import com.swp.PodBookingSystem.dto.request.Room.RoomAvailabilityDTO;
-import com.swp.PodBookingSystem.dto.request.Slot.SlotCreationRequest;
+import com.swp.PodBookingSystem.dto.request.Slot.SlotDTO;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.request.Room.RoomCreationRequest;
 import com.swp.PodBookingSystem.dto.request.Room.RoomPaginationDTO;
-import com.swp.PodBookingSystem.dto.respone.Calendar.DateResponse;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.dto.respone.Room.BookedRoomDto;
 import com.swp.PodBookingSystem.dto.respone.Room.RoomResponse;
@@ -41,10 +40,12 @@ public class RoomController {
     }
 
     @GetMapping
-    PaginationResponse<List<Room>> getRooms(@RequestParam(defaultValue = "1", name = "page") int page,
+    PaginationResponse<List<Room>> getRooms(@RequestParam(required = false) String searchParams,
+                                            @RequestParam(required = false,defaultValue = "0") int buildingId,
+                                            @RequestParam(defaultValue = "1", name = "page") int page,
                                             @RequestParam(defaultValue = "10", name = "take") int take) {
         RoomPaginationDTO dto = new RoomPaginationDTO(page, take);
-        Page<Room> roomPage = roomService.getRooms(dto.page, dto.take);
+        Page<Room> roomPage = roomService.getRooms(buildingId,searchParams, dto.page, dto.take);
 
         return PaginationResponse.<List<Room>>builder()
                 .data(roomPage.getContent())
@@ -87,13 +88,13 @@ public class RoomController {
     @GetMapping("/available-rooms")
     ApiResponse<List<Room>> getAvailableRoomsByRoomTypeId(@RequestParam  Integer typeId,
                                                           @RequestParam(required = false)  List<String> slots) {
-        List<SlotCreationRequest> slotList = new ArrayList<>();
+        List<SlotDTO> slotList = new ArrayList<>();
         if(slots!=null) {
             for(String slot: slots) {
                 String[] parts = slot.split("_");
                 LocalDateTime startTime = LocalDateTime.parse(parts[0]);
                 LocalDateTime endTime = LocalDateTime.parse(parts[1]);
-                slotList.add(new SlotCreationRequest(startTime,endTime));
+                slotList.add(new SlotDTO(startTime,endTime));
             }
         }
         return ApiResponse.<List<Room>>builder()
@@ -102,24 +103,13 @@ public class RoomController {
                 .build();
     }
 
-    @GetMapping("/calendar")
-    ApiResponse<List<DateResponse>> getCalendar(@RequestParam List<Integer> roomIds,
-                                                @RequestParam(required = false) Integer servicePackageId,
-                                                @RequestParam LocalDate selectedDate,
-                                                @RequestParam List<String> slots
-                                        ) {
-        return ApiResponse.<List<DateResponse>>builder()
-                .data(roomService.getCalendar(roomIds,servicePackageId,selectedDate,slots))
-                .message("Get calendar successfully")
-                .build();
-    }
-
     @GetMapping("/unavailable")
-    ApiResponse<List<RoomAvailabilityDTO>> getUnavailableRooms(@RequestParam LocalDateTime startTime,
+    ApiResponse<List<RoomAvailabilityDTO>> getUnavailableRooms(@RequestParam List<Integer> roomIds,
+                                                                @RequestParam LocalDateTime startTime,
                                                                 @RequestParam LocalDateTime endTime
                                                                ) {
         return ApiResponse.<List<RoomAvailabilityDTO>>builder()
-                .data(roomService.getUnavailableRooms(startTime,endTime))
+                .data(roomService.getUnavailableRooms(roomIds,startTime,endTime))
                 .message("Get unavailable rooms successfully")
                 .build();
     }
@@ -148,4 +138,38 @@ public class RoomController {
                 .data(roomService.getBookedRooms(accountIdFromToken))
                 .build();
     }
+
+    @GetMapping("/booked-rooms/account")
+    ApiResponse<List<BookedRoomDto>> getBookedRoomsByAccountId(@RequestParam("accountId") String accountId) {
+        return ApiResponse.<List<BookedRoomDto>>builder()
+                .message("Các phòng đã đặt")
+                .data(roomService.getBookedRooms(accountId))
+                .build();
+    }
+
+    @GetMapping("/number-served-rooms-currently")
+    ApiResponse<Integer> countCurrentlyServedRooms() {
+        return ApiResponse.<Integer>builder()
+                .message("Số phòng đang được phục vụ")
+                .data(roomService.countCurrentlyServedRooms())
+                .build();
+    }
+    @GetMapping("/available-by-type-and-date")
+    ApiResponse<List<Room>> getRoomsByTypeAndDate(@RequestParam  Integer typeId, @RequestParam String date) {
+        LocalDate selectedDate = LocalDate.parse(date);
+        return ApiResponse.<List<Room>>builder()
+                .data(roomService.getRoomsByTypeAndDate(typeId, selectedDate))
+                .message("Get rooms by typeId and date successfully")
+                .build();
+    }
+
+    @GetMapping("/slots-by-rooms-and-date")
+    ApiResponse<List<SlotDTO>> getSlotsByRoomsAndDate(@RequestParam(required = false) List<Integer> roomIds, @RequestParam(required = false) String date) {
+        return ApiResponse.<List<SlotDTO>>builder()
+                .data(roomService.getSlotsByRoomsAndDate(roomIds, date))
+                .message("Get slots by rooms and date successfully")
+                .build();
+    }
+
+
 }

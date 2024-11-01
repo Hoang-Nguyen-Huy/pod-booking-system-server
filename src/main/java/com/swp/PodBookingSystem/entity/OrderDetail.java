@@ -69,6 +69,9 @@ public class OrderDetail {
     @Temporal(TemporalType.TIMESTAMP)
     LocalDateTime updatedAt;
 
+    @Column(name = "cancelReason")
+    String cancelReason;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
