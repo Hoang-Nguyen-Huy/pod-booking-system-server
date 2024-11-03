@@ -107,4 +107,12 @@ public class BuildingController {
                 .message("Get all buildings successfully")
                 .build();
     }
+
+    @GetMapping("/buildings-option")
+    ApiResponse<List<Building>> getAllBuildingsForHomePage() {
+        return ApiResponse.<List<Building>>builder()
+                .data(buildingService.getAllBuildingsForHomePage())
+                .message("Get all buildings successfully")
+                .build();
+    }
 }

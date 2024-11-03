@@ -94,4 +94,17 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
             "JOIN r.roomType rt " +
             "WHERE rt.id = :typeId")
     List<Room> findAllByTypeId(@Param("typeId") Integer typeId);
+
+    @Query("SELECT r FROM Room r WHERE r.name LIKE %:searchParams% OR r.roomType.name LIKE %:searchParams% " +
+            "ORDER BY r.createdAt DESC")
+    Page<Room> findFilteredManagementRoom(@Param("searchParams") String searchParams, Pageable pageable);
+
+    @Query ("SELECT r FROM Room r " +
+            "JOIN r.roomType rt " +
+            "JOIN rt.building b " +
+            "WHERE b.id = :buildingId " +
+            "AND (r.name LIKE %:searchParams% OR r.roomType.name LIKE %:searchParams%) " +
+            "ORDER BY r.createdAt DESC")
+    Page<Room> findFilteredManagementRoomByBuildingId(@Param("buildingId") Integer buildingId,
+                                                      @Param("searchParams") String searchParams, Pageable pageable);
 }
