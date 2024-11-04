@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -60,6 +61,7 @@ public class AmenityService {
         Amenity existingAmenity = amenityRepository.findById(amenityId)
                 .orElseThrow(() -> new EntityNotFoundException("Amenity not found"));
         Amenity updateAmenity = amenityMapper.toUpdateAmenity(request, existingAmenity);
+        updateAmenity.setUpdatedAt(LocalDateTime.now());
         return amenityMapper.toAmenityResponse(amenityRepository.save(updateAmenity));
     }
 
@@ -67,6 +69,7 @@ public class AmenityService {
         Amenity existingAmenity = amenityRepository.findById(amenityId)
                 .orElseThrow(() -> new EntityNotFoundException("Amenity not found"));
         existingAmenity.setIsDeleted(existingAmenity.getIsDeleted() == 1 ? 0 : 1);
+
         amenityRepository.save(existingAmenity);
         return "Delete amenity " + amenityId + " successfully";
     }

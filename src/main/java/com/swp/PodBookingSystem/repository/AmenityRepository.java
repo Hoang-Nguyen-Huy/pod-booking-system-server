@@ -20,6 +20,9 @@ public interface AmenityRepository extends JpaRepository<Amenity, Integer> {
 
     Page<Amenity> findAllByBuildingId(Integer buildingId, Pageable pageable);
 
+    @Query("SELECT a FROM Amenity a WHERE a.isDeleted = 0")
+    List<Amenity> findAllActiveAmenities();
+
     @Query("SELECT a " +
             "FROM Amenity a " +
             "WHERE a.building.id = :buildingId AND a.isDeleted = 0 AND a.quantity > 0")
