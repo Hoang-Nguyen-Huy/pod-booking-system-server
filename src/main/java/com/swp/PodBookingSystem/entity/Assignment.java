@@ -17,7 +17,7 @@ import lombok.experimental.FieldDefaults;
 @Table(name = "assignment")
 public class Assignment {
     @Id
-    String Id;
+    String id;
 
     String staffId;
 

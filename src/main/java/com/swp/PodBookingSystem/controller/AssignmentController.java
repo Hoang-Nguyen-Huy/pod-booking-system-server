@@ -48,5 +48,22 @@ public class AssignmentController {
                 .message("Update Assignment successfully")
                 .build();
     }
+
+    @DeleteMapping("/{assignmentId}")
+    ApiResponse<AssignmentResponse> deleteAssignment(@PathVariable("assignmentId") String assignmentId){
+        return ApiResponse.<AssignmentResponse>builder()
+                .message(assignmentService.deleteAssignment(assignmentId))
+                .build();
     }
+
+        @GetMapping("/{staffId}")
+        public ApiResponse<List<AssignmentResponse>> getAssignmentByStaffId(@PathVariable("staffId") String staffId) {
+            List<AssignmentResponse> assignments = assignmentService.getAssignmentsByStaffId(staffId);
+            return ApiResponse.<List<AssignmentResponse>>builder()
+                    .data(assignments)
+                    .message("Assignments retrieved successfully")
+                    .build();
+        }
+
+}
 

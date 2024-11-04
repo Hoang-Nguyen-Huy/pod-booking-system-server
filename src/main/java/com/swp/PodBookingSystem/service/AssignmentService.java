@@ -44,7 +44,20 @@ public class AssignmentService {
                 .orElseThrow(() -> new EntityNotFoundException("Assignment not found"));
         Assignment updateAssignment = assignmentMapper.toUpdateAssignment(request, existingAssignment);
         return assignmentMapper.toAssignmentResponse(assignmentRepository.save(updateAssignment));
-
-
     }
+
+    public String deleteAssignment(String id){
+        Assignment existingAssignment = assignmentRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Assignment not found"));
+        assignmentRepository.deleteById(id);
+        return "Assignment deleted successfully";
+    }
+
+    public List<AssignmentResponse> getAssignmentsByStaffId(String staffId) {
+        List<Assignment> assignments = assignmentRepository.findByStaffId(staffId);
+        return assignments.stream()
+                .map(assignmentMapper::toAssignmentResponse)
+                .collect(Collectors.toList());
+    }
+
 }

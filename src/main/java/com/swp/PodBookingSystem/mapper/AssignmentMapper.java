@@ -10,6 +10,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 
 public interface AssignmentMapper {
@@ -19,4 +21,5 @@ public interface AssignmentMapper {
 
     @Mapping(target = "id", ignore = true)
     Assignment toUpdateAssignment(AssignmentRequest request, @MappingTarget Assignment assignment);
+
 }
