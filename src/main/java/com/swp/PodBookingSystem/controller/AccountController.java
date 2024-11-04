@@ -4,6 +4,7 @@ import com.swp.PodBookingSystem.dto.request.Account.*;
 import com.swp.PodBookingSystem.dto.request.CalendarRequest;
 import com.swp.PodBookingSystem.dto.respone.Account.AccountManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.Account.AccountOrderResponse;
+import com.swp.PodBookingSystem.dto.respone.Account.AccountStaffResponse;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.respone.AccountResponse;
 import com.swp.PodBookingSystem.dto.respone.Order.OrderManagementResponse;
@@ -79,6 +80,7 @@ public class AccountController {
                 .build();
     }
 
+
     @PatchMapping("/{id}")
     ApiResponse<AccountResponse> updateAccountByAdmin(@PathVariable("id") String id,
                                                       @RequestBody AccountUpdateAdminRequest request) {
@@ -152,9 +154,23 @@ public class AccountController {
     }
 
     @GetMapping("/staff")
-    public ResponseEntity<List<AccountOrderResponse>> getAllStaffAccounts() {
-        return ResponseEntity.status(HttpStatus.OK).body(accountService.getAllStaffAccounts());
+    public ResponseEntity<List<AccountOrderResponse>> getAllStaffAccounts(@RequestHeader("Authorization") String token) {
+        try {
+            Account account = accountService.getAccountById(accountService.extractAccountIdFromToken(token));
+
+            if (account.getRole().equals(AccountRole.Admin)) {
+                return ResponseEntity.status(HttpStatus.OK).body(accountService.getAllStaffAccounts());
+            } else if (account.getRole().equals(AccountRole.Manager)) {
+                return ResponseEntity.status(HttpStatus.OK).body(accountService.getAllStaffAccountsByManager(account.getBuildingNumber()));
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
+
 
     @GetMapping("/{keyword}/{role}")
     public ResponseEntity<List<AccountOrderResponse>> searchAccounts(
@@ -184,4 +200,6 @@ public class AccountController {
                 .data(accountService.countCustomer(start, end))
                 .build();
     }
+
+
 }

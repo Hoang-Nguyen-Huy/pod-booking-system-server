@@ -4,6 +4,7 @@ import com.swp.PodBookingSystem.dto.request.Account.AccountCreationRequest;
 import com.swp.PodBookingSystem.dto.request.Account.AccountUpdateAdminRequest;
 import com.swp.PodBookingSystem.dto.respone.Account.AccountManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.Account.AccountOrderResponse;
+import com.swp.PodBookingSystem.dto.respone.Account.AccountStaffResponse;
 import com.swp.PodBookingSystem.dto.respone.AccountResponse;
 import com.swp.PodBookingSystem.dto.respone.Building.BuildingResponse;
 import com.swp.PodBookingSystem.entity.Account;
@@ -66,6 +67,8 @@ public class AccountService {
         return accountPage.map(this::convertToAccountManagementResponse);
     }
 
+
+
     public Account getAccountById(String id) {
         return accountRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
     }
@@ -90,6 +93,15 @@ public class AccountService {
                     .map(this::toAccountResponse)
                     .collect(Collectors.toList());
     }
+
+    public List<AccountOrderResponse> getAllStaffAccountsByManager(int buildingNumber) {
+        List<Account> accounts = accountRepository.findStaffByManager(AccountRole.Staff, buildingNumber);
+        return accounts.stream()
+                .map(this::toAccountResponse)
+                .collect(Collectors.toList());
+    }
+
+
 
     public List<AccountOrderResponse> searchAccounts(String keyword, AccountRole role) {
         List<Account> accounts = accountRepository.searchAccounts(keyword, role);

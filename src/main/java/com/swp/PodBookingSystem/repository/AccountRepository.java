@@ -22,6 +22,9 @@ public interface AccountRepository extends JpaRepository<Account, String> {
     @Query("SELECT a FROM Account a WHERE a.role = :role")
     List<Account> findByRole(@Param("role") AccountRole role);
 
+    @Query("SELECT a FROM Account a WHERE a.role = :role AND a.buildingNumber = :buildingNumber")
+    List<Account> findStaffByManager(@Param("role") AccountRole role, @Param("buildingNumber") int buildingNumber);
+
     @Query("""
             SELECT a FROM Account a 
             WHERE (:keyword IS NULL OR LOWER(a.name) LIKE LOWER(CONCAT('%', :keyword, '%')) 
@@ -47,4 +50,6 @@ public interface AccountRepository extends JpaRepository<Account, String> {
     @Query("SELECT a FROM Account a WHERE a.name LIKE %:searchParams% OR a.email LIKE %:searchParams% " +
             "ORDER BY a.createdAt DESC")
     Page<Account> findFilteredAccount(@Param("searchParams") String searchParams, Pageable pageable);
+
+
 }
