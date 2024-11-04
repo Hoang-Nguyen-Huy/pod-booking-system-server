@@ -1,4 +1,4 @@
-package com.swp.PodBookingSystem.dto.respone.Assignment;
+package com.swp.PodBookingSystem.dto.request.Assignment;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AssignmentResponse {
+public class AssignmentRequest {
     String id;
     String staffId;
     String slot;

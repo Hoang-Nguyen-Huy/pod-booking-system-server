@@ -1,6 +1,8 @@
 package com.swp.PodBookingSystem.controller;
 
 import com.swp.PodBookingSystem.dto.request.Assignment.AssignmentCreationRequest;
+import com.swp.PodBookingSystem.dto.request.Assignment.AssignmentRequest;
+import com.swp.PodBookingSystem.dto.respone.AmenityResponse;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.respone.Assignment.AssignmentResponse;
 import com.swp.PodBookingSystem.service.AssignmentService;
@@ -38,4 +40,13 @@ public class AssignmentController {
                 .build();
     }
 
-}
+    @PutMapping("/{assignmentId}")
+    ApiResponse<AssignmentResponse> updateAssignment(@PathVariable("assignmentId") String assignmentId,
+                                                     @RequestBody AssignmentRequest request){
+        return ApiResponse.<AssignmentResponse>builder()
+                .data(assignmentService.updateAssignment(assignmentId,request))
+                .message("Update Assignment successfully")
+                .build();
+    }
+    }
+

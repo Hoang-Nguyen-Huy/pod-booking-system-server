@@ -1,10 +1,12 @@
 package com.swp.PodBookingSystem.service;
 
 import com.swp.PodBookingSystem.dto.request.Assignment.AssignmentCreationRequest;
+import com.swp.PodBookingSystem.dto.request.Assignment.AssignmentRequest;
 import com.swp.PodBookingSystem.dto.respone.Assignment.AssignmentResponse;
 import com.swp.PodBookingSystem.entity.Assignment;
 import com.swp.PodBookingSystem.mapper.AssignmentMapper;
 import com.swp.PodBookingSystem.repository.AssignmentRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -12,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +28,7 @@ public class AssignmentService {
 
     public AssignmentResponse createAssignment(AssignmentCreationRequest request){
         Assignment newAssignment = assignmentMapper.toAssignment(request);
+        newAssignment.setId(UUID.randomUUID().toString());
         return assignmentMapper.toAssignmentResponse(assignmentRepository.save(newAssignment));
     }
 
@@ -33,5 +37,14 @@ public class AssignmentService {
         return assignments.stream()
                 .map(assignmentMapper::toAssignmentResponse)
                 .collect(Collectors.toList());
+    }
+
+    public AssignmentResponse updateAssignment(String id, AssignmentRequest request){
+        Assignment existingAssignment = assignmentRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Assignment not found"));
+        Assignment updateAssignment = assignmentMapper.toUpdateAssignment(request, existingAssignment);
+        return assignmentMapper.toAssignmentResponse(assignmentRepository.save(updateAssignment));
+
+
     }
 }
