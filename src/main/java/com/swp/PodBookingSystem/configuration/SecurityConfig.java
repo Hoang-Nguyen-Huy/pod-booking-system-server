@@ -30,7 +30,7 @@ public class SecurityConfig {
     private final String[] PUBLIC_ENDPOINTS = {"/accounts", "/accounts/me",
             "/auth/login", "/auth/introspect", "/auth/refresh-token",
             "/auth/logout", "/auth/login/google",
-            "/rooms/slots-by-rooms-and-date","/rooms/available-by-type-and-date"
+            "/rooms/slots-by-rooms-and-date", "/rooms/available-by-type-and-date"
     };
 
     private final String[] ADMIN_ENDPOINTS = {
@@ -68,6 +68,7 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
+        config.addAllowedOrigin("https://flexipod.site");
         config.addAllowedOrigin("http://localhost:3000");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
