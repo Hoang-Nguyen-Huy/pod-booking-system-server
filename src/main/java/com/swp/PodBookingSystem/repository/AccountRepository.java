@@ -19,8 +19,11 @@ public interface AccountRepository extends JpaRepository<Account, String> {
 
     Optional<Account> findByEmail(String email);
 
-    @Query("SELECT a FROM Account a WHERE a.role = :role")
+    @Query("SELECT a FROM Account a WHERE a.role = :role AND a.status = 1")
     List<Account> findByRole(@Param("role") AccountRole role);
+
+    @Query("SELECT a FROM Account a WHERE a.role = :role AND a.buildingNumber = :buildingNumber  AND a.status = 1")
+    List<Account> findStaffByManager(@Param("role") AccountRole role, @Param("buildingNumber") int buildingNumber);
 
     @Query("""
             SELECT a FROM Account a 
@@ -47,4 +50,6 @@ public interface AccountRepository extends JpaRepository<Account, String> {
     @Query("SELECT a FROM Account a WHERE a.name LIKE %:searchParams% OR a.email LIKE %:searchParams% " +
             "ORDER BY a.createdAt DESC")
     Page<Account> findFilteredAccount(@Param("searchParams") String searchParams, Pageable pageable);
+
+
 }
