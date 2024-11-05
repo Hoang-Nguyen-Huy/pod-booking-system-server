@@ -154,20 +154,26 @@ public class AccountController {
     }
 
     @GetMapping("/staff")
-    public ResponseEntity<List<AccountOrderResponse>> getAllStaffAccounts(@RequestHeader("Authorization") String token) {
+    public ApiResponse<List<AccountOrderResponse>> getAllStaffAccounts(@RequestHeader("Authorization") String token) {
         try {
             Account account = accountService.getAccountById(accountService.extractAccountIdFromToken(token));
 
             if (account.getRole().equals(AccountRole.Admin)) {
-                return ResponseEntity.status(HttpStatus.OK).body(accountService.getAllStaffAccounts());
+                return ApiResponse.<List<AccountOrderResponse>>builder()
+                        .message("Lấy danh sách nhân viên thành công")
+                        .data(accountService.getAllStaffAccounts())
+                        .build();
             } else if (account.getRole().equals(AccountRole.Manager)) {
-                return ResponseEntity.status(HttpStatus.OK).body(accountService.getAllStaffAccountsByManager(account.getBuildingNumber()));
+                return ApiResponse.<List<AccountOrderResponse>>builder()
+                        .message("Lấy danh sách nhân viên thành công")
+                        .data(accountService.getAllStaffAccountsByManager(account.getBuildingNumber()))
+                        .build();
             } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                throw new AppException(ErrorCode.UNAUTHORIZED);
             }
 
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
     }
 
