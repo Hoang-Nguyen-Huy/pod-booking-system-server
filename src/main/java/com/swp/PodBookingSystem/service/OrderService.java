@@ -214,6 +214,26 @@ public class OrderService {
         return pattern.matcher(normalized).replaceAll("").replaceAll("[^\\p{L}]", "");
     }
 
+    public static String getRoomName(String roomName) {
+        String pattern = removeDiacritics(roomName).replace("Room","");
+        String[] words = pattern.split(" ");
+        if (words.length > 1) {
+            return String.join("", Arrays.copyOfRange(words, 1, words.length));
+        } else {
+            return words[0];
+        }
+    }
+
+    public static String getInitials(String name) {
+
+        String[] words = name.trim().split(" ");
+        String[] results = new String[words.length];
+        for (int i = 0; i < words.length; i++) {
+            results[i] = words[i].substring(0, 1);
+        }
+        return String.join("", results);
+    }
+
     public String renderOrderID(OrderDetailCreationRequest request, Account account) {
         String customerName;
         if(request.getCustomer() == null) {
@@ -223,13 +243,11 @@ public class OrderService {
         }
         String roomNames = request.getSelectedRooms()
                 .stream()
-                .map(room -> room.getName().replace(" ", ""))
+                .map(room -> getRoomName(room.getName()))
                 .collect(Collectors.joining("-"));
         String uuid = UUID.randomUUID().toString();
-        return "OD-" + roomNames.toLowerCase() + "-CUS-" + customerName.replace(" ", "").toString().substring(0, 3).toLowerCase() + "-D-"
-                + request.getStartTime().getFirst().getDayOfMonth() + "-"
-                + request.getStartTime().getFirst().getMonthValue() + "-"
-                + uuid.substring(0, 6);
+        return "OD" + uuid.substring(0, 4).toUpperCase() + "-" + roomNames.toUpperCase() + "-" + getInitials(customerName) + "-D"
+                + request.getStartTime().getFirst().getDayOfMonth() + request.getStartTime().getFirst().getMonthValue();
     }
 
     /*
