@@ -6,10 +6,7 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.swp.PodBookingSystem.dto.request.Account.AccountCreationRequest;
-import com.swp.PodBookingSystem.dto.request.Authentication.AuthenticationRequest;
-import com.swp.PodBookingSystem.dto.request.Authentication.ForgotPasswordRequest;
-import com.swp.PodBookingSystem.dto.request.Authentication.LogoutRequest;
-import com.swp.PodBookingSystem.dto.request.Authentication.RefreshTokenRequest;
+import com.swp.PodBookingSystem.dto.request.Authentication.*;
 import com.swp.PodBookingSystem.dto.request.IntrospectRequest;
 import com.swp.PodBookingSystem.dto.respone.AuthenticationResponse;
 import com.swp.PodBookingSystem.dto.respone.IntrospectResponse;
@@ -90,6 +87,26 @@ public class AuthenticationService {
         SignedJWT decodeRefreshToken = SignedJWT.parse(refreshToken);
         refreshTokenRepository.save(new RefreshToken(null, refreshToken, account, decodeRefreshToken.getJWTClaimsSet().getIssueTime(), decodeRefreshToken.getJWTClaimsSet().getExpirationTime()));
         var accountResponse = accountMapper.toAccountResponseClient(account);
+        return AuthenticationResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .account(accountResponse)
+                .build();
+    }
+
+    public AuthenticationResponse register(RegisterRequest payload) throws ParseException {
+        Optional<Account> existingAccount = accountRepository.findByEmail(payload.getEmail());
+        if (existingAccount.isPresent()) throw new AppException(ErrorCode.EMAIL_EXISTED);
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+        AccountCreationRequest request = new AccountCreationRequest(payload.getName(), payload.getEmail(), passwordEncoder.encode(payload.getPassword()), 0, "Customer", 1);
+        Account newAccount = accountMapper.toAccount(request);
+        accountRepository.save(newAccount);
+
+        var accessToken = generateAccessToken(newAccount);
+        var refreshToken = generateRefreshToken(newAccount);
+        SignedJWT decodeRefreshToken = SignedJWT.parse(refreshToken);
+        refreshTokenRepository.save(new RefreshToken(null, refreshToken, newAccount, decodeRefreshToken.getJWTClaimsSet().getIssueTime(), decodeRefreshToken.getJWTClaimsSet().getExpirationTime()));
+        var accountResponse = accountMapper.toAccountResponseClient(newAccount);
         return AuthenticationResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
