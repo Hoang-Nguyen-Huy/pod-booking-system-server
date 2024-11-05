@@ -1,11 +1,8 @@
 package com.swp.PodBookingSystem.controller;
 
 import com.nimbusds.jose.JOSEException;
-import com.swp.PodBookingSystem.dto.request.Authentication.ForgotPasswordRequest;
-import com.swp.PodBookingSystem.dto.request.Authentication.LogoutRequest;
-import com.swp.PodBookingSystem.dto.request.Authentication.RefreshTokenRequest;
+import com.swp.PodBookingSystem.dto.request.Authentication.*;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
-import com.swp.PodBookingSystem.dto.request.Authentication.AuthenticationRequest;
 import com.swp.PodBookingSystem.dto.request.IntrospectRequest;
 import com.swp.PodBookingSystem.dto.respone.AuthenticationResponse;
 import com.swp.PodBookingSystem.dto.respone.IntrospectResponse;
@@ -55,6 +52,15 @@ public class AuthenticationController {
         var result = authenticationService.login(request);
         return ApiResponse.<AuthenticationResponse>builder()
                 .message("Đăng nhập thành công")
+                .data(result)
+                .build();
+    }
+
+    @PostMapping("/register")
+    ApiResponse<AuthenticationResponse> register(@RequestBody RegisterRequest request) throws ParseException {
+        var result = authenticationService.register(request);
+        return ApiResponse.<AuthenticationResponse>builder()
+                .message("Đăng kí thành công")
                 .data(result)
                 .build();
     }
