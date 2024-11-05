@@ -215,23 +215,19 @@ public class OrderService {
     }
 
     public static String getRoomName(String roomName) {
-        String pattern = removeDiacritics(roomName).replace("Room","");
-        String[] words = pattern.split(" ");
-        if (words.length > 1) {
-            return String.join("", Arrays.copyOfRange(words, 1, words.length));
-        } else {
-            return words[0];
-        }
+        String pattern = removeDiacritics(roomName).replace("Room", "").trim();
+        return String.join("", pattern.split("\\s+")).toUpperCase();
     }
 
     public static String getInitials(String name) {
-
-        String[] words = name.trim().split(" ");
-        String[] results = new String[words.length];
-        for (int i = 0; i < words.length; i++) {
-            results[i] = words[i].substring(0, 1);
+        String[] words = name.trim().split("\\s+");
+        StringBuilder initials = new StringBuilder();
+        for (String word : words) {
+            if (!word.isEmpty()) {
+                initials.append(word.charAt(0));
+            }
         }
-        return String.join("", results);
+        return initials.toString().toUpperCase();
     }
 
     public String renderOrderID(OrderDetailCreationRequest request, Account account) {

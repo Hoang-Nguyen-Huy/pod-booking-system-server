@@ -87,6 +87,13 @@ public class AccountService {
         return accountMapper.toAccountResponse(accountRepository.save(updatedAccount));
     }
 
+    public void updatePhoneNumber (String accountId, String phoneNumber) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+        account.setPhoneNumber(phoneNumber);
+        accountRepository.save(account);
+    }
+
     public List<AccountOrderResponse> getAllStaffAccounts() {
             List<Account> accounts = accountRepository.findByRole(AccountRole.Staff);
             return accounts.stream()

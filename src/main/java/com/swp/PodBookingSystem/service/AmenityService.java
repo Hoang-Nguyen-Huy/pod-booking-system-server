@@ -29,7 +29,7 @@ public class AmenityService {
     private AmenityMapper amenityMapper;
 
     public List<AmenityResponse> getAllAmenities(){
-        List<Amenity> amenities = amenityRepository.findAll();
+        List<Amenity> amenities = amenityRepository.findAllAvailable();
         return amenities.stream()
                 .map(amenityMapper::toAmenityResponse)
                 .collect(Collectors.toList());
