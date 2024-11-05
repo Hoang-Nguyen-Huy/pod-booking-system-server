@@ -2,8 +2,11 @@ package com.swp.PodBookingSystem.service;
 
 import com.swp.PodBookingSystem.dto.request.Assignment.AssignmentCreationRequest;
 import com.swp.PodBookingSystem.dto.request.Assignment.AssignmentRequest;
+import com.swp.PodBookingSystem.dto.respone.AccountResponse;
 import com.swp.PodBookingSystem.dto.respone.Assignment.AssignmentResponse;
 import com.swp.PodBookingSystem.entity.Assignment;
+import com.swp.PodBookingSystem.mapper.AccountMapper;
+import com.swp.PodBookingSystem.mapper.AccountMapperImpl;
 import com.swp.PodBookingSystem.mapper.AssignmentMapper;
 import com.swp.PodBookingSystem.repository.AccountRepository;
 import com.swp.PodBookingSystem.repository.AssignmentRepository;
@@ -27,6 +30,7 @@ public class AssignmentService {
     private final AssignmentMapper assignmentMapper;
     private final AssignmentRepository assignmentRepository;
     private final AccountRepository accountRepository;
+    private final AccountMapper accountMapper;
 
     public AssignmentResponse createAssignment(AssignmentCreationRequest request){
         Assignment newAssignment = assignmentMapper.toAssignment(request);
@@ -75,5 +79,16 @@ public class AssignmentService {
                 })
                 .collect(Collectors.toList());
     }
+
+
+    public List<AccountResponse> getStaffWithoutAssignment(String weekDate, String slot) {
+        List<String> assignedStaffIds = assignmentRepository
+                .findStaffIdsByWeekDateAndSlot(weekDate, slot);
+
+        return accountRepository.findStaffNotInAssignedList(assignedStaffIds).stream()
+                .map(accountMapper::toAccountResponse)
+                .collect(Collectors.toList());
+    }
+
 
 }
