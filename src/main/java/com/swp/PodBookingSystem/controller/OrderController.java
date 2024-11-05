@@ -5,7 +5,6 @@ import com.swp.PodBookingSystem.dto.request.Order.OrderUpdateStaffRequest;
 import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.respone.Order.OrderManagementResponse;
-import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderResponse;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.entity.*;
@@ -15,7 +14,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -54,7 +52,7 @@ public class OrderController {
 
 
     @GetMapping("/page")
-    public ApiResponse<PaginationResponse<List<OrderManagementResponse>>> getOrdersByRole(
+    public PaginationResponse<List<OrderManagementResponse>> getOrdersByRole(
             @RequestHeader("Authorization") String token,
             @RequestParam String startDate,
             @RequestParam String endDate,
@@ -66,19 +64,13 @@ public class OrderController {
         LocalDateTime startDateTime = orderService.parseDateTime(startDate);
         LocalDateTime endDateTime = orderService.parseDateTime(endDate);
 
-        return ApiResponse.<PaginationResponse<List<OrderManagementResponse>>>builder()
-                .data(orderService.getOrdersByRole(page, size, startDateTime, endDateTime, user, status))
-                .message("get paging order successfully")
-                .build();
+        return orderService.getOrdersByRole(page, size, startDateTime, endDateTime, user, status);
     }
 
     @GetMapping("/search")
-    public ApiResponse<PaginationResponse<List<OrderManagementResponse>>> searchOrders(@RequestParam String keyword, @RequestParam(defaultValue = "0") int page,
+    public PaginationResponse<List<OrderManagementResponse>> searchOrders(@RequestParam String keyword, @RequestParam(defaultValue = "0") int page,
                                                                                        @RequestParam(defaultValue = "10") int size) {
-        return ApiResponse.<PaginationResponse<List<OrderManagementResponse>>>builder()
-                .data(orderService.searchOrdersByKeyword(page, size, keyword))
-                .message("search order successfully")
-                .build();
+        return orderService.searchOrdersByKeyword(page, size, keyword);
     }
 
     @GetMapping("/{accountId}")
