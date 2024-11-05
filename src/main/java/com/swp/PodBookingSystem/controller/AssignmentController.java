@@ -28,7 +28,7 @@ public class AssignmentController {
     ApiResponse<AssignmentResponse> createAssignment(@RequestBody @Valid AssignmentCreationRequest request){
         return ApiResponse.<AssignmentResponse>builder()
                 .data(assignmentService.createAssignment(request))
-                .message("Thêm assignment thành công")
+                .message("Add Assignment successfully")
                 .build();
     }
 
@@ -56,14 +56,14 @@ public class AssignmentController {
                 .build();
     }
 
-        @GetMapping("/{staffId}")
-        public ApiResponse<List<AssignmentResponse>> getAssignmentByStaffId(@PathVariable("staffId") String staffId) {
-            List<AssignmentResponse> assignments = assignmentService.getAssignmentsByStaffId(staffId);
-            return ApiResponse.<List<AssignmentResponse>>builder()
-                    .data(assignments)
-                    .message("Assignments retrieved successfully")
-                    .build();
-        }
+    @GetMapping("/{staffId}")
+    public ApiResponse<List<AssignmentResponse>> getAssignmentByStaffId(@PathVariable("staffId") String staffId) {
+        List<AssignmentResponse> assignments = assignmentService.getAssignmentsByStaffId(staffId);
+        return ApiResponse.<List<AssignmentResponse>>builder()
+                .data(assignments)
+                .message("Assignments retrieved successfully")
+                .build();
+    }
 
 }
 

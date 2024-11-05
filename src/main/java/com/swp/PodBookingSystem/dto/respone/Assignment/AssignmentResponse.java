@@ -13,4 +13,5 @@ public class AssignmentResponse {
     String staffId;
     String slot;
     String weekDate;
+    String nameStaff;
 }
