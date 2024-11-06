@@ -25,6 +25,9 @@ public interface AccountRepository extends JpaRepository<Account, String> {
     @Query("SELECT a FROM Account a WHERE a.role = :role AND a.buildingNumber = :buildingNumber  AND a.status = 1")
     List<Account> findStaffByManager(@Param("role") AccountRole role, @Param("buildingNumber") int buildingNumber);
 
+    @Query("SELECT a FROM Account a WHERE a.id NOT IN :assignedStaffIds AND a.role = 'Staff' AND a.buildingNumber = :buildingNumber")
+    List<Account> findStaffNotInAssignedListByBuilding(@Param("assignedStaffIds") List<String> assignedStaffIds, @Param("buildingNumber") Integer buildingNumber);
+
     @Query("""
             SELECT a FROM Account a 
             WHERE (:keyword IS NULL OR LOWER(a.name) LIKE LOWER(CONCAT('%', :keyword, '%')) 
@@ -50,6 +53,11 @@ public interface AccountRepository extends JpaRepository<Account, String> {
     @Query("SELECT a FROM Account a WHERE a.name LIKE %:searchParams% OR a.email LIKE %:searchParams% " +
             "ORDER BY a.createdAt DESC")
     Page<Account> findFilteredAccount(@Param("searchParams") String searchParams, Pageable pageable);
+
+    @Query("SELECT a FROM Account a WHERE a.id NOT IN :assignedStaffIds AND a.role = 'Staff'")
+    List<Account> findStaffNotInAssignedList(@Param("assignedStaffIds") List<String> assignedStaffIds);
+
+
 
 
 }
