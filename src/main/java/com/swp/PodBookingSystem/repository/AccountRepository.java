@@ -51,5 +51,10 @@ public interface AccountRepository extends JpaRepository<Account, String> {
             "ORDER BY a.createdAt DESC")
     Page<Account> findFilteredAccount(@Param("searchParams") String searchParams, Pageable pageable);
 
+    @Query("SELECT a FROM Account a WHERE a.id NOT IN :assignedStaffIds AND a.role = 'Staff'")
+    List<Account> findStaffNotInAssignedList(@Param("assignedStaffIds") List<String> assignedStaffIds);
+
+
+
 
 }
