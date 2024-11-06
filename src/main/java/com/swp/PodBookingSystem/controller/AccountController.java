@@ -158,7 +158,7 @@ public class AccountController {
         Integer buildingNumber = account.getBuildingNumber();
 
         if (weekDate != null && slot != null) {
-            List<AccountResponse> availableStaff;
+            List<AccountOrderResponse> availableStaff;
             if (account.getRole().equals(AccountRole.Admin)) {
                 availableStaff = accountService.getStaffWithoutAssignment(weekDate, slot, "Admin", null);
             } else if (account.getRole().equals(AccountRole.Manager)) {
@@ -167,7 +167,7 @@ public class AccountController {
                 throw new AppException(ErrorCode.UNAUTHORIZED);
             }
 
-            return ApiResponse.<List<AccountResponse>>builder()
+            return ApiResponse.<List<AccountOrderResponse>>builder()
                     .data(availableStaff)
                     .message("Available staff retrieved successfully")
                     .build();
