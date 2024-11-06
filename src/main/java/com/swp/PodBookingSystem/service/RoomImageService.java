@@ -31,4 +31,7 @@ public class RoomImageService {
         });
     }
 
+    public void deleteImage(int imageId) {
+        roomImageRepository.deleteById(imageId);
+    }
 }
