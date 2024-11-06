@@ -41,5 +41,13 @@ public class RoomImageController {
                 .build();
     }
 
+    @DeleteMapping("/{roomId}")
+    ApiResponse<String> deleteImage(@PathVariable int imageId) {
+        roomImageService.deleteImage(imageId);
+        return ApiResponse.<String>builder().data("Xóa hình ảnh thành công")
+                .message("Xóa hình ảnh thành công")
+                .build();
+    }
+
 
 }
