@@ -2,8 +2,6 @@ package com.swp.PodBookingSystem.controller;
 
 import com.swp.PodBookingSystem.dto.request.Assignment.AssignmentCreationRequest;
 import com.swp.PodBookingSystem.dto.request.Assignment.AssignmentRequest;
-import com.swp.PodBookingSystem.dto.respone.AccountResponse;
-import com.swp.PodBookingSystem.dto.respone.AmenityResponse;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.respone.Assignment.AssignmentResponse;
 import com.swp.PodBookingSystem.service.AssignmentService;
@@ -33,31 +31,14 @@ public class AssignmentController {
                 .build();
     }
 
-//    @GetMapping("/all")
-//    public ApiResponse<List<AssignmentResponse>> getAllAssignment(){
-//        List<AssignmentResponse> assignments = assignmentService.getAllAssignments();
-//        return ApiResponse.<List<AssignmentResponse>>builder()
-//                .data(assignments)
-//                .build();
-//    }
-
     @GetMapping("/all")
-    public ApiResponse<?> getAssignmentsOrAvailableStaff(
-            @RequestParam(value = "weekDate", required = false) String weekDate,
-            @RequestParam(value = "slot", required = false) String slot) {
-        if (weekDate != null && slot != null) {
-            List<AccountResponse> availableStaff = assignmentService.getStaffWithoutAssignment(weekDate, slot);
-            return ApiResponse.<List<AccountResponse>>builder()
-                    .data(availableStaff)
-                    .message("Available staff retrieved successfully")
-                    .build();
-        } else {
-            List<AssignmentResponse> assignments = assignmentService.getAllAssignments();
+    public ApiResponse<List<AssignmentResponse>> getAllAssignment(){
+        List<AssignmentResponse> assignments = assignmentService.getAllAssignments();
             return ApiResponse.<List<AssignmentResponse>>builder()
                     .data(assignments)
                     .build();
-        }
     }
+
 
     @PutMapping("/{assignmentId}")
     ApiResponse<AssignmentResponse> updateAssignment(@PathVariable("assignmentId") String assignmentId,
