@@ -211,7 +211,7 @@ public class OrderService {
     public static String removeDiacritics(String input) {
         String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
         Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
-        return pattern.matcher(normalized).replaceAll("").replaceAll("[^\\p{L}]", "");
+        return pattern.matcher(normalized).replaceAll("").replaceAll("[^\\p{L} ]", "");
     }
 
     public static String getRoomName(String roomName) {
@@ -242,7 +242,7 @@ public class OrderService {
                 .map(room -> getRoomName(room.getName()))
                 .collect(Collectors.joining("-"));
         String uuid = UUID.randomUUID().toString();
-        return "OD" + uuid.substring(0, 4).toUpperCase() + "-" + roomNames.toUpperCase() + "-" + getInitials(customerName) + "-D"
+        return "OD" + uuid.substring(0, 4).toUpperCase() + "-R" + roomNames.toUpperCase() + "-" + getInitials(customerName) + "-D"
                 + request.getStartTime().getFirst().getDayOfMonth() + request.getStartTime().getFirst().getMonthValue();
     }
 
