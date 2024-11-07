@@ -30,7 +30,7 @@ public class OrderDetail {
     Building building;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "roomId", referencedColumnName = "id")
+    @JoinColumn(name = "roomId", referencedColumnName = "id", unique = false, nullable = false)
     Room room;
 
     @ManyToOne(fetch = FetchType.LAZY)
