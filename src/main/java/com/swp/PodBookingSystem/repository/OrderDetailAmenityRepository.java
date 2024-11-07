@@ -1,5 +1,6 @@
 package com.swp.PodBookingSystem.repository;
 
+import com.swp.PodBookingSystem.entity.OrderDetail;
 import com.swp.PodBookingSystem.entity.OrderDetailAmenity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 
@@ -21,12 +23,22 @@ public interface OrderDetailAmenityRepository extends JpaRepository<OrderDetailA
     @Query("DELETE FROM OrderDetailAmenity a WHERE a.orderDetail.id = :orderDetailId")
     void deleteByOrderDetailId(String orderDetailId);
 
-    @Query("SELECT o FROM OrderDetailAmenity o " +
-            "JOIN o.orderDetail od " +
-            "JOIN o.amenity a " +
-            "WHERE LOWER(a.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR LOWER(a.type) LIKE LOWER(CONCAT('%', :keyword, '%'))")
-    Page<OrderDetailAmenity> searchByAmenityKeyword(@Param("keyword") String keyword, Pageable pageable);
+    @Query("SELECT od FROM OrderDetail od " +
+            "JOIN od.orderDetailAmenity ode " +
+            "JOIN ode.amenity a " +
+            "JOIN od.building b " +
+            "WHERE (LOWER(a.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(a.type) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "AND od.startTime >= :startDate AND od.endTime <= :endDate " +
+            "AND (:buildingNumber IS NULL OR od.building.id = :buildingNumber)")
+    Page<OrderDetail> searchByAmenityKeywordAndTimeRange(
+            @Param("keyword") String keyword,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            @Param("buildingNumber") Integer buildingNumber,
+            Pageable pageable);
+
+
 
 
 
