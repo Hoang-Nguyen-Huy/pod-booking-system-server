@@ -9,6 +9,7 @@ import com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueChartDto;
 import com.swp.PodBookingSystem.dto.respone.OrderResponse;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.service.OrderDetailService;
+import com.swp.PodBookingSystem.service.OrderService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -32,6 +33,7 @@ import java.util.*;
 public class OrderDetailController {
 
     private OrderDetailService orderDetailService;
+    private OrderService orderService;
 
     @GetMapping
     public ApiResponse<List<OrderDetailResponse>> getAllOrders() {
@@ -133,8 +135,9 @@ public class OrderDetailController {
     @PutMapping("/staff")
     ApiResponse<Void> updateStaffWithOrderDetailId(@RequestBody OrderDetailUpdateStaffRequest request) {
         orderDetailService.updateOrderHandlerWithOrderDetail(request.getId(), request.getOrderHandler());
+        orderService.updateOrderUpdateAtByOrderDetailId(request.getId());
         return ApiResponse.<Void>builder()
-                .message("Update order successfully")
+                .message("Update staff successfully")
                 .build();
     }
 }

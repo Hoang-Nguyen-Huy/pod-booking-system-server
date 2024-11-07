@@ -398,7 +398,7 @@ public class OrderDetailService {
                 od.setStatus(request.getStatus());
                 if (request.getStatus().equals(OrderStatus.Rejected)) {
                     double total = 0;
-                    int countService = 0;
+                    int countService;
                     if (od.getServicePackage().getId() == 2) {
                         countService = 7;
                     } else if (od.getServicePackage().getId() == 3) {
@@ -431,29 +431,38 @@ public class OrderDetailService {
             if (request.getOrderDetails() != null && !request.getOrderDetails().isEmpty()) {
                 for (OrderDetailUpdateRoomRequest odr : request.getOrderDetails()) {
                     if (odr.getId().equals(od.getId())) {
-                        Optional<Room> room = roomRepository.findById(odr.getRoomId());
-                        if (room.isEmpty()) {
-                            throw new RuntimeException("Room not found with id: " + odr.getRoomId());
+                        if(odr.getRoomId() != 0){
+                            Optional<Room> room = roomRepository.findById(odr.getRoomId());
+                            if (room.isEmpty()) {
+                                throw new RuntimeException("Room not found with id: " + odr.getRoomId());
+                            }
+                            if (room.get().getRoomType().equals(od.getRoom().getRoomType())) {
+                                od.setRoom(room.get());
+                            } else {
+                                throw new RuntimeException("Room type not match");
+                            }
                         }
-                        if (room.get().getRoomType().equals(od.getRoom().getRoomType())) {
-                            od.setRoom(room.get());
-                        } else {
-                            throw new RuntimeException("Room type not match");
+                        if(odr.getStatus() != null){
+                            od.setStatus(odr.getStatus());
                         }
                     }
+
                 }
             }
             orderDetailRepository.updateOrderDetailUpdatedAt(od.getId(), LocalDateTime.now());
         }
     }
 
-    public void updateOrderHandlerWithOrderDetail(String orderId, Account accountHandler) {
-        List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(orderId);
+    public void updateOrderHandlerWithOrderDetail(String orderDetailId, Account accountHandler) {
+        Optional<OrderDetail> orderDetail = orderDetailRepository.findById(orderDetailId);
         Account orderHandler = accountService.getAccountById(accountHandler.getId());
-        for (OrderDetail od : orderDetails) {
-            od.setOrderHandler(orderHandler);
+        if(orderDetail.isEmpty()){
+            throw new RuntimeException("order detail not match");
+        }else{
+            OrderDetail updateOD = orderDetail.get();
+            updateOD.setOrderHandler(orderHandler);
+            orderDetailRepository.save(updateOD);
         }
-        orderDetailRepository.saveAll(orderDetails);
     }
 
     //DELETE:

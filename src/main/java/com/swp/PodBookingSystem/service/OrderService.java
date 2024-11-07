@@ -12,6 +12,7 @@ import com.swp.PodBookingSystem.enums.OrderStatus;
 import com.swp.PodBookingSystem.exception.AppException;
 import com.swp.PodBookingSystem.exception.ErrorCode;
 import com.swp.PodBookingSystem.mapper.OrderMapper;
+import com.swp.PodBookingSystem.repository.OrderDetailRepository;
 import com.swp.PodBookingSystem.repository.OrderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,11 +36,13 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
     private final OrderDetailService orderDetailService;
+    private final OrderDetailRepository orderDetailRepository;
 
-    public OrderService(OrderRepository orderRepository, OrderMapper orderMapper, OrderDetailService orderDetailService) {
+    public OrderService(OrderRepository orderRepository, OrderMapper orderMapper, OrderDetailService orderDetailService, OrderDetailRepository orderDetailRepository) {
         this.orderRepository = orderRepository;
         this.orderMapper = orderMapper;
         this.orderDetailService = orderDetailService;
+        this.orderDetailRepository = orderDetailRepository;
     }
 
     //GET:
@@ -137,6 +140,11 @@ public class OrderService {
         orderRepository.updateOrderUpdatedAt(orderId, LocalDateTime.now());
     }
 
+    public void updateOrderUpdateAtByOrderDetailId(String orderDetailId) {
+        Optional<OrderDetail> orderDetail = orderDetailRepository.findById(orderDetailId);
+        orderDetail.ifPresent(detail -> orderRepository.updateOrderUpdatedAt(detail.getOrder().getId(), LocalDateTime.now()));
+    }
+
     //DELETE:
     @Transactional
     public String deleteOrder(String orderId) {
@@ -195,7 +203,8 @@ public class OrderService {
     public static String removeDiacritics(String input) {
         String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
         Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
-        return pattern.matcher(normalized).replaceAll("").replaceAll("[^\\p{L} ]", "");
+        normalized = normalized.replace("Đ", "D").replace("đ", "d");
+        return pattern.matcher(normalized).replaceAll("").replaceAll("[^\\p{L}\\p{N} ]", "");
     }
 
     public static String getRoomName(String roomName) {
