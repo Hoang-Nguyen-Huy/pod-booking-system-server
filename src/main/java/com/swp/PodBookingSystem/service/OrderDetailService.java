@@ -399,9 +399,11 @@ public class OrderDetailService {
                 if (request.getStatus().equals(OrderStatus.Rejected)) {
                     double total = 0;
                     int countService = 0;
-                    if (od.getServicePackage().getId() == 1) {
+                    if (od.getServicePackage().getId() == 2) {
+                        countService = 7;
+                    } else if (od.getServicePackage().getId() == 3) {
                         countService = 4;
-                    } else if (od.getServicePackage().getId() == 2) {
+                    }else if (od.getServicePackage().getId() == 4) {
                         countService = 30;
                     } else {
                         countService = 1;
@@ -445,7 +447,7 @@ public class OrderDetailService {
         }
     }
 
-    public void updateOrderHandlerOrderDetail(String orderId, Account accountHandler) {
+    public void updateOrderHandlerWithOrderDetail(String orderId, Account accountHandler) {
         List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(orderId);
         Account orderHandler = accountService.getAccountById(accountHandler.getId());
         for (OrderDetail od : orderDetails) {

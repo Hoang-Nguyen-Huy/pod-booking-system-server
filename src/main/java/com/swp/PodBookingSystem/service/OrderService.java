@@ -1,7 +1,6 @@
 package com.swp.PodBookingSystem.service;
 
 import com.swp.PodBookingSystem.dto.request.Order.OrderUpdateRequest;
-import com.swp.PodBookingSystem.dto.request.Order.OrderUpdateStaffRequest;
 import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.Order.OrderManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailManagementResponse;
@@ -126,21 +125,6 @@ public class OrderService {
     public OrderResponse updateOrder(OrderUpdateRequest request) {
         Order existingOrder = orderRepository.findById(request.getId()).orElseThrow(() -> new RuntimeException("Order not found with id: " + request.getId()));
         orderDetailService.updateOrderDetail(request);
-        return OrderResponse.builder()
-                .id(existingOrder.getId())
-                .accountId(existingOrder.getAccount().getId())
-                .createdAt(existingOrder.getCreatedAt())
-                .updatedAt(existingOrder.getUpdatedAt())
-                .build();
-    }
-
-    public OrderResponse updateOrderHandlerWithOrder(String id, OrderUpdateStaffRequest request) {
-        Order existingOrder = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
-        if (request.getOrderHandler() == null) {
-            throw new RuntimeException("Account handler cannot be null");
-        }
-        orderDetailService.updateOrderHandlerOrderDetail(existingOrder.getId(), request.getOrderHandler());
-        updateOrderUpdateAt(request.getId());
         return OrderResponse.builder()
                 .id(existingOrder.getId())
                 .accountId(existingOrder.getAccount().getId())
