@@ -76,6 +76,13 @@ public class AccountController {
                 .build();
     }
 
+    @PatchMapping("/phoneNumber")
+    ApiResponse<Void> updateAccountPhoneNumber (@RequestBody AccountUpdatePhoneRequest request) {
+        accountService.updatePhoneNumber(request.getId(), request.getPhoneNumber());
+        return ApiResponse.<Void>builder()
+                .message("Cập nhật tài khoản thành công")
+                .build();
+    }
 
     @PatchMapping("/{id}")
     ApiResponse<AccountResponse> updateAccountByAdmin(@PathVariable("id") String id,
@@ -223,6 +230,4 @@ public class AccountController {
                 .data(accountService.countCustomer(start, end))
                 .build();
     }
-
-
 }
