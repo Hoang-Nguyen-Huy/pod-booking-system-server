@@ -4,11 +4,12 @@ import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenit
 import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenityCreationRequest;
 import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenityUpdateReq;
 import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementResponse;
+import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailAmenityListResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetailAmenity.OrderDetailAmenityResponse;
-import com.swp.PodBookingSystem.entity.Account;
-import com.swp.PodBookingSystem.entity.Amenity;
-import com.swp.PodBookingSystem.entity.OrderDetail;
-import com.swp.PodBookingSystem.entity.OrderDetailAmenity;
+import com.swp.PodBookingSystem.dto.respone.OrderDetailAmenity.OrderDetailAmenityResponseDTO;
+import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
+import com.swp.PodBookingSystem.entity.*;
+import com.swp.PodBookingSystem.enums.AccountRole;
 import com.swp.PodBookingSystem.enums.AmenityType;
 import com.swp.PodBookingSystem.enums.OrderDetailAmenityStatus;
 import com.swp.PodBookingSystem.mapper.AmenityMapper;
@@ -20,6 +21,8 @@ import com.swp.PodBookingSystem.repository.OrderDetailRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -58,7 +61,7 @@ public class OrderDetailAmenityService {
     public void createOrderDetailAmenity(OrderDetailAmenityRequest request) {
         Optional<OrderDetail> orderDetail = orderDetailRepository.findById(request.getOrderDetailId());
         Optional<Amenity> amenity = amenityRepository.findById(request.getAmenityId());
-        if(orderDetail.isEmpty() || amenity.isEmpty()) {
+        if (orderDetail.isEmpty() || amenity.isEmpty()) {
             throw new RuntimeException("Order detail or amenity not found");
         }
         OrderDetailAmenity orderDetailAmenity = new OrderDetailAmenity();
@@ -76,11 +79,11 @@ public class OrderDetailAmenityService {
 
     public void updateAmenityQuantityAfterCreateODA(OrderDetailAmenity orderDetailAmenity) {
         Optional<Amenity> amenityOptional = amenityRepository.findById(orderDetailAmenity.getAmenity().getId());
-        if(amenityOptional.isEmpty()) {
+        if (amenityOptional.isEmpty()) {
             throw new RuntimeException("Amenity not found");
         }
         Amenity amenity = amenityOptional.get();
-        if(amenity.getQuantity() < orderDetailAmenity.getQuantity()) {
+        if (amenity.getQuantity() < orderDetailAmenity.getQuantity()) {
             throw new RuntimeException("Not enough quantity");
         }
         amenity.setQuantity(amenity.getQuantity() - orderDetailAmenity.getQuantity());
@@ -91,7 +94,7 @@ public class OrderDetailAmenityService {
     /*
     [POST]: /order-detail-amenity
      */
-    public OrderDetailAmenityResponse createOrderDetailAmenityApi(OrderDetailAmenityCreationRequest request){
+    public OrderDetailAmenityResponse createOrderDetailAmenityApi(OrderDetailAmenityCreationRequest request) {
         Optional<Amenity> amenity = amenityRepository.findById(request.getAmenityId());
         Optional<OrderDetail> orderDetail = orderDetailRepository.findById(request.getOrderDetailId());
         if (orderDetail.isEmpty()) {
@@ -101,13 +104,13 @@ public class OrderDetailAmenityService {
             throw new RuntimeException("Amenity not found");
         }
         Amenity updatedAmenity = amenity.get();
-        if(updatedAmenity.getQuantity() < request.getQuantity()){
+        if (updatedAmenity.getQuantity() < request.getQuantity()) {
             throw new RuntimeException("Not enough quantity");
         }
         updatedAmenity.setQuantity(updatedAmenity.getQuantity() - request.getQuantity());
         amenityRepository.save(updatedAmenity);
 
-        OrderDetail savedOrderDetail= orderDetail.get();
+        OrderDetail savedOrderDetail = orderDetail.get();
 
         OrderDetailAmenity newOrderDetailAmenity = orderDetailAmenityMapper.toOrderDetailAmenity(request);
         newOrderDetailAmenity.setAmenity(updatedAmenity);
@@ -135,7 +138,7 @@ public class OrderDetailAmenityService {
         OrderDetail od = updateOrderDetailAmenity.getOrderDetail();
         od.setUpdatedAt(LocalDateTime.now());
         orderDetailRepository.save(od);
-        if(request.getStatus() == OrderDetailAmenityStatus.Canceled){
+        if (request.getStatus() == OrderDetailAmenityStatus.Canceled) {
             Account customer = od.getCustomer();
             customer.setBalance(customer.getBalance() + updateOrderDetailAmenity.getPrice() * updateOrderDetailAmenity.getQuantity());
             accountRepository.save(customer);
@@ -159,8 +162,8 @@ public class OrderDetailAmenityService {
     //UTILS:
     public void restoreAmenityQuantity(String orderDetailId) {
         List<OrderDetailAmenity> orderDetailAmenities = orderDetailAmenityRepository.findByOrderDetailId(orderDetailId);
-        for(OrderDetailAmenity orderDetailAmenity : orderDetailAmenities){
-            if(orderDetailAmenity.getAmenity().getType() == AmenityType.Office) {
+        for (OrderDetailAmenity orderDetailAmenity : orderDetailAmenities) {
+            if (orderDetailAmenity.getAmenity().getType() == AmenityType.Office) {
                 Optional<Amenity> amenity = amenityRepository.findById(orderDetailAmenity.getAmenity().getId());
                 if (amenity.isEmpty()) {
                     throw new RuntimeException("Amenity not found");
@@ -171,4 +174,75 @@ public class OrderDetailAmenityService {
             }
         }
     }
+
+    public PaginationResponse<List<OrderDetailAmenityListResponse>> searchOrderDetailAmenityByKeyword(int page, int size, String keyword, Account user, LocalDateTime startDate, LocalDateTime endDate) {
+        Page<OrderDetail> orderDetailPage;
+        if (user.getRole() == AccountRole.Admin) {
+            orderDetailPage = orderDetailAmenityRepository.searchByAmenityKeywordAndTimeRange(keyword, startDate, endDate, null, PageRequest.of(page, size));
+        } else if (user.getRole() == AccountRole.Staff || user.getRole() == AccountRole.Manager) {
+            orderDetailPage = orderDetailAmenityRepository.searchByAmenityKeywordAndTimeRange(keyword, startDate, endDate, user.getBuildingNumber(), PageRequest.of(page, size));
+        } else {
+            throw new RuntimeException("Only admin, staff and manager can access this API");
+        }
+        List<OrderDetailAmenityListResponse> orderDetailResponses = orderDetailPage.getContent().stream()
+                .map(orderDetail -> {
+                    List<OrderDetailAmenityResponseDTO> amenities =
+                            this.getOrderDetailAmenitiesAllInfoByOrderDetailId(orderDetail.getId()).stream()
+                                    .map(oda -> OrderDetailAmenityResponseDTO.builder()
+                                            .id(oda.getId())
+                                            .quantity(oda.getQuantity())
+                                            .price(oda.getPrice())
+                                            .orderDetailId(oda.getOrderDetail().getId())
+                                            .amenityId(oda.getAmenity().getId())
+                                            .amenityName(oda.getAmenity().getName())
+                                            .amenityType(oda.getAmenity().getType())
+                                            .status(Optional.ofNullable(oda.getStatus())
+                                                    .orElse(null))
+                                            .statusDescription(Optional.ofNullable(oda.getStatus())
+                                                    .map(OrderDetailAmenityStatus::getDescription)
+                                                    .orElse(null))
+                                            .createdAt(oda.getCreatedAt())
+                                            .updatedAt(oda.getUpdatedAt())
+                                            .build())
+                                    .collect(Collectors.toList());
+                    return OrderDetailAmenityListResponse.builder()
+                            .id(orderDetail.getId())
+                            .customerId(Optional.ofNullable(orderDetail.getCustomer())
+                                    .map(Account::getId)
+                                    .orElse(null))
+                            .customerName(Optional.ofNullable(orderDetail.getCustomer())
+                                    .map(Account::getName)
+                                    .orElse(null))
+                            .orderHandledId(Optional.ofNullable(orderDetail.getOrderHandler())
+                                    .map(Account::getId)
+                                    .orElse(null))
+                            .buildingId(orderDetail.getBuilding().getId())
+                            .buildingAddress(orderDetail.getBuilding().getAddress())
+                            .roomId(orderDetail.getRoom().getId())
+                            .roomName(orderDetail.getRoom().getName())
+                            .orderId(orderDetail.getOrder().getId())
+                            .orderDetailAmenities(amenities)
+                            .servicePackageId(orderDetail.getServicePackage().getId())
+                            .orderHandledId(Optional.ofNullable(orderDetail.getOrderHandler())
+                                    .map(Account::getId)
+                                    .orElse(null))
+                            .priceRoom(orderDetail.getPriceRoom())
+                            .status(orderDetail.getStatus())
+                            .startTime(orderDetail.getStartTime())
+                            .endTime(orderDetail.getEndTime())
+                            .createdAt(orderDetail.getCreatedAt())
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        return PaginationResponse.<List<OrderDetailAmenityListResponse>>builder()
+                .data(orderDetailResponses)
+                .currentPage(orderDetailPage.getNumber())
+                .totalPage(orderDetailPage.getTotalPages())
+                .recordPerPage(orderDetailPage.getSize())
+                .totalRecord((int) orderDetailPage.getTotalElements())
+                .build();
+    }
+
+
 }
