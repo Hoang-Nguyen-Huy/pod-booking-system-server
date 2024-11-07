@@ -1,6 +1,7 @@
 package com.swp.PodBookingSystem.controller;
 
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
+import com.swp.PodBookingSystem.dto.respone.RoomImage.RoomImageCustomResponse;
 import com.swp.PodBookingSystem.entity.Room;
 import com.swp.PodBookingSystem.entity.RoomImage;
 import com.swp.PodBookingSystem.repository.RoomRepository;
@@ -30,6 +31,14 @@ public class RoomImageController {
                 .message("Tất cả hình ảnh của phòng " + room.get().getName()+" được tìm thấy")
                 .build();
     }
+
+    @GetMapping("/room-type/{roomTypeId}")
+    ApiResponse<List<RoomImageCustomResponse>> getRoomImagesByRoomType(@PathVariable  int roomTypeId) {
+        return ApiResponse.<List<RoomImageCustomResponse>>builder().data(roomImageService.getRoomImagesByRoomType(roomTypeId))
+                .message("Tất cả hình ảnh của phòng loại " + roomTypeId+" được tìm thấy")
+                .build();
+    }
+
     @PostMapping("/{roomId}")
     ApiResponse<List<String>> addRoomImages(@PathVariable int roomId, @RequestBody List<String> images) {
         Optional<Room> room = roomRepository.findById(roomId);
