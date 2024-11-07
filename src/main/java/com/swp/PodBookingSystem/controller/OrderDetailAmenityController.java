@@ -4,6 +4,7 @@ import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenit
 import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenityUpdateReq;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenityCreationRequest;
+import com.swp.PodBookingSystem.dto.respone.Order.OrderManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailAmenityListResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetailAmenity.OrderDetailAmenityResponse;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
@@ -78,5 +79,11 @@ public class OrderDetailAmenityController {
                     .message("Failed to update order detail amenity: " + e.getMessage())
                     .build();
         }
+    }
+
+    @GetMapping("/search")
+    public PaginationResponse<List<OrderDetailAmenityListResponse>> searchOrders(@RequestParam String keyword, @RequestParam(defaultValue = "0") int page,
+                                                                          @RequestParam(defaultValue = "10") int size) {
+        return orderDetailAmenityService.searchOrderDetailAmenityByKeyword(page, size, keyword);
     }
 }
