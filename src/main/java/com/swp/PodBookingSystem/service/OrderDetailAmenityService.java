@@ -178,9 +178,9 @@ public class OrderDetailAmenityService {
     public PaginationResponse<List<OrderDetailAmenityListResponse>> searchOrderDetailAmenityByKeyword(int page, int size, String keyword, Account user, LocalDateTime startDate, LocalDateTime endDate) {
         Page<OrderDetail> orderDetailPage;
         if (user.getRole() == AccountRole.Admin) {
-            orderDetailPage = orderDetailAmenityRepository.searchByAmenityKeywordAndTimeRange(keyword, startDate, endDate, null, PageRequest.of(page, size));
+            orderDetailPage = orderDetailAmenityRepository.searchByAmenityKeywordAndTimeRange(keyword, startDate, endDate, null, PageRequest.of(page - 1, size));
         } else if (user.getRole() == AccountRole.Staff || user.getRole() == AccountRole.Manager) {
-            orderDetailPage = orderDetailAmenityRepository.searchByAmenityKeywordAndTimeRange(keyword, startDate, endDate, user.getBuildingNumber(), PageRequest.of(page, size));
+            orderDetailPage = orderDetailAmenityRepository.searchByAmenityKeywordAndTimeRange(keyword, startDate, endDate, user.getBuildingNumber(), PageRequest.of(page - 1, size));
         } else {
             throw new RuntimeException("Only admin, staff and manager can access this API");
         }
