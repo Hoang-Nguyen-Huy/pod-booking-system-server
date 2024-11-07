@@ -170,18 +170,18 @@ public class AccountService {
         return accountRepository.countCustomerBetweenDatetime(startTime, endTime);
     }
 
-    public List<AccountResponse> getStaffWithoutAssignment(String weekDate, String slot, String role, Integer buildingNumber) {
+    public List<AccountOrderResponse> getStaffWithoutAssignment(String weekDate, String slot, String role, Integer buildingNumber) {
 
         List<String> assignedStaffIds = assignmentRepository.findStaffIdsByWeekDateAndSlot(weekDate, slot);
 
 
         if ("Admin".equals(role)) {
             return accountRepository.findStaffNotInAssignedList(assignedStaffIds).stream()
-                    .map(accountMapper::toAccountResponse)
+                    .map(accountMapper::toAccountOrderResponse)
                     .collect(Collectors.toList());
         } else if ("Manager".equals(role) && buildingNumber != null) {
             return accountRepository.findStaffNotInAssignedListByBuilding(assignedStaffIds, buildingNumber).stream()
-                    .map(accountMapper::toAccountResponse)
+                    .map(accountMapper::toAccountOrderResponse)
                     .collect(Collectors.toList());
         } else {
             throw new IllegalArgumentException("Invalid role or missing building number for manager.");
