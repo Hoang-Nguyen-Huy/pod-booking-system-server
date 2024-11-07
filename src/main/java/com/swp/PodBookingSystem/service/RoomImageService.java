@@ -1,5 +1,6 @@
 package com.swp.PodBookingSystem.service;
 
+import com.swp.PodBookingSystem.dto.respone.RoomImage.RoomImageCustomResponse;
 import com.swp.PodBookingSystem.entity.Room;
 import com.swp.PodBookingSystem.entity.RoomImage;
 import com.swp.PodBookingSystem.repository.RoomImageRepository;
@@ -33,5 +34,9 @@ public class RoomImageService {
 
     public void deleteImage(int imageId) {
         roomImageRepository.deleteById(imageId);
+    }
+
+    public List<RoomImageCustomResponse> getRoomImagesByRoomType(int roomTypeId) {
+        return roomImageRepository.findAllImagesByRoomTypeId(roomTypeId);
     }
 }
