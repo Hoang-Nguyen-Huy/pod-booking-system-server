@@ -1,5 +1,6 @@
 package com.swp.PodBookingSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -20,5 +21,6 @@ public class RoomImage {
 
     @ManyToOne
     @JoinColumn(name = "roomId")
+    @JsonIgnore
     Room room;
 }

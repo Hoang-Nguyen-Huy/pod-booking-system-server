@@ -18,7 +18,7 @@ import java.util.Optional;
 public class RoomImageService {
     RoomImageRepository roomImageRepository;
     RoomRepository roomRepository;
-    public List<String> getRoomImages(int roomId) {
+    public List<RoomImage> getRoomImages(int roomId) {
         return roomImageRepository.findAllImagesByRoomId(roomId);
     }
 

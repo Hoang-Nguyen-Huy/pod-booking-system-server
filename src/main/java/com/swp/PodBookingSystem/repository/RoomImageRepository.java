@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface RoomImageRepository extends JpaRepository<RoomImage, Integer> {
 
-    @Query("SELECT ri.imageUrl FROM RoomImage ri WHERE ri.room.id = :roomId")
-    List<String> findAllImagesByRoomId(int roomId);
+    @Query("SELECT ri FROM RoomImage ri WHERE ri.room.id = :roomId")
+    List<RoomImage> findAllImagesByRoomId(int roomId);
 }
