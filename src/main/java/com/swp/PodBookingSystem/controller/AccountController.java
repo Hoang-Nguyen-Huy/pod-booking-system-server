@@ -4,7 +4,6 @@ import com.swp.PodBookingSystem.dto.request.Account.*;
 import com.swp.PodBookingSystem.dto.request.CalendarRequest;
 import com.swp.PodBookingSystem.dto.respone.Account.AccountManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.Account.AccountOrderResponse;
-import com.swp.PodBookingSystem.dto.respone.Account.AccountStaffResponse;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.respone.AccountResponse;
 import com.swp.PodBookingSystem.dto.respone.Order.OrderManagementResponse;
@@ -15,10 +14,7 @@ import com.swp.PodBookingSystem.enums.AccountRole;
 import com.swp.PodBookingSystem.exception.AppException;
 import com.swp.PodBookingSystem.exception.ErrorCode;
 import com.swp.PodBookingSystem.mapper.AccountMapper;
-import com.swp.PodBookingSystem.service.AccountService;
-import com.swp.PodBookingSystem.service.OrderDetailService;
-import com.swp.PodBookingSystem.service.OrderService;
-import com.swp.PodBookingSystem.service.SendEmailService;
+import com.swp.PodBookingSystem.service.*;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -27,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -52,6 +47,7 @@ public class AccountController {
     JwtDecoder jwtDecoder;
     OrderService orderService;
     OrderDetailService orderDetailService;
+
 
     @PostMapping
     ApiResponse<AccountResponse> createAccount(@RequestBody @Valid AccountCreationRequest request) {
@@ -160,29 +156,50 @@ public class AccountController {
                 .build();
     }
 
-    @GetMapping("/staff")
-    public ApiResponse<List<AccountOrderResponse>> getAllStaffAccounts(@RequestHeader("Authorization") String token) {
-        try {
-            Account account = accountService.getAccountById(accountService.extractAccountIdFromToken(token));
 
+    @GetMapping("/staff")
+    public ApiResponse<?> getAllStaffAccounts(@RequestHeader("Authorization") String token,
+                                              @RequestParam(value = "weekDate", required = false) String weekDate,
+                                              @RequestParam(value = "slot", required = false) String slot) {
+        Account account = accountService.getAccountById(accountService.extractAccountIdFromToken(token));
+        Integer buildingNumber = account.getBuildingNumber();
+
+        if (weekDate != null && slot != null) {
+            List<AccountResponse> availableStaff;
+            if (account.getRole().equals(AccountRole.Admin)) {
+                availableStaff = accountService.getStaffWithoutAssignment(weekDate, slot, "Admin", null);
+            } else if (account.getRole().equals(AccountRole.Manager)) {
+                availableStaff = accountService.getStaffWithoutAssignment(weekDate, slot, "Manager", buildingNumber);
+            } else {
+                throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
+
+            return ApiResponse.<List<AccountResponse>>builder()
+                    .data(availableStaff)
+                    .message("Available staff retrieved successfully")
+                    .build();
+        }
+        else {
             if (account.getRole().equals(AccountRole.Admin)) {
                 return ApiResponse.<List<AccountOrderResponse>>builder()
                         .message("Lấy danh sách nhân viên thành công")
                         .data(accountService.getAllStaffAccounts())
                         .build();
-            } else if (account.getRole().equals(AccountRole.Manager)) {
+            }
+            else if (account.getRole().equals(AccountRole.Manager)) {
                 return ApiResponse.<List<AccountOrderResponse>>builder()
                         .message("Lấy danh sách nhân viên thành công")
-                        .data(accountService.getAllStaffAccountsByManager(account.getBuildingNumber()))
+                        .data(accountService.getAllStaffAccountsByManager(buildingNumber))
                         .build();
-            } else {
+            }
+            else {
                 throw new AppException(ErrorCode.UNAUTHORIZED);
             }
-
-        } catch (Exception e) {
-            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
     }
+
+
+
 
 
     @GetMapping("/{keyword}/{role}")

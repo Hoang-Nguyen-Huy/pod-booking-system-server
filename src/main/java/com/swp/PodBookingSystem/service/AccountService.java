@@ -4,7 +4,6 @@ import com.swp.PodBookingSystem.dto.request.Account.AccountCreationRequest;
 import com.swp.PodBookingSystem.dto.request.Account.AccountUpdateAdminRequest;
 import com.swp.PodBookingSystem.dto.respone.Account.AccountManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.Account.AccountOrderResponse;
-import com.swp.PodBookingSystem.dto.respone.Account.AccountStaffResponse;
 import com.swp.PodBookingSystem.dto.respone.AccountResponse;
 import com.swp.PodBookingSystem.dto.respone.Building.BuildingResponse;
 import com.swp.PodBookingSystem.entity.Account;
@@ -15,6 +14,7 @@ import com.swp.PodBookingSystem.exception.ErrorCode;
 import com.swp.PodBookingSystem.mapper.AccountMapper;
 import com.swp.PodBookingSystem.mapper.BuildingMapper;
 import com.swp.PodBookingSystem.repository.AccountRepository;
+import com.swp.PodBookingSystem.repository.AssignmentRepository;
 import com.swp.PodBookingSystem.repository.BuildingRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -46,6 +45,8 @@ public class AccountService {
     BuildingMapper buildingMapper;
     JwtDecoder jwtDecoder;
     BuildingRepository buildingRepository;
+    private final AssignmentRepository assignmentRepository;
+
 
     public AccountResponse createAccount(AccountCreationRequest request) {
         if (accountRepository.existsByEmail(request.getEmail())) {
@@ -175,4 +176,23 @@ public class AccountService {
     public int countCustomer(LocalDateTime startTime, LocalDateTime endTime) {
         return accountRepository.countCustomerBetweenDatetime(startTime, endTime);
     }
+
+    public List<AccountResponse> getStaffWithoutAssignment(String weekDate, String slot, String role, Integer buildingNumber) {
+
+        List<String> assignedStaffIds = assignmentRepository.findStaffIdsByWeekDateAndSlot(weekDate, slot);
+
+
+        if ("Admin".equals(role)) {
+            return accountRepository.findStaffNotInAssignedList(assignedStaffIds).stream()
+                    .map(accountMapper::toAccountResponse)
+                    .collect(Collectors.toList());
+        } else if ("Manager".equals(role) && buildingNumber != null) {
+            return accountRepository.findStaffNotInAssignedListByBuilding(assignedStaffIds, buildingNumber).stream()
+                    .map(accountMapper::toAccountResponse)
+                    .collect(Collectors.toList());
+        } else {
+            throw new IllegalArgumentException("Invalid role or missing building number for manager.");
+        }
+    }
+
 }

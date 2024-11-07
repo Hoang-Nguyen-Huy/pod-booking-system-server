@@ -81,14 +81,6 @@ public class AssignmentService {
     }
 
 
-    public List<AccountResponse> getStaffWithoutAssignment(String weekDate, String slot) {
-        List<String> assignedStaffIds = assignmentRepository
-                .findStaffIdsByWeekDateAndSlot(weekDate, slot);
-
-        return accountRepository.findStaffNotInAssignedList(assignedStaffIds).stream()
-                .map(accountMapper::toAccountResponse)
-                .collect(Collectors.toList());
-    }
 
 
 }
