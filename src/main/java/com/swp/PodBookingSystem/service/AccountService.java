@@ -61,7 +61,6 @@ public class AccountService {
     /*
     [GET]: /accounts/page&take
      */
-    @PreAuthorize("hasRole('Admin')")
     public Page<AccountManagementResponse> getAccounts(String searchParams, int page, int take) {
         Pageable pageable = PageRequest.of(page - 1, take, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Account> accountPage = accountRepository.findFilteredAccount(searchParams, pageable);
