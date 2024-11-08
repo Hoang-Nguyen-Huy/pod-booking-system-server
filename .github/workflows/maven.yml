@@ -96,9 +96,9 @@ jobs:
           echo "  JWT_SECRET_ACCESS_TOKEN: \"${{ secrets.JWT_SECRET_ACCESS_TOKEN }}\"" >> src/main/resources/application.yaml
           echo "  JWT_SECRET_REFRESH_TOKEN: \"${{ secrets.JWT_SECRET_REFRESH_TOKEN }}\"" >> src/main/resources/application.yaml
           echo "" >> src/main/resources/application.yaml
-          echo "  google:" >> src/main/resources/application.yaml
-          echo "    success: \"${{ secrets.GOOGLE_SUCCESS }}\ "" >> src/main/resources/application.yaml
-          echo "    failure: \"${{ secrets.GOOGLE_FAILURE }}\ "" >> src/main/resources/application.yaml
+          echo "google:" >> src/main/resources/application.yaml
+          echo "  success: \"${{ secrets.GOOGLE_SUCCESS }}\"" >> src/main/resources/application.yaml
+          echo "  failure: \"${{ secrets.GOOGLE_FAILURE }}\"" >> src/main/resources/application.yaml
           echo "vnpay:" >> src/main/resources/application.yaml
           echo " tmn-code: \"${{ secrets.VNPAY_TMN_CODE }}\"" >> src/main/resources/application.yaml
           echo " hash-secret: \"${{ secrets.VNPAY_HASH_SECRET }}\"" >> src/main/resources/application.yaml
