@@ -33,7 +33,11 @@ public interface AmenityRepository extends JpaRepository<Amenity, Integer> {
             "WHERE a.building.id = :buildingId AND a.isDeleted = 0 AND a.quantity > 0")
     List<Amenity> findAllAvailableByBuildingId(Integer buildingId);
 
-    @Query("SELECT a FROM Amenity a WHERE a.name LIKE %:searchParams% OR a.building.address LIKE %:searchParams% " +
+    @Query("SELECT a FROM Amenity a " +
+            "JOIN a.building b " +
+            "WHERE LOWER(a.name) LIKE LOWER(CONCAT('%', :searchParams, '%')) " +
+            "OR LOWER(b.address) LIKE LOWER(CONCAT('%', :searchParams, '%')) " +
             "ORDER BY a.createdAt DESC")
     Page<Amenity> findFilteredAmenities(@Param("searchParams") String searchParams, Pageable pageable);
+
 }
