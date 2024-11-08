@@ -260,8 +260,8 @@ public class OrderDetailService {
             LocalDateTime startTime = request.getStartTime().get(i);
             LocalDateTime endTime = request.getEndTime().get(i);
             for (int day = 0; day < 7; day++) {
-                LocalDateTime newStartTime = startTime.plusWeeks(day);
-                LocalDateTime newEndTime = endTime.plusWeeks(day);
+                LocalDateTime newStartTime = startTime.plusDays(day);
+                LocalDateTime newEndTime = endTime.plusDays(day);
                 isSomeRoomWasBook |= createOrderDetailsForRooms(request, selectedRooms, order, account, newStartTime, newEndTime);
             }
         }

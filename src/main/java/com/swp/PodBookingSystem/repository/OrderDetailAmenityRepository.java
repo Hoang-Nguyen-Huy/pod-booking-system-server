@@ -27,8 +27,7 @@ public interface OrderDetailAmenityRepository extends JpaRepository<OrderDetailA
             "JOIN od.orderDetailAmenity ode " +
             "JOIN ode.amenity a " +
             "JOIN od.building b " +
-            "WHERE (LOWER(a.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR LOWER(a.type) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "WHERE (LOWER(a.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
             "AND od.startTime >= :startDate AND od.endTime <= :endDate " +
             "AND (:buildingNumber IS NULL OR od.building.id = :buildingNumber)")
     Page<OrderDetail> searchByAmenityKeywordAndTimeRange(

@@ -89,16 +89,16 @@ public class OrderDetailAmenityController {
     @GetMapping("/search")
     public PaginationResponse<List<OrderDetailAmenityListResponse>> searchOrders(
                                                                                 @RequestHeader("Authorization") String token,
-                                                                                @RequestParam String keyword,
+                                                                                @RequestParam String searchParams,
                                                                                  @RequestParam String startDate,
                                                                                  @RequestParam String endDate,
                                                                                  @RequestParam(defaultValue = "0") int page,
-                                                                                 @RequestParam(defaultValue = "10") int size) {
+                                                                                 @RequestParam(defaultValue = "10") int take) {
 
         Account user = accountService.getAccountById(accountService.extractAccountIdFromToken(token));
 
         LocalDateTime startDateTime = orderService.parseDateTime(startDate);
         LocalDateTime endDateTime = orderService.parseDateTime(endDate);
-        return orderDetailAmenityService.searchOrderDetailAmenityByKeyword(page, size, keyword, user, startDateTime, endDateTime);
+        return orderDetailAmenityService.searchOrderDetailAmenityByKeyword(page, take, searchParams, user, startDateTime, endDateTime);
     }
 }
