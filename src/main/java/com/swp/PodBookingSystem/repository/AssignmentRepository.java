@@ -16,4 +16,6 @@ public interface AssignmentRepository extends JpaRepository<Assignment, String> 
     @Query("SELECT a.staffId FROM Assignment a WHERE a.weekDate = :weekDate AND a.slot = :slot")
     List<String> findStaffIdsByWeekDateAndSlot(@Param("weekDate") String weekDate, @Param("slot") String slot);
 
+
+
 }
