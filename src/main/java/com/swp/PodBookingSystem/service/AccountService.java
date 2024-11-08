@@ -94,6 +94,13 @@ public class AccountService {
         accountRepository.save(account);
     }
 
+    public void updateBalance (String accountId, double usedBalance) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+        account.setBalance(account.getBalance() - usedBalance);
+        accountRepository.save(account);
+    }
+
     public List<AccountOrderResponse> getAllStaffAccounts() {
             List<Account> accounts = accountRepository.findByRole(AccountRole.Staff);
             return accounts.stream()

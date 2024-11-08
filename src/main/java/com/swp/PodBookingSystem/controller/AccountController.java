@@ -80,7 +80,15 @@ public class AccountController {
     ApiResponse<Void> updateAccountPhoneNumber (@RequestBody AccountUpdatePhoneRequest request) {
         accountService.updatePhoneNumber(request.getId(), request.getPhoneNumber());
         return ApiResponse.<Void>builder()
-                .message("Cập nhật tài khoản thành công")
+                .message("Cập nhật số điện thoại thành công")
+                .build();
+    }
+
+    @PatchMapping("/balance")
+    public ApiResponse<Void> updateAccountPhoneNumber(@RequestBody UpdateBalanceDto updateBalanceDto) {
+        accountService.updateBalance(updateBalanceDto.getAccountId(), updateBalanceDto.getUsedBalance());
+        return ApiResponse.<Void>builder()
+                .message("Cập nhật tiền trong ví thành công")
                 .build();
     }
 
