@@ -79,4 +79,23 @@ public class OrderDetailAmenityController {
                     .build();
         }
     }
+<<<<<<< Updated upstream
+=======
+
+    @GetMapping("/search")
+    public PaginationResponse<List<OrderDetailAmenityListResponse>> searchOrders(
+                                                                                @RequestHeader("Authorization") String token,
+                                                                                @RequestParam String searchParams,
+                                                                                @RequestParam String startDate,
+                                                                                @RequestParam String endDate,
+                                                                                @RequestParam(defaultValue = "0") int page,
+                                                                                @RequestParam(defaultValue = "10") int take) {
+
+        Account user = accountService.getAccountById(accountService.extractAccountIdFromToken(token));
+
+        LocalDateTime startDateTime = orderService.parseDateTime(startDate);
+        LocalDateTime endDateTime = orderService.parseDateTime(endDate);
+        return orderDetailAmenityService.searchOrderDetailAmenityByKeyword(page, take, searchParams, user, startDateTime, endDateTime);
+    }
+>>>>>>> Stashed changes
 }

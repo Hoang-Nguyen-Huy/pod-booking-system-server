@@ -162,4 +162,22 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, String
             "FROM OrderDetail od " +
             "GROUP BY od.building.id, od.building.address")
     List<NumberOrderByBuildingDto> countOrdersByBuilding();
+
+
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE OrderDetail od " +
+            "SET od.orderHandler.id = :staffId " +
+            "WHERE WEEKDAY(od.startTime) = :weekDay " +
+            "AND TIME(od.startTime) BETWEEN :slotStartTime AND :slotEndTime " +
+            "AND od.building.id = :buildingNumber " +
+            "AND od.startTime > CURRENT_TIMESTAMP " +
+            "AND (od.orderHandler.id != :staffId OR od.orderHandler IS NULL)")
+    void assignOrdersToStaff(@Param("staffId") String staffId,
+                             @Param("weekDay") int weekDay,
+                             @Param("slotStartTime") String slotStartTime,
+                             @Param("slotEndTime") String slotEndTime,
+                             @Param("buildingNumber") Integer buildingNumber);
+
 }
