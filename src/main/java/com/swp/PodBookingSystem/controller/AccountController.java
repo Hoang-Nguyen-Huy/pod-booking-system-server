@@ -76,6 +76,21 @@ public class AccountController {
                 .build();
     }
 
+    @PatchMapping("/phoneNumber")
+    ApiResponse<Void> updateAccountPhoneNumber (@RequestBody AccountUpdatePhoneRequest request) {
+        accountService.updatePhoneNumber(request.getId(), request.getPhoneNumber());
+        return ApiResponse.<Void>builder()
+                .message("Cập nhật số điện thoại thành công")
+                .build();
+    }
+
+    @PatchMapping("/balance")
+    public ApiResponse<Void> updateAccountPhoneNumber(@RequestBody UpdateBalanceDto updateBalanceDto) {
+        accountService.updateBalance(updateBalanceDto.getAccountId(), updateBalanceDto.getUsedBalance());
+        return ApiResponse.<Void>builder()
+                .message("Cập nhật tiền trong ví thành công")
+                .build();
+    }
 
     @PatchMapping("/{id}")
     ApiResponse<AccountResponse> updateAccountByAdmin(@PathVariable("id") String id,
@@ -223,6 +238,4 @@ public class AccountController {
                 .data(accountService.countCustomer(start, end))
                 .build();
     }
-
-
 }

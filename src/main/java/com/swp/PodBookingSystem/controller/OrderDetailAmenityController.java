@@ -18,7 +18,12 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
 
 @RestController
 @RequestMapping("/order-detail-amenity")
@@ -29,6 +34,7 @@ public class OrderDetailAmenityController {
     OrderDetailService orderDetailService;
     private final AccountService accountService;
     private final OrderService orderService;
+    private static final Logger log = LoggerFactory.getLogger(OrderDetailAmenityController.class);
 
     @GetMapping("/page")
     public PaginationResponse<List<OrderDetailAmenityListResponse>> getOrderDetailAndAmenity(
@@ -79,8 +85,7 @@ public class OrderDetailAmenityController {
                     .build();
         }
     }
-<<<<<<< Updated upstream
-=======
+
 
     @GetMapping("/search")
     public PaginationResponse<List<OrderDetailAmenityListResponse>> searchOrders(
@@ -91,11 +96,12 @@ public class OrderDetailAmenityController {
                                                                                 @RequestParam(defaultValue = "0") int page,
                                                                                 @RequestParam(defaultValue = "10") int take) {
 
+
         Account user = accountService.getAccountById(accountService.extractAccountIdFromToken(token));
 
         LocalDateTime startDateTime = orderService.parseDateTime(startDate);
         LocalDateTime endDateTime = orderService.parseDateTime(endDate);
         return orderDetailAmenityService.searchOrderDetailAmenityByKeyword(page, take, searchParams, user, startDateTime, endDateTime);
     }
->>>>>>> Stashed changes
+
 }

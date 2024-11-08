@@ -15,4 +15,5 @@ public class AmenityCreationRequest {
     double price;
     int quantity;
     AmenityType type;
+    int buildingId;
 }

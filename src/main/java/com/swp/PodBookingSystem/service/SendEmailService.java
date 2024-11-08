@@ -4,9 +4,7 @@ import biweekly.Biweekly;
 import biweekly.ICalendar;
 import biweekly.component.VEvent;
 import biweekly.property.Method;
-import biweekly.property.RecurrenceRule;
 import biweekly.util.Duration;
-import biweekly.util.Frequency;
 import com.swp.PodBookingSystem.dto.request.CalendarRequest;
 import com.swp.PodBookingSystem.dto.respone.Order.OrderManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailFullInfoResponse;
@@ -38,6 +36,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -128,13 +127,19 @@ public class SendEmailService {
             content = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         }
 
-        var roomHaveAmenities = order.getAmenities().stream().map(amenity -> amenity.getName()).collect(Collectors.toList());
+        LocalDateTime now = LocalDateTime.now();
+        List<String> roomHaveAmenities = new ArrayList<>();
+        double totalPriceAmenity = 0;
 
-        double totalPriceAmenity = order.getAmenities().stream()
-                .mapToDouble(amenity -> amenity.getPrice() * amenity.getQuantity())
-                .sum();
-        double finalPrice = totalPriceAmenity * (1 - order.getServicePackage().getDiscountPercentage() / 100);
+        for (var amenity : order.getAmenities()) {
+            long minutesDifference = java.time.Duration.between(amenity.getCreatedAt(), now).toMinutes();
 
+            if (minutesDifference <= 2) {
+                roomHaveAmenities.add(amenity.getName());
+                totalPriceAmenity += amenity.getPrice() * amenity.getQuantity();
+            }
+        }
+        double finalPrice = totalPriceAmenity * (1 - (double) order.getServicePackage().getDiscountPercentage() / 100);
         int integerAmount = (int) Math.round(finalPrice);
         String formattedAmount = String.format("%,d", integerAmount).replace(",", ".");
         content = content.replace("{{orderId}}", order.getId())

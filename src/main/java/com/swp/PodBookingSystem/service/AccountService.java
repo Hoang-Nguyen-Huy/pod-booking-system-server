@@ -61,7 +61,6 @@ public class AccountService {
     /*
     [GET]: /accounts/page&take
      */
-    @PreAuthorize("hasRole('Admin')")
     public Page<AccountManagementResponse> getAccounts(String searchParams, int page, int take) {
         Pageable pageable = PageRequest.of(page - 1, take, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Account> accountPage = accountRepository.findFilteredAccount(searchParams, pageable);
@@ -86,6 +85,20 @@ public class AccountService {
         Account updatedAccount = accountMapper.toUpdatedAccountAdmin(request, existedAccount);
 
         return accountMapper.toAccountResponse(accountRepository.save(updatedAccount));
+    }
+
+    public void updatePhoneNumber (String accountId, String phoneNumber) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+        account.setPhoneNumber(phoneNumber);
+        accountRepository.save(account);
+    }
+
+    public void updateBalance (String accountId, double usedBalance) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+        account.setBalance(account.getBalance() - usedBalance);
+        accountRepository.save(account);
     }
 
     public List<AccountOrderResponse> getAllStaffAccounts() {

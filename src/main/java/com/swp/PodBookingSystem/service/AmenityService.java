@@ -4,10 +4,12 @@ import com.swp.PodBookingSystem.dto.request.Amenity.AmenityCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.AmenityResponse;
 import com.swp.PodBookingSystem.entity.Account;
 import com.swp.PodBookingSystem.entity.Amenity;
+import com.swp.PodBookingSystem.entity.Building;
 import com.swp.PodBookingSystem.enums.AccountRole;
 import com.swp.PodBookingSystem.enums.AmenityType;
 import com.swp.PodBookingSystem.mapper.AmenityMapper;
 import com.swp.PodBookingSystem.repository.AmenityRepository;
+import com.swp.PodBookingSystem.repository.BuildingRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -28,8 +30,10 @@ public class AmenityService {
     @Autowired
     private AmenityMapper amenityMapper;
 
+    private BuildingRepository buildingRepository;
+
     public List<AmenityResponse> getAllAmenities(){
-        List<Amenity> amenities = amenityRepository.findAll();
+        List<Amenity> amenities = amenityRepository.findAllAvailable();
         return amenities.stream()
                 .map(amenityMapper::toAmenityResponse)
                 .collect(Collectors.toList());
@@ -53,7 +57,9 @@ public class AmenityService {
     }
 
     public AmenityResponse createAmenity(AmenityCreationRequest request){
+        Building buildingAmenity = buildingRepository.getById(request.getBuildingId());
         Amenity newAmenity = amenityMapper.toAmenity(request);
+        newAmenity.setBuilding(buildingAmenity);
         return amenityMapper.toAmenityResponse(amenityRepository.save(newAmenity));
     }
 
