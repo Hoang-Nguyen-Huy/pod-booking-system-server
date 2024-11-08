@@ -29,7 +29,7 @@ public class AmenityService {
 
     @Autowired
     private AmenityMapper amenityMapper;
-    @Autowired
+
     private BuildingRepository buildingRepository;
 
     public List<AmenityResponse> getAllAmenities(){
