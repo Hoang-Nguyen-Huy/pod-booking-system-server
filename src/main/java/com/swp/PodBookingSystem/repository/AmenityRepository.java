@@ -15,10 +15,18 @@ import java.util.List;
 public interface AmenityRepository extends JpaRepository<Amenity, Integer> {
     @Query("SELECT a " +
             "FROM Amenity a " +
+            "WHERE a.isDeleted = 0 AND a.quantity > 0")
+    List<Amenity> findAllAvailable();
+
+    @Query("SELECT a " +
+            "FROM Amenity a " +
             "WHERE a.type = :type AND a.isDeleted = 0 AND a.quantity > 0")
     List<Amenity> findAllByType(AmenityType type);
 
     Page<Amenity> findAllByBuildingId(Integer buildingId, Pageable pageable);
+
+    @Query("SELECT a FROM Amenity a WHERE a.isDeleted = 0")
+    List<Amenity> findAllActiveAmenities();
 
     @Query("SELECT a " +
             "FROM Amenity a " +

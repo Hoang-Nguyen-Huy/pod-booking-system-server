@@ -1,7 +1,6 @@
 package com.swp.PodBookingSystem.service;
 
 import com.swp.PodBookingSystem.dto.request.Order.OrderUpdateRequest;
-import com.swp.PodBookingSystem.dto.request.Order.OrderUpdateStaffRequest;
 import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.Order.OrderManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailManagementResponse;
@@ -13,6 +12,7 @@ import com.swp.PodBookingSystem.enums.OrderStatus;
 import com.swp.PodBookingSystem.exception.AppException;
 import com.swp.PodBookingSystem.exception.ErrorCode;
 import com.swp.PodBookingSystem.mapper.OrderMapper;
+import com.swp.PodBookingSystem.repository.OrderDetailRepository;
 import com.swp.PodBookingSystem.repository.OrderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,11 +36,13 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
     private final OrderDetailService orderDetailService;
+    private final OrderDetailRepository orderDetailRepository;
 
-    public OrderService(OrderRepository orderRepository, OrderMapper orderMapper, OrderDetailService orderDetailService) {
+    public OrderService(OrderRepository orderRepository, OrderMapper orderMapper, OrderDetailService orderDetailService, OrderDetailRepository orderDetailRepository) {
         this.orderRepository = orderRepository;
         this.orderMapper = orderMapper;
         this.orderDetailService = orderDetailService;
+        this.orderDetailRepository = orderDetailRepository;
     }
 
     //GET:
@@ -134,23 +136,13 @@ public class OrderService {
                 .build();
     }
 
-    public OrderResponse updateOrderHandlerWithOrder(String id, OrderUpdateStaffRequest request) {
-        Order existingOrder = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
-        if (request.getOrderHandler() == null) {
-            throw new RuntimeException("Account handler cannot be null");
-        }
-        orderDetailService.updateOrderHandlerOrderDetail(existingOrder.getId(), request.getOrderHandler());
-        updateOrderUpdateAt(request.getId());
-        return OrderResponse.builder()
-                .id(existingOrder.getId())
-                .accountId(existingOrder.getAccount().getId())
-                .createdAt(existingOrder.getCreatedAt())
-                .updatedAt(existingOrder.getUpdatedAt())
-                .build();
-    }
-
     public void updateOrderUpdateAt(String orderId) {
         orderRepository.updateOrderUpdatedAt(orderId, LocalDateTime.now());
+    }
+
+    public void updateOrderUpdateAtByOrderDetailId(String orderDetailId) {
+        Optional<OrderDetail> orderDetail = orderDetailRepository.findById(orderDetailId);
+        orderDetail.ifPresent(detail -> orderRepository.updateOrderUpdatedAt(detail.getOrder().getId(), LocalDateTime.now()));
     }
 
     //DELETE:
@@ -211,7 +203,24 @@ public class OrderService {
     public static String removeDiacritics(String input) {
         String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
         Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
-        return pattern.matcher(normalized).replaceAll("").replaceAll("[^\\p{L}]", "");
+        normalized = normalized.replace("Đ", "D").replace("đ", "d");
+        return pattern.matcher(normalized).replaceAll("").replaceAll("[^\\p{L}\\p{N} ]", "");
+    }
+
+    public static String getRoomName(String roomName) {
+        String pattern = removeDiacritics(roomName).replace("Room", "").trim();
+        return String.join("", pattern.split("\\s+")).toUpperCase();
+    }
+
+    public static String getInitials(String name) {
+        String[] words = name.trim().split("\\s+");
+        StringBuilder initials = new StringBuilder();
+        for (String word : words) {
+            if (!word.isEmpty()) {
+                initials.append(word.charAt(0));
+            }
+        }
+        return initials.toString().toUpperCase();
     }
 
     public String renderOrderID(OrderDetailCreationRequest request, Account account) {
@@ -223,13 +232,11 @@ public class OrderService {
         }
         String roomNames = request.getSelectedRooms()
                 .stream()
-                .map(room -> room.getName().replace(" ", ""))
+                .map(room -> getRoomName(room.getName()))
                 .collect(Collectors.joining("-"));
         String uuid = UUID.randomUUID().toString();
-        return "OD-" + roomNames.toLowerCase() + "-CUS-" + customerName.replace(" ", "").toString().substring(0, 3).toLowerCase() + "-D-"
-                + request.getStartTime().getFirst().getDayOfMonth() + "-"
-                + request.getStartTime().getFirst().getMonthValue() + "-"
-                + uuid.substring(0, 6);
+        return "OD" + uuid.substring(0, 4).toUpperCase() + "-R" + roomNames.toUpperCase() + "-" + getInitials(customerName) + "-D"
+                + request.getStartTime().getFirst().getDayOfMonth() + request.getStartTime().getFirst().getMonthValue();
     }
 
     /*

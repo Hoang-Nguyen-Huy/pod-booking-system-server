@@ -6,6 +6,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -30,7 +31,7 @@ public class OrderDetail {
     Building building;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "roomId", referencedColumnName = "id")
+    @JoinColumn(name = "roomId", referencedColumnName = "id", unique = false, nullable = false)
     Room room;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -71,6 +72,9 @@ public class OrderDetail {
 
     @Column(name = "cancelReason")
     String cancelReason;
+
+    @OneToMany(mappedBy = "orderDetail")
+    private List<OrderDetailAmenity> orderDetailAmenity;
 
     @PrePersist
     protected void onCreate() {
