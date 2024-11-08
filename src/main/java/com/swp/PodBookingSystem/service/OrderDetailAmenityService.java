@@ -3,6 +3,7 @@ package com.swp.PodBookingSystem.service;
 import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenityRequest;
 import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenityCreationRequest;
 import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenityUpdateReq;
+import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementConfigResponse;
 import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailAmenityListResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetailAmenity.OrderDetailAmenityResponse;
@@ -50,6 +51,17 @@ public class OrderDetailAmenityService {
                 .name(amenity.getAmenity().getName())
                 .price(amenity.getPrice())
                 .quantity(amenity.getQuantity())
+                .build()).collect(Collectors.toList());
+    }
+
+    public List<AmenityManagementConfigResponse> getOrderDetailAmenitiesByOrderDetailIdConfig(String orderDetailId) {
+        return orderDetailAmenityRepository.findByOrderDetailId(orderDetailId).stream().map(amenity -> AmenityManagementConfigResponse.builder()
+                .id(amenity.getAmenity().getId())
+                .name(amenity.getAmenity().getName())
+                .price(amenity.getPrice())
+                .quantity(amenity.getQuantity())
+                .createdAt(amenity.getCreatedAt())
+                .updatedAt(amenity.getUpdatedAt())
                 .build()).collect(Collectors.toList());
     }
 
