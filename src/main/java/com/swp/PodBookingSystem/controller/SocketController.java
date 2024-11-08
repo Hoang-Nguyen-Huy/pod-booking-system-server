@@ -1,5 +1,6 @@
 package com.swp.PodBookingSystem.controller;
 
+import com.swp.PodBookingSystem.dto.socketPayload.LogoutUserPayload;
 import com.swp.PodBookingSystem.dto.socketPayload.UpdateOrder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -16,5 +17,12 @@ public class SocketController {
     public UpdateOrder updateOrder(@Payload UpdateOrder updateOrder) {
         log.info("Received message: {}", updateOrder.getId());
         return updateOrder;
+    }
+
+    @MessageMapping("/logout-user")
+    @SendTo("/topic/logout-user")
+    public LogoutUserPayload logoutUser(@Payload LogoutUserPayload payload) {
+        log.info("Received message: {}", payload.getAccountId());
+        return payload;
     }
 }
