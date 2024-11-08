@@ -37,7 +37,7 @@ public class PaymentService {
             vnp_Params.put("vnp_OrderType", "100000");
             vnp_Params.put("vnp_OrderInfo", "Thanh toan don hang:" + orderId);
 
-            Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+            Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
             String vnp_CreateDate = formatter.format(cld.getTime());
 
