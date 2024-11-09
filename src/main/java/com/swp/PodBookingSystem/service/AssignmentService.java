@@ -54,9 +54,6 @@ public class AssignmentService {
         String slotStartTime = slotTimes[0].toString();
         String slotEndTime = slotTimes[1].toString();
 
-        logger.info("Creating assignment for staffId: {} (Staff building: {}), weekDate: {}, dayOfWeek: {}, weekDay: {}, " +
-                        "slot: {}, slotStartTime: {}, slotEndTime: {}, assigning orders where startTime > CURRENT_TIMESTAMP",
-                newAssignment.getStaffId(), staff.getBuildingNumber(), weekDate, dayOfWeek, weekDay, slot, slotStartTime, slotEndTime);
         orderDetailRepository.assignOrdersToStaff(newAssignment.getStaffId(), weekDay, slotStartTime, slotEndTime, staff.getBuildingNumber());
 
         return assignmentMapper.toAssignmentResponse(assignmentRepository.save(newAssignment));

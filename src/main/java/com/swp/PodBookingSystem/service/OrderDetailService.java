@@ -29,10 +29,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.YearMonth;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -53,6 +50,7 @@ public class OrderDetailService {
     private final RoomService roomService;
     private final RoomRepository roomRepository;
     private final OrderDetailAmenityRepository orderDetailAmenityRepository;
+    private final AssignmentRepository assignmentRepository;
 
     //GET:
     public List<OrderDetailResponse> getAllOrders() {
@@ -351,13 +349,28 @@ public class OrderDetailService {
         }
     }
 
-    public OrderDetail createOrderDetail(OrderDetailCreationRequest request, Order order, Room room, OrderStatus status, Account account, LocalDateTime startTime, LocalDateTime endTime) {
+        public OrderDetail createOrderDetail(OrderDetailCreationRequest request, Order order, Room room, OrderStatus status, Account account, LocalDateTime startTime, LocalDateTime endTime) {
         try {
             ServicePackage servicePackage = servicePackageRepository.findById(request.getServicePackage().getId())
                     .orElseThrow(() -> new IllegalArgumentException("Service package not found"));
             Building building = buildingRepository.findById(request.getBuilding().getId())
                     .orElseThrow(() -> new IllegalArgumentException("Building not found"));
 
+
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+            String formattedStartTime = startTime.format(timeFormatter);
+            String formattedEndTime = endTime.format(timeFormatter);
+            String slot = formattedStartTime + " - " + formattedEndTime;
+
+            DayOfWeek dayOfWeek = startTime.getDayOfWeek();
+            String weekDate = getDayLabel(dayOfWeek);
+            Account orderHandler;
+            String orderHandlerId = assignmentRepository.findStaffForMatchingOrder(slot, weekDate, building.getId());
+            if (orderHandlerId == null){
+                orderHandler = null;
+            } else {
+                orderHandler = accountRepository.getById(orderHandlerId);
+            }
             OrderDetail response = new OrderDetail();
 
             response.setCustomer(account);
@@ -366,7 +379,7 @@ public class OrderDetailService {
             response.setBuilding(building);
             response.setRoom(room);
             response.setServicePackage(servicePackage);
-            response.setOrderHandler(null);
+            response.setOrderHandler(orderHandler);
             response.setPriceRoom(request.getPriceRoom());
             response.setDiscountPercentage(servicePackage.getDiscountPercentage());
             response.setStartTime(startTime);
@@ -382,6 +395,27 @@ public class OrderDetailService {
         } catch (Exception e) {
             log.error("Unexpected error creating order detail", e);
             throw new RuntimeException("Failed to create order detail: " + e.getMessage(), e);
+        }
+    }
+
+    private String getDayLabel(DayOfWeek dayOfWeek) {
+        switch (dayOfWeek) {
+            case MONDAY:
+                return "T2";
+            case TUESDAY:
+                return "T3";
+            case WEDNESDAY:
+                return "T4";
+            case THURSDAY:
+                return "T5";
+            case FRIDAY:
+                return "T6";
+            case SATURDAY:
+                return "T7";
+            case SUNDAY:
+                return "CN";
+            default:
+                return "";
         }
     }
 
