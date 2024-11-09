@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -201,7 +202,12 @@ public class AccountController {
                         .build();
             }
             else {
-                throw new AppException(ErrorCode.UNAUTHORIZED);
+                List<AccountOrderResponse> list = new ArrayList<>();
+                list.add(new AccountOrderResponse(account.getId(), account.getName(), account.getEmail(), account.getAvatar(), account.getRole(), account.getBuildingNumber(), account.getRankingName()));
+                return ApiResponse.<List<AccountOrderResponse>>builder()
+                        .message("Không có quyền truy cập")
+                        .data(list)
+                        .build();
             }
         }
     }
