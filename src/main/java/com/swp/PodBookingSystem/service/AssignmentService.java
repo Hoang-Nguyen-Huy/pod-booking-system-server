@@ -4,6 +4,7 @@ import com.swp.PodBookingSystem.dto.request.Assignment.AssignmentCreationRequest
 import com.swp.PodBookingSystem.dto.request.Assignment.AssignmentRequest;
 import com.swp.PodBookingSystem.dto.respone.Assignment.AssignmentResponse;
 import com.swp.PodBookingSystem.entity.Assignment;
+import com.swp.PodBookingSystem.enums.AccountRole;
 import com.swp.PodBookingSystem.mapper.AccountMapper;
 import com.swp.PodBookingSystem.mapper.AssignmentMapper;
 import com.swp.PodBookingSystem.repository.AccountRepository;
@@ -34,9 +35,7 @@ public class AssignmentService {
     private final AssignmentMapper assignmentMapper;
     private final AssignmentRepository assignmentRepository;
     private final AccountRepository accountRepository;
-    private final AccountMapper accountMapper;
     private final OrderDetailRepository orderDetailRepository;
-    private static final Logger  logger = LoggerFactory.getLogger(AssignmentService.class);
 
 
     public AssignmentResponse createAssignment(AssignmentCreationRequest request) {
@@ -53,10 +52,6 @@ public class AssignmentService {
         LocalTime[] slotTimes = getSlotTimes(slot);
         String slotStartTime = slotTimes[0].toString();
         String slotEndTime = slotTimes[1].toString();
-
-        logger.info("Creating assignment for staffId: {} (Staff building: {}), weekDate: {}, dayOfWeek: {}, weekDay: {}, " +
-                        "slot: {}, slotStartTime: {}, slotEndTime: {}, assigning orders where startTime > CURRENT_TIMESTAMP",
-                newAssignment.getStaffId(), staff.getBuildingNumber(), weekDate, dayOfWeek, weekDay, slot, slotStartTime, slotEndTime);
         orderDetailRepository.assignOrdersToStaff(newAssignment.getStaffId(), weekDay, slotStartTime, slotEndTime, staff.getBuildingNumber());
 
         return assignmentMapper.toAssignmentResponse(assignmentRepository.save(newAssignment));
@@ -86,19 +81,27 @@ public class AssignmentService {
 
 
 
-    public List<AssignmentResponse> getAllAssignments(){
-        List<Assignment> assignments = assignmentRepository.findAll();
-        return assignments.stream()
-                .map(assignment -> {
-                    AssignmentResponse response = assignmentMapper.toAssignmentResponse(assignment);
-                    String nameStaff = accountRepository.findById(assignment.getStaffId())
-                            .map(Account::getName)
-                            .orElse("Unknown");
-                    response.setNameStaff(nameStaff);
-                    return response;
-                })
-                .collect(Collectors.toList());
-    }
+        public List<AssignmentResponse> getAllAssignments(Account user){
+            List<Assignment> assignments = null;
+            Integer buildingId = user.getBuildingNumber();
+            if (user.getRole() == AccountRole.Admin) {
+                assignments = assignmentRepository.findAllByRoleAndBuildingAndStaff("Admin", null, null);
+            } else if(user.getRole() == AccountRole.Manager){
+                assignments = assignmentRepository.findAllByRoleAndBuildingAndStaff("Manager", buildingId, null);
+            } else if (user.getRole() == AccountRole.Staff){
+                assignments = assignmentRepository.findAllByRoleAndBuildingAndStaff("Staff", buildingId, user.getId());
+            }
+            return assignments.stream()
+                    .map(assignment -> {
+                        AssignmentResponse response = assignmentMapper.toAssignmentResponse(assignment);
+                        String nameStaff = accountRepository.findById(assignment.getStaffId())
+                                .map(Account::getName)
+                                .orElse("Unknown");
+                        response.setNameStaff(nameStaff);
+                        return response;
+                    })
+                    .collect(Collectors.toList());
+        }
 
     public AssignmentResponse updateAssignment(String id, AssignmentRequest request){
         Assignment existingAssignment = assignmentRepository.findById(id)

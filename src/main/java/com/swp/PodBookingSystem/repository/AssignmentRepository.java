@@ -17,5 +17,15 @@ public interface AssignmentRepository extends JpaRepository<Assignment, String> 
     List<String> findStaffIdsByWeekDateAndSlot(@Param("weekDate") String weekDate, @Param("slot") String slot);
 
 
+    @Query("SELECT a FROM Assignment a " +
+            "JOIN Account acc ON a.staffId = acc.id " +
+            "WHERE (:role = 'Admin') OR " +
+            "(:role = 'Manager' AND acc.buildingNumber = :buildingId) OR " +
+            "(:role = 'Staff' AND acc.buildingNumber = :buildingId AND a.staffId = :staffId)")
+    List<Assignment> findAllByRoleAndBuildingAndStaff(
+            @Param("role") String role,
+            @Param("buildingId") Integer buildingId,
+            @Param("staffId") String staffId
+    );
 
 }
