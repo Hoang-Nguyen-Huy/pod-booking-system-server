@@ -27,5 +27,15 @@ public interface AssignmentRepository extends JpaRepository<Assignment, String> 
                                      @Param("buildingId") Integer buildingId);
 
 
+    @Query("SELECT a FROM Assignment a " +
+            "JOIN Account acc ON a.staffId = acc.id " +
+            "WHERE (:role = 'Admin') OR " +
+            "(:role = 'Manager' AND acc.buildingNumber = :buildingId) OR " +
+            "(:role = 'Staff' AND acc.buildingNumber = :buildingId AND a.staffId = :staffId)")
+    List<Assignment> findAllByRoleAndBuildingAndStaff(
+            @Param("role") String role,
+            @Param("buildingId") Integer buildingId,
+            @Param("staffId") String staffId
+    );
 
 }
