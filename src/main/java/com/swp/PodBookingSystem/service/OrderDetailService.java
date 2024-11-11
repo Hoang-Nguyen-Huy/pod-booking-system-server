@@ -5,6 +5,7 @@ import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailCreationReque
 import com.swp.PodBookingSystem.dto.request.OrderDetail.OrderDetailUpdateRoomRequest;
 import com.swp.PodBookingSystem.dto.request.OrderDetailAmenity.OrderDetailAmenityUpdateReq;
 import com.swp.PodBookingSystem.dto.request.Room.RoomWithAmenitiesDTO;
+import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementConfigResponse;
 import com.swp.PodBookingSystem.dto.respone.Amenity.AmenityManagementResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.*;
 import com.swp.PodBookingSystem.dto.respone.Order.NumberOrderByBuildingDto;
@@ -28,10 +29,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.YearMonth;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -52,6 +50,7 @@ public class OrderDetailService {
     private final RoomService roomService;
     private final RoomRepository roomRepository;
     private final OrderDetailAmenityRepository orderDetailAmenityRepository;
+    private final AssignmentRepository assignmentRepository;
 
     //GET:
     public List<OrderDetailResponse> getAllOrders() {
@@ -66,7 +65,7 @@ public class OrderDetailService {
         if (orderDetail == null) {
             throw new AppException(ErrorCode.ORDER_DETAIL_NOT_EXIST);
         }
-        List<AmenityManagementResponse> amenities = orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailId(orderDetail.getId());
+        List<AmenityManagementConfigResponse> amenities = orderDetailAmenityService.getOrderDetailAmenitiesByOrderDetailIdConfig(orderDetail.getId());
         return OrderDetailFullInfoResponse.builder()
                 .id(orderDetail.getId())
                 .roomId(orderDetail.getRoom().getId())
@@ -234,11 +233,20 @@ public class OrderDetailService {
         if (account.getRole() != AccountRole.Customer) {
             account = request.getCustomer();
         }
+        if (request.getServicePackage() == null) {
+            ServicePackage defaultPackage = new ServicePackage();
+            defaultPackage.setId(1);
+            defaultPackage.setName("Standard Package");
+            defaultPackage.setDiscountPercentage(5);
+            request.setServicePackage(defaultPackage);
+        }
+
         List<RoomWithAmenitiesDTO> selectedRooms = request.getSelectedRooms();
         return switch (request.getServicePackage().getId()) {
-            case 1 -> handleWeeklyBooking(selectedRooms, request, order, account);
-            case 2 -> handleDailyBooking(selectedRooms, request, order, account);
-            case 3 -> handleStandardBooking(selectedRooms, request, order, account);
+            case 1 -> handleStandardBooking(selectedRooms, request, order, account);
+            case 2 -> handleWeeklyBooking(selectedRooms, request, order, account);
+            case 3 -> handle4WeeklyBooking(selectedRooms, request, order, account);
+            case 4 -> handleDailyBooking(selectedRooms, request, order, account);
             default -> throw new AppException(ErrorCode.INVALID_KEY);
         };
     }
@@ -246,6 +254,23 @@ public class OrderDetailService {
     private boolean handleWeeklyBooking(List<RoomWithAmenitiesDTO> selectedRooms,
                                         OrderDetailCreationRequest request,
                                         Order order, Account account) {
+        boolean isSomeRoomWasBook = false;
+        for (int i = 0; i < request.getStartTime().size(); i++) {
+            LocalDateTime startTime = request.getStartTime().get(i);
+            LocalDateTime endTime = request.getEndTime().get(i);
+            for (int day = 0; day < 7; day++) {
+                LocalDateTime newStartTime = startTime.plusDays(day);
+                LocalDateTime newEndTime = endTime.plusDays(day);
+                isSomeRoomWasBook |= createOrderDetailsForRooms(request, selectedRooms, order, account, newStartTime, newEndTime);
+            }
+        }
+        return isSomeRoomWasBook;
+    }
+
+
+    private boolean handle4WeeklyBooking(List<RoomWithAmenitiesDTO> selectedRooms,
+                                         OrderDetailCreationRequest request,
+                                         Order order, Account account) {
         boolean isSomeRoomWasBook = false;
         for (int i = 0; i < request.getStartTime().size(); i++) {
             LocalDateTime startTime = request.getStartTime().get(i);
@@ -324,13 +349,28 @@ public class OrderDetailService {
         }
     }
 
-    public OrderDetail createOrderDetail(OrderDetailCreationRequest request, Order order, Room room, OrderStatus status, Account account, LocalDateTime startTime, LocalDateTime endTime) {
+        public OrderDetail createOrderDetail(OrderDetailCreationRequest request, Order order, Room room, OrderStatus status, Account account, LocalDateTime startTime, LocalDateTime endTime) {
         try {
             ServicePackage servicePackage = servicePackageRepository.findById(request.getServicePackage().getId())
                     .orElseThrow(() -> new IllegalArgumentException("Service package not found"));
             Building building = buildingRepository.findById(request.getBuilding().getId())
                     .orElseThrow(() -> new IllegalArgumentException("Building not found"));
 
+
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+            String formattedStartTime = startTime.format(timeFormatter);
+            String formattedEndTime = endTime.format(timeFormatter);
+            String slot = formattedStartTime + " - " + formattedEndTime;
+
+            DayOfWeek dayOfWeek = startTime.getDayOfWeek();
+            String weekDate = getDayLabel(dayOfWeek);
+            Account orderHandler;
+            String orderHandlerId = assignmentRepository.findStaffForMatchingOrder(slot, weekDate, building.getId());
+            if (orderHandlerId == null){
+                orderHandler = null;
+            } else {
+                orderHandler = accountRepository.getById(orderHandlerId);
+            }
             OrderDetail response = new OrderDetail();
 
             response.setCustomer(account);
@@ -339,7 +379,7 @@ public class OrderDetailService {
             response.setBuilding(building);
             response.setRoom(room);
             response.setServicePackage(servicePackage);
-            response.setOrderHandler(null);
+            response.setOrderHandler(orderHandler);
             response.setPriceRoom(request.getPriceRoom());
             response.setDiscountPercentage(servicePackage.getDiscountPercentage());
             response.setStartTime(startTime);
@@ -358,6 +398,27 @@ public class OrderDetailService {
         }
     }
 
+    private String getDayLabel(DayOfWeek dayOfWeek) {
+        switch (dayOfWeek) {
+            case MONDAY:
+                return "T2";
+            case TUESDAY:
+                return "T3";
+            case WEDNESDAY:
+                return "T4";
+            case THURSDAY:
+                return "T5";
+            case FRIDAY:
+                return "T6";
+            case SATURDAY:
+                return "T7";
+            case SUNDAY:
+                return "CN";
+            default:
+                return "";
+        }
+    }
+
     public List<OrderDetail> getNextDayBookings(LocalDate dayNow) {
         LocalDateTime startOfDay = dayNow.plusDays(1).atStartOfDay();
         LocalDateTime endOfDay = dayNow.plusDays(1).atTime(LocalTime.MAX);
@@ -372,10 +433,12 @@ public class OrderDetailService {
                 od.setStatus(request.getStatus());
                 if (request.getStatus().equals(OrderStatus.Rejected)) {
                     double total = 0;
-                    int countService = 0;
-                    if (od.getServicePackage().getId() == 1) {
+                    int countService;
+                    if (od.getServicePackage().getId() == 2) {
+                        countService = 7;
+                    } else if (od.getServicePackage().getId() == 3) {
                         countService = 4;
-                    } else if (od.getServicePackage().getId() == 2) {
+                    } else if (od.getServicePackage().getId() == 4) {
                         countService = 30;
                     } else {
                         countService = 1;
@@ -403,29 +466,38 @@ public class OrderDetailService {
             if (request.getOrderDetails() != null && !request.getOrderDetails().isEmpty()) {
                 for (OrderDetailUpdateRoomRequest odr : request.getOrderDetails()) {
                     if (odr.getId().equals(od.getId())) {
-                        Optional<Room> room = roomRepository.findById(odr.getRoomId());
-                        if (room.isEmpty()) {
-                            throw new RuntimeException("Room not found with id: " + odr.getRoomId());
+                        if (odr.getRoomId() != 0) {
+                            Optional<Room> room = roomRepository.findById(odr.getRoomId());
+                            if (room.isEmpty()) {
+                                throw new RuntimeException("Room not found with id: " + odr.getRoomId());
+                            }
+                            if (room.get().getRoomType().equals(od.getRoom().getRoomType())) {
+                                od.setRoom(room.get());
+                            } else {
+                                throw new RuntimeException("Room type not match");
+                            }
                         }
-                        if (room.get().getRoomType().equals(od.getRoom().getRoomType())) {
-                            od.setRoom(room.get());
-                        } else {
-                            throw new RuntimeException("Room type not match");
+                        if (odr.getStatus() != null) {
+                            od.setStatus(odr.getStatus());
                         }
                     }
+
                 }
             }
             orderDetailRepository.updateOrderDetailUpdatedAt(od.getId(), LocalDateTime.now());
         }
     }
 
-    public void updateOrderHandlerOrderDetail(String orderId, Account accountHandler) {
-        List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(orderId);
+    public void updateOrderHandlerWithOrderDetail(String orderDetailId, Account accountHandler) {
+        Optional<OrderDetail> orderDetail = orderDetailRepository.findById(orderDetailId);
         Account orderHandler = accountService.getAccountById(accountHandler.getId());
-        for (OrderDetail od : orderDetails) {
-            od.setOrderHandler(orderHandler);
+        if (orderDetail.isEmpty()) {
+            throw new RuntimeException("order detail not match");
+        } else {
+            OrderDetail updateOD = orderDetail.get();
+            updateOD.setOrderHandler(orderHandler);
+            orderDetailRepository.save(updateOD);
         }
-        orderDetailRepository.saveAll(orderDetails);
     }
 
     //DELETE:
@@ -533,7 +605,7 @@ public class OrderDetailService {
         YearMonth start = YearMonth.from(startTime);
         YearMonth end = YearMonth.from(endTime);
 
-        while(!start.isAfter(end)) {
+        while (!start.isAfter(end)) {
             String monthKey = start.toString() + "-01";
             double revenue = revenueMap.getOrDefault(monthKey, 0.0);
             result.add(new RevenueChartDto(monthKey, revenue));

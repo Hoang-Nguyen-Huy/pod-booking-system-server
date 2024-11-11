@@ -1,12 +1,15 @@
 package com.swp.PodBookingSystem.controller;
 
 import com.swp.PodBookingSystem.dto.request.Building.BuildingPaginationDTO;
+import com.swp.PodBookingSystem.dto.request.Order.OrderDetailUpdateStaffRequest;
 import com.swp.PodBookingSystem.dto.respone.Order.NumberOrderByBuildingDto;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailFullInfoResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.OrderDetailResponse;
 import com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueChartDto;
+import com.swp.PodBookingSystem.dto.respone.OrderResponse;
 import com.swp.PodBookingSystem.dto.respone.PaginationResponse;
 import com.swp.PodBookingSystem.service.OrderDetailService;
+import com.swp.PodBookingSystem.service.OrderService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -30,6 +33,7 @@ import java.util.*;
 public class OrderDetailController {
 
     private OrderDetailService orderDetailService;
+    private OrderService orderService;
 
     @GetMapping
     public ApiResponse<List<OrderDetailResponse>> getAllOrders() {
@@ -125,6 +129,15 @@ public class OrderDetailController {
         return ApiResponse.<List<NumberOrderByBuildingDto>>builder()
                 .message("Số đơn hàng theo chi nhánh")
                 .data(orderDetailService.getNumberOrderByBuilding())
+                .build();
+    }
+
+    @PutMapping("/staff")
+    ApiResponse<Void> updateStaffWithOrderDetailId(@RequestBody OrderDetailUpdateStaffRequest request) {
+        orderDetailService.updateOrderHandlerWithOrderDetail(request.getId(), request.getOrderHandler());
+        orderService.updateOrderUpdateAtByOrderDetailId(request.getId());
+        return ApiResponse.<Void>builder()
+                .message("Update staff successfully")
                 .build();
     }
 }

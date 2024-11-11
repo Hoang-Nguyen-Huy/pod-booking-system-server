@@ -9,7 +9,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class OrderUpdateStaffRequest {
+public class OrderDetailUpdateStaffRequest {
     private String id;
     private Account orderHandler;
 }

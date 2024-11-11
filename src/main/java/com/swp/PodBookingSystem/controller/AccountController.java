@@ -14,10 +14,7 @@ import com.swp.PodBookingSystem.enums.AccountRole;
 import com.swp.PodBookingSystem.exception.AppException;
 import com.swp.PodBookingSystem.exception.ErrorCode;
 import com.swp.PodBookingSystem.mapper.AccountMapper;
-import com.swp.PodBookingSystem.service.AccountService;
-import com.swp.PodBookingSystem.service.OrderDetailService;
-import com.swp.PodBookingSystem.service.OrderService;
-import com.swp.PodBookingSystem.service.SendEmailService;
+import com.swp.PodBookingSystem.service.*;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -26,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,6 +33,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -51,6 +48,7 @@ public class AccountController {
     JwtDecoder jwtDecoder;
     OrderService orderService;
     OrderDetailService orderDetailService;
+
 
     @PostMapping
     ApiResponse<AccountResponse> createAccount(@RequestBody @Valid AccountCreationRequest request) {
@@ -76,6 +74,22 @@ public class AccountController {
                 .totalPage(accountPage.getTotalPages())
                 .recordPerPage(accountPage.getNumberOfElements())
                 .totalRecord((int) accountPage.getTotalElements())
+                .build();
+    }
+
+    @PatchMapping("/phoneNumber")
+    ApiResponse<Void> updateAccountPhoneNumber (@RequestBody AccountUpdatePhoneRequest request) {
+        accountService.updatePhoneNumber(request.getId(), request.getPhoneNumber());
+        return ApiResponse.<Void>builder()
+                .message("Cập nhật số điện thoại thành công")
+                .build();
+    }
+
+    @PatchMapping("/balance")
+    public ApiResponse<Void> updateAccountPhoneNumber(@RequestBody UpdateBalanceDto updateBalanceDto) {
+        accountService.updateBalance(updateBalanceDto.getAccountId(), updateBalanceDto.getUsedBalance());
+        return ApiResponse.<Void>builder()
+                .message("Cập nhật tiền trong ví thành công")
                 .build();
     }
 
@@ -151,10 +165,56 @@ public class AccountController {
                 .build();
     }
 
+
     @GetMapping("/staff")
-    public ResponseEntity<List<AccountOrderResponse>> getAllStaffAccounts() {
-        return ResponseEntity.status(HttpStatus.OK).body(accountService.getAllStaffAccounts());
+    public ApiResponse<?> getAllStaffAccounts(@RequestHeader("Authorization") String token,
+                                              @RequestParam(value = "weekDate", required = false) String weekDate,
+                                              @RequestParam(value = "slot", required = false) String slot) {
+        Account account = accountService.getAccountById(accountService.extractAccountIdFromToken(token));
+        Integer buildingNumber = account.getBuildingNumber();
+
+        if (weekDate != null && slot != null) {
+            List<AccountOrderResponse> availableStaff;
+            if (account.getRole().equals(AccountRole.Admin)) {
+                availableStaff = accountService.getStaffWithoutAssignment(weekDate, slot, "Admin", null);
+            } else if (account.getRole().equals(AccountRole.Manager)) {
+                availableStaff = accountService.getStaffWithoutAssignment(weekDate, slot, "Manager", buildingNumber);
+            } else {
+                throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
+
+            return ApiResponse.<List<AccountOrderResponse>>builder()
+                    .data(availableStaff)
+                    .message("Available staff retrieved successfully")
+                    .build();
+        }
+        else {
+            if (account.getRole().equals(AccountRole.Admin)) {
+                return ApiResponse.<List<AccountOrderResponse>>builder()
+                        .message("Lấy danh sách nhân viên thành công")
+                        .data(accountService.getAllStaffAccounts())
+                        .build();
+            }
+            else if (account.getRole().equals(AccountRole.Manager)) {
+                return ApiResponse.<List<AccountOrderResponse>>builder()
+                        .message("Lấy danh sách nhân viên thành công")
+                        .data(accountService.getAllStaffAccountsByManager(buildingNumber))
+                        .build();
+            }
+            else {
+                List<AccountOrderResponse> list = new ArrayList<>();
+                list.add(new AccountOrderResponse(account.getId(), account.getName(), account.getEmail(), account.getAvatar(), account.getRole(), account.getBuildingNumber(), account.getRankingName()));
+                return ApiResponse.<List<AccountOrderResponse>>builder()
+                        .message("Không có quyền truy cập")
+                        .data(list)
+                        .build();
+            }
+        }
     }
+
+
+
+
 
     @GetMapping("/{keyword}/{role}")
     public ResponseEntity<List<AccountOrderResponse>> searchAccounts(

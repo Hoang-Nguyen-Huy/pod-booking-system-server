@@ -14,6 +14,7 @@ import com.swp.PodBookingSystem.exception.ErrorCode;
 import com.swp.PodBookingSystem.mapper.AccountMapper;
 import com.swp.PodBookingSystem.mapper.BuildingMapper;
 import com.swp.PodBookingSystem.repository.AccountRepository;
+import com.swp.PodBookingSystem.repository.AssignmentRepository;
 import com.swp.PodBookingSystem.repository.BuildingRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +45,8 @@ public class AccountService {
     BuildingMapper buildingMapper;
     JwtDecoder jwtDecoder;
     BuildingRepository buildingRepository;
+    private final AssignmentRepository assignmentRepository;
+
 
     public AccountResponse createAccount(AccountCreationRequest request) {
         if (accountRepository.existsByEmail(request.getEmail())) {
@@ -59,12 +61,13 @@ public class AccountService {
     /*
     [GET]: /accounts/page&take
      */
-    @PreAuthorize("hasRole('Admin')")
     public Page<AccountManagementResponse> getAccounts(String searchParams, int page, int take) {
         Pageable pageable = PageRequest.of(page - 1, take, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Account> accountPage = accountRepository.findFilteredAccount(searchParams, pageable);
         return accountPage.map(this::convertToAccountManagementResponse);
     }
+
+
 
     public Account getAccountById(String id) {
         return accountRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
@@ -84,12 +87,35 @@ public class AccountService {
         return accountMapper.toAccountResponse(accountRepository.save(updatedAccount));
     }
 
+    public void updatePhoneNumber (String accountId, String phoneNumber) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+        account.setPhoneNumber(phoneNumber);
+        accountRepository.save(account);
+    }
+
+    public void updateBalance (String accountId, double usedBalance) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+        account.setBalance(account.getBalance() - usedBalance);
+        accountRepository.save(account);
+    }
+
     public List<AccountOrderResponse> getAllStaffAccounts() {
             List<Account> accounts = accountRepository.findByRole(AccountRole.Staff);
             return accounts.stream()
                     .map(this::toAccountResponse)
                     .collect(Collectors.toList());
     }
+
+    public List<AccountOrderResponse> getAllStaffAccountsByManager(int buildingNumber) {
+        List<Account> accounts = accountRepository.findStaffByManager(AccountRole.Staff, buildingNumber);
+        return accounts.stream()
+                .map(this::toAccountResponse)
+                .collect(Collectors.toList());
+    }
+
+
 
     public List<AccountOrderResponse> searchAccounts(String keyword, AccountRole role) {
         List<Account> accounts = accountRepository.searchAccounts(keyword, role);
@@ -156,4 +182,23 @@ public class AccountService {
     public int countCustomer(LocalDateTime startTime, LocalDateTime endTime) {
         return accountRepository.countCustomerBetweenDatetime(startTime, endTime);
     }
+
+    public List<AccountOrderResponse> getStaffWithoutAssignment(String weekDate, String slot, String role, Integer buildingNumber) {
+
+        List<String> assignedStaffIds = assignmentRepository.findStaffIdsByWeekDateAndSlot(weekDate, slot);
+
+
+        if ("Admin".equals(role)) {
+            return accountRepository.findStaffNotInAssignedList(assignedStaffIds).stream()
+                    .map(accountMapper::toAccountOrderResponse)
+                    .collect(Collectors.toList());
+        } else if ("Manager".equals(role) && buildingNumber != null) {
+            return accountRepository.findStaffNotInAssignedListByBuilding(assignedStaffIds, buildingNumber).stream()
+                    .map(accountMapper::toAccountOrderResponse)
+                    .collect(Collectors.toList());
+        } else {
+            throw new IllegalArgumentException("Invalid role or missing building number for manager.");
+        }
+    }
+
 }

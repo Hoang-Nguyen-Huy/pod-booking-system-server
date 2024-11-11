@@ -35,8 +35,19 @@ public interface OrderRepository extends JpaRepository<Order, String> {
             JOIN OrderDetail od ON o.id = od.order.id
             WHERE o.createdAt >= :startTime 
               AND o.createdAt <= :endTime
-              AND (:status IS NULL OR od.status = :status)
-            AND od.id IS NOT NULL
+              AND (
+                :status IS NULL
+                OR (
+                    (:status = 'Pending' OR :status = 'Rejected') 
+                    AND EXISTS (
+                        SELECT 1 FROM OrderDetail od2 WHERE od2.order.id = o.id AND od2.status = :status
+                    )
+                    OR (:status = 'Successfully'
+                    AND NOT EXISTS (
+                        SELECT 1 FROM OrderDetail od3 WHERE od3.order.id = o.id AND od3.status <> :status
+                    ))
+                 )
+              )
             ORDER BY o.createdAt DESC
             """)
     Page<Order> findAllWithTimeRange(
@@ -48,14 +59,26 @@ public interface OrderRepository extends JpaRepository<Order, String> {
     ;
 
     @Query("""
-                SELECT DISTINCT o FROM Order o
-                JOIN OrderDetail od ON o.id = od.order.id
-                WHERE od.building.id = :buildingNumber
-                  AND o.createdAt >= :startTime 
-                  AND o.createdAt <= :endTime
-                  AND (:status IS NULL OR od.status = :status)
-                ORDER BY o.createdAt DESC
-            """)
+       SELECT DISTINCT o FROM Order o
+       JOIN OrderDetail od ON o.id = od.order.id
+       WHERE od.building.id = :buildingNumber
+         AND o.createdAt >= :startTime 
+         AND o.createdAt <= :endTime
+         AND (
+                :status IS NULL
+                OR (
+                    (:status = 'Pending' OR :status = 'Rejected') 
+                    AND EXISTS (
+                        SELECT 1 FROM OrderDetail od2 WHERE od2.order.id = o.id AND od2.status = :status
+                    )
+                    OR (:status = 'Successfully'
+                    AND NOT EXISTS (
+                        SELECT 1 FROM OrderDetail od3 WHERE od3.order.id = o.id AND od3.status <> :status
+                    ))
+                 )
+         )
+       ORDER BY o.createdAt DESC
+       """)
     Page<Order> findOrdersByBuildingNumberAndTimeRange(
             @Param("buildingNumber") int buildingNumber,
             @Param("startTime") LocalDateTime startTime,
@@ -69,7 +92,19 @@ public interface OrderRepository extends JpaRepository<Order, String> {
                 WHERE od.orderHandler.id = :staffId
                   AND o.createdAt >= :startTime 
                   AND o.createdAt <= :endTime
-                  AND (:status IS NULL OR od.status = :status)
+                  AND (
+                :status IS NULL
+                OR (
+                    (:status = 'Pending' OR :status = 'Rejected') 
+                    AND EXISTS (
+                        SELECT 1 FROM OrderDetail od2 WHERE od2.order.id = o.id AND od2.status = :status
+                    )
+                    OR (:status = 'Successfully'
+                    AND NOT EXISTS (
+                        SELECT 1 FROM OrderDetail od3 WHERE od3.order.id = o.id AND od3.status <> :status
+                    ))
+                 )
+              )
                 ORDER BY o.createdAt DESC
             """)
     Page<Order> findOrdersByStaffIdAndTimeRange(

@@ -4,10 +4,12 @@ import com.swp.PodBookingSystem.dto.request.Amenity.AmenityCreationRequest;
 import com.swp.PodBookingSystem.dto.respone.AmenityResponse;
 import com.swp.PodBookingSystem.entity.Account;
 import com.swp.PodBookingSystem.entity.Amenity;
+import com.swp.PodBookingSystem.entity.Building;
 import com.swp.PodBookingSystem.enums.AccountRole;
 import com.swp.PodBookingSystem.enums.AmenityType;
 import com.swp.PodBookingSystem.mapper.AmenityMapper;
 import com.swp.PodBookingSystem.repository.AmenityRepository;
+import com.swp.PodBookingSystem.repository.BuildingRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -27,8 +30,10 @@ public class AmenityService {
     @Autowired
     private AmenityMapper amenityMapper;
 
+    private BuildingRepository buildingRepository;
+
     public List<AmenityResponse> getAllAmenities(){
-        List<Amenity> amenities = amenityRepository.findAll();
+        List<Amenity> amenities = amenityRepository.findAllAvailable();
         return amenities.stream()
                 .map(amenityMapper::toAmenityResponse)
                 .collect(Collectors.toList());
@@ -52,7 +57,9 @@ public class AmenityService {
     }
 
     public AmenityResponse createAmenity(AmenityCreationRequest request){
+        Building buildingAmenity = buildingRepository.getById(request.getBuildingId());
         Amenity newAmenity = amenityMapper.toAmenity(request);
+        newAmenity.setBuilding(buildingAmenity);
         return amenityMapper.toAmenityResponse(amenityRepository.save(newAmenity));
     }
 
@@ -60,6 +67,7 @@ public class AmenityService {
         Amenity existingAmenity = amenityRepository.findById(amenityId)
                 .orElseThrow(() -> new EntityNotFoundException("Amenity not found"));
         Amenity updateAmenity = amenityMapper.toUpdateAmenity(request, existingAmenity);
+        updateAmenity.setUpdatedAt(LocalDateTime.now());
         return amenityMapper.toAmenityResponse(amenityRepository.save(updateAmenity));
     }
 
@@ -67,6 +75,7 @@ public class AmenityService {
         Amenity existingAmenity = amenityRepository.findById(amenityId)
                 .orElseThrow(() -> new EntityNotFoundException("Amenity not found"));
         existingAmenity.setIsDeleted(existingAmenity.getIsDeleted() == 1 ? 0 : 1);
+
         amenityRepository.save(existingAmenity);
         return "Delete amenity " + amenityId + " successfully";
     }

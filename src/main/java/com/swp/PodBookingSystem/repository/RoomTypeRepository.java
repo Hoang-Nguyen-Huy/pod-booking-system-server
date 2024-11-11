@@ -13,19 +13,18 @@ import java.util.List;
 public interface RoomTypeRepository extends JpaRepository<RoomType, Integer> {
     @Query("SELECT rt FROM RoomType rt " +
             "JOIN rt.building b " +
-            "LEFT JOIN Room r ON r.roomType.id = rt.id " +
-            "LEFT JOIN OrderDetail od ON r.id = od.room.id " +
             "WHERE (:address IS NULL OR b.address LIKE %:address%) " +
             "AND b.status = com.swp.PodBookingSystem.enums.BuildingStatus.Active " +
             "AND (:capacity IS NULL OR rt.capacity = :capacity) " +
-            "AND ((:startTime IS NULL AND :endTime IS NULL) " +
-            "     OR NOT EXISTS (SELECT 1 FROM OrderDetail od2 " +
-            "                   WHERE od2.room.id = r.id " +
-            "                   AND ((od2.startTime BETWEEN :startTime AND :endTime) " +
-            "                        OR (od2.endTime BETWEEN :startTime AND :endTime)))) " +
-            "GROUP BY rt.id " +
-            "HAVING (:startTime IS NOT NULL AND :endTime IS NOT NULL AND COUNT(r.id) >= 1) " +
-            "     OR (:startTime IS NULL AND :endTime IS NULL)")
+            "AND (:startTime IS NULL AND :endTime IS NULL OR " +
+            "     rt.quantity > (" +
+            "         SELECT COUNT(DISTINCT r.id) FROM Room r " +
+            "         JOIN OrderDetail od ON r.id = od.room.id " +
+            "         WHERE r.roomType = rt " +
+            "         AND ((od.startTime < :endTime AND od.endTime > :startTime) OR " +
+            "              (od.startTime >= :startTime AND od.startTime < :endTime))" +
+            "     ))" +
+            "GROUP BY rt.id")
     Page<RoomType> findFilteredRoomTypes(@Param("address") String address,
                                          @Param("capacity") Integer capacity,
                                          @Param("startTime") LocalDateTime startTime,

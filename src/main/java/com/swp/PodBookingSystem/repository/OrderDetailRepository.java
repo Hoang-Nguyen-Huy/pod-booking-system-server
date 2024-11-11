@@ -36,13 +36,12 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, String
 
     @Query("""
     SELECT od FROM OrderDetail od
-    WHERE od.startTime >= :startTime 
-      AND od.endTime <= :endTime 
+    WHERE od.startTime >= :startTime
+      AND od.endTime <= :endTime
       AND EXISTS (
-          SELECT 1 FROM OrderDetailAmenity oda 
+          SELECT 1 FROM OrderDetailAmenity oda
           WHERE oda.orderDetail.id = od.id
       )
-    ORDER BY od.updatedAt DESC
 """)
     Page<OrderDetail> findAllWithTimeRange(
             @Param("startTime") LocalDateTime startTime,
@@ -162,4 +161,22 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, String
             "FROM OrderDetail od " +
             "GROUP BY od.building.id, od.building.address")
     List<NumberOrderByBuildingDto> countOrdersByBuilding();
+
+
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE OrderDetail od " +
+            "SET od.orderHandler.id = :staffId " +
+            "WHERE WEEKDAY(od.startTime) = :weekDay " +
+            "AND TIME(od.startTime) BETWEEN :slotStartTime AND :slotEndTime " +
+            "AND od.building.id = :buildingNumber " +
+            "AND od.startTime > CURRENT_TIMESTAMP " +
+            "AND (od.orderHandler.id != :staffId OR od.orderHandler IS NULL)")
+    void assignOrdersToStaff(@Param("staffId") String staffId,
+                             @Param("weekDay") int weekDay,
+                             @Param("slotStartTime") String slotStartTime,
+                             @Param("slotEndTime") String slotEndTime,
+                             @Param("buildingNumber") Integer buildingNumber);
+
 }

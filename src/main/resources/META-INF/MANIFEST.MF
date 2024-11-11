@@ -1,0 +1,47 @@
+Manifest-Version: 1.0
+Main-Class: com.swp.PodBookingSystem.PodBookingSystemServerApplication
+Class-Path: springdoc-openapi-starter-webmvc-ui-2.6.0.jar spring-securit
+ y-web-6.3.3.jar antlr4-runtime-4.13.0.jar mysql-connector-j-8.3.0.jar i
+ stack-commons-runtime-4.1.2.jar swagger-ui-5.17.14.jar spring-boot-3.3.
+ 4.jar snakeyaml-2.2.jar spring-boot-devtools-3.3.4.jar swagger-annotati
+ ons-jakarta-2.2.22.jar spring-data-jpa-3.3.4.jar logback-core-1.5.8.jar
+  jakarta.mail-2.0.3.jar log4j-to-slf4j-2.23.1.jar spring-boot-autoconfi
+ gure-3.3.4.jar spring-security-oauth2-core-6.3.3.jar log4j-api-2.23.1.j
+ ar jackson-dataformat-yaml-2.17.2.jar jboss-logging-3.5.3.Final.jar spr
+ ing-aspects-6.1.13.jar spring-expression-6.1.13.jar spring-jcl-6.1.13.j
+ ar jakarta.validation-api-3.0.2.jar spring-boot-starter-3.3.4.jar tomca
+ t-embed-el-10.1.30.jar stomp-websocket-2.3.4.jar jakarta.inject-api-2.0
+ .1.jar spring-security-crypto-6.3.3.jar biweekly-0.6.8.jar accessors-sm
+ art-2.5.1.jar spring-core-6.1.13.jar hibernate-commons-annotations-6.0.
+ 6.Final.jar jcip-annotations-1.0-1.jar swagger-core-jakarta-2.2.22.jar 
+ jackson-databind-2.17.2.jar spring-security-oauth2-jose-6.3.3.jar sprin
+ g-boot-starter-websocket-3.3.4.jar mapstruct-1.6.2.jar spring-data-comm
+ ons-3.3.4.jar content-type-2.2.jar spring-boot-starter-web-3.3.4.jar sp
+ ring-context-6.1.13.jar spring-tx-6.1.13.jar spring-security-oauth2-cli
+ ent-6.3.3.jar spring-context-support-6.1.13.jar micrometer-commons-1.13
+ .4.jar spring-boot-starter-jdbc-3.3.4.jar json-smart-2.5.1.jar micromet
+ er-observation-1.13.4.jar aspectjweaver-1.9.22.1.jar tomcat-embed-webso
+ cket-10.1.30.jar jaxb-core-4.0.5.jar springdoc-openapi-starter-webmvc-a
+ pi-2.6.0.jar jakarta.annotation-api-2.1.1.jar jackson-annotations-2.17.
+ 2.jar jakarta.activation-api-2.1.3.jar spring-boot-starter-data-jpa-3.3
+ .4.jar vinnie-2.0.2.jar spring-web-6.1.13.jar classmate-1.7.0.jar jakar
+ ta.persistence-api-3.1.0.jar jackson-datatype-jsr310-2.17.2.jar byte-bu
+ ddy-1.14.19.jar springdoc-openapi-starter-common-2.6.0.jar jandex-3.1.2
+ .jar spring-security-oauth2-resource-server-6.3.3.jar asm-9.6.jar lang-
+ tag-1.7.jar spring-beans-6.1.13.jar HikariCP-5.1.0.jar jackson-module-p
+ arameter-names-2.17.2.jar spring-security-core-6.3.3.jar angus-activati
+ on-2.0.2.jar slf4j-api-2.0.16.jar spring-boot-starter-oauth2-resource-s
+ erver-3.3.4.jar logback-classic-1.5.8.jar spring-aop-6.1.13.jar nimbus-
+ jose-jwt-9.37.3.jar spring-boot-starter-json-3.3.4.jar spring-boot-star
+ ter-validation-3.3.4.jar oauth2-oidc-sdk-9.43.4.jar sockjs-client-1.5.1
+ .jar hibernate-core-6.5.3.Final.jar jackson-datatype-jdk8-2.17.2.jar sp
+ ring-orm-6.1.13.jar jakarta.transaction-api-2.0.1.jar spring-security-c
+ onfig-6.3.3.jar spring-boot-starter-aop-3.3.4.jar spring-websocket-6.1.
+ 13.jar txw2-4.0.5.jar spring-boot-starter-logging-3.3.4.jar commons-lan
+ g3-3.14.0.jar jakarta.xml.bind-api-4.0.2.jar spring-messaging-6.1.13.ja
+ r jul-to-slf4j-2.0.16.jar jackson-core-2.17.2.jar spring-jdbc-6.1.13.ja
+ r jaxb-runtime-4.0.5.jar spring-webmvc-6.1.13.jar spring-boot-starter-m
+ ail-3.3.4.jar swagger-models-jakarta-2.2.22.jar tomcat-embed-core-10.1.
+ 30.jar hibernate-validator-8.0.1.Final.jar spring-boot-starter-tomcat-3
+ .3.4.jar
+
