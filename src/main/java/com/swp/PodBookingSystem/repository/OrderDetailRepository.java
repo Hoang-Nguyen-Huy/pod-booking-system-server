@@ -172,7 +172,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, String
             "AND TIME(od.startTime) BETWEEN :slotStartTime AND :slotEndTime " +
             "AND od.building.id = :buildingNumber " +
             "AND od.startTime > CURRENT_TIMESTAMP " +
-            "AND (od.orderHandler.id != :staffId OR od.orderHandler IS NULL)")
+            "AND od.orderHandler IS NULL")
     void assignOrdersToStaff(@Param("staffId") String staffId,
                              @Param("weekDay") int weekDay,
                              @Param("slotStartTime") String slotStartTime,

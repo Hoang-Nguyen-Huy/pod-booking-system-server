@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AssignmentRepository extends JpaRepository<Assignment, String> {
@@ -22,9 +23,11 @@ public interface AssignmentRepository extends JpaRepository<Assignment, String> 
             "WHERE a.slot = :slot " +
             "AND a.weekDate = :weekDate " +
             "AND ac.buildingNumber = :buildingId")
-    String findStaffForMatchingOrder(@Param("slot") String slot,
-                                     @Param("weekDate") String weekDate,
-                                     @Param("buildingId") Integer buildingId);
+    List<String> findStaffIdsForMatchingOrder(@Param("slot") String slot,
+                                              @Param("weekDate") String weekDate,
+                                              @Param("buildingId") Integer buildingId);
+
+
 
 
     @Query("SELECT a FROM Assignment a " +
