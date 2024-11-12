@@ -30,6 +30,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -68,7 +69,6 @@ public class AccountService {
     }
 
 
-
     public Account getAccountById(String id) {
         return accountRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
     }
@@ -87,14 +87,14 @@ public class AccountService {
         return accountMapper.toAccountResponse(accountRepository.save(updatedAccount));
     }
 
-    public void updatePhoneNumber (String accountId, String phoneNumber) {
+    public void updatePhoneNumber(String accountId, String phoneNumber) {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
         account.setPhoneNumber(phoneNumber);
         accountRepository.save(account);
     }
 
-    public void updateBalance (String accountId, double usedBalance) {
+    public void updateBalance(String accountId, double usedBalance) {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
         account.setBalance(account.getBalance() - usedBalance);
@@ -102,10 +102,10 @@ public class AccountService {
     }
 
     public List<AccountOrderResponse> getAllStaffAccounts() {
-            List<Account> accounts = accountRepository.findByRole(AccountRole.Staff);
-            return accounts.stream()
-                    .map(this::toAccountResponse)
-                    .collect(Collectors.toList());
+        List<Account> accounts = accountRepository.findByRole(AccountRole.Staff);
+        return accounts.stream()
+                .map(this::toAccountResponse)
+                .collect(Collectors.toList());
     }
 
     public List<AccountOrderResponse> getAllStaffAccountsByManager(int buildingNumber) {
@@ -114,7 +114,6 @@ public class AccountService {
                 .map(this::toAccountResponse)
                 .collect(Collectors.toList());
     }
-
 
 
     public List<AccountOrderResponse> searchAccounts(String keyword, AccountRole role) {
@@ -132,7 +131,6 @@ public class AccountService {
                 .avatar(account.getAvatar())
                 .role(account.getRole())
                 .buildingNumber(account.getBuildingNumber())
-                .rankingName(account.getRankingName())
                 .build();
     }
 
@@ -154,7 +152,6 @@ public class AccountService {
                 .role(account.getRole())
                 .balance(account.getBalance())
                 .building(buildingResponse)
-                .rankingName(account.getRankingName())
                 .createdAt(account.getCreatedAt())
                 .status(account.getStatus())
                 .build();

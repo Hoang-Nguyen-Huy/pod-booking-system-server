@@ -18,5 +18,4 @@ public class AccountOrderResponse {
     String avatar;
     AccountRole role;
     int buildingNumber;
-    String rankingName;
 }
