@@ -52,9 +52,10 @@ public class AccountController {
 
     @PostMapping
     ApiResponse<AccountResponse> createAccount(@RequestBody @Valid AccountCreationRequest request) {
+        AccountResponse response = accountService.createAccount(request);
         return ApiResponse.<AccountResponse>builder()
-                .data(accountService.createAccount(request))
-                .message("Thêm tài khoản mới thành công")
+                .data(response)
+                .message(response != null ? "Thêm tài khoản mới thành công" : "Email đã tồn tại")
                 .build();
     }
 

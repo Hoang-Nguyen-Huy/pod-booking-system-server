@@ -42,17 +42,38 @@ public class AuthenticationController {
     @Value("${google.failure}")
     protected String urlFailure;
 
-    @GetMapping("/login/google")
-    public RedirectView loginGoogle(OAuth2AuthenticationToken token) throws ParseException, UnsupportedEncodingException {
+//    @GetMapping("/login/google")
+//    public RedirectView loginGoogle(OAuth2AuthenticationToken token) throws ParseException, UnsupportedEncodingException {
+//        try {
+//            var result = authenticationService.loginGoogle(token.getPrincipal().getAttribute("email"),
+//                    token.getPrincipal().getAttribute("name"),
+//                    token.getPrincipal().getAttribute("picture"));
+//            return new RedirectView(urlSuccess + result.getAccessToken()
+//                    + "&refreshToken=" + result.getRefreshToken() + "&status=" + 200);
+//        } catch (Exception e) {
+//            String message = URLEncoder.encode("Tài khoản đã bị cấm", "UTF-8");
+//            return new RedirectView(urlFailure + message + "&status=" + 500);
+//        }
+//    }
+
+    @PostMapping("/login/google")
+    ApiResponse<LoginGoogleRes> loginGoogle(@RequestBody FirebaseToken token) throws ParseException, UnsupportedEncodingException {
         try {
-            var result = authenticationService.loginGoogle(token.getPrincipal().getAttribute("email"),
-                    token.getPrincipal().getAttribute("name"),
-                    token.getPrincipal().getAttribute("picture"));
-            return new RedirectView(urlSuccess + result.getAccessToken()
-                    + "&refreshToken=" + result.getRefreshToken() + "&status=" + 200);
+            log.info("email:" + token.getEmail());
+            var result = authenticationService.loginGoogle(token.getEmail(),
+                    token.getName(),
+                    token.getAvatar());
+            String redirectUrl = urlSuccess + result.getAccessToken()
+                    + "&refreshToken=" + result.getRefreshToken() + "&status=" + 200;
+            return ApiResponse.<LoginGoogleRes>builder()
+                    .data(new LoginGoogleRes(redirectUrl))
+                    .build();
         } catch (Exception e) {
             String message = URLEncoder.encode("Tài khoản đã bị cấm", "UTF-8");
-            return new RedirectView(urlFailure + message + "&status=" + 500);
+            String errorUrl = urlFailure + message + "&status=" + 500;
+            return ApiResponse.<LoginGoogleRes>builder()
+                    .data(new LoginGoogleRes(errorUrl))
+                    .build();
         }
     }
 
