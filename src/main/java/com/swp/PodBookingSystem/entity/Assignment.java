@@ -1,7 +1,9 @@
 package com.swp.PodBookingSystem.entity;
 
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -17,9 +19,7 @@ public class Assignment {
     @Id
     String id;
 
-    @OneToOne
-    @JoinColumn(name = "staffId", referencedColumnName = "id", nullable = false)
-    Account staff;
+    String staffId;
 
     String slot;
 
