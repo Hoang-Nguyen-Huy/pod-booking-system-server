@@ -88,7 +88,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, String
 //    integer countByBuildingId(@Param("buildingId") Integer buildingId);
 
     @Query("SELECT SUM((od.priceRoom + COALESCE(amenityTotal.totalAmenityPrice, 0)) * " +
-            "(1 - COALESCE(od.discountPercentage, 0) / 100.0) * (1 - COALESCE(sp.discountPercentage, 0) / 100.0)) as grandTotal " +
+            "(1 - COALESCE(od.discountPercentage, 0) / 100.0)) as grandTotal " +
             "FROM OrderDetail od " +
             "LEFT JOIN od.servicePackage sp " +
             "LEFT JOIN (SELECT oda.orderDetail.id as orderDetailId, SUM(oda.price * oda.quantity) as totalAmenityPrice " +
@@ -99,7 +99,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, String
     Double calculateRevenueCurrentDay();
 
     @Query("SELECT SUM((od.priceRoom + COALESCE(amenityTotal.totalAmenityPrice, 0)) * " +
-            "(1 - COALESCE(od.discountPercentage, 0) / 100.0) * (1 - COALESCE(sp.discountPercentage, 0) / 100.0)) as grandTotal " +
+            "(1 - COALESCE(od.discountPercentage, 0) / 100.0)) as grandTotal " +
             "FROM OrderDetail od " +
             "LEFT JOIN od.servicePackage sp " +
             "LEFT JOIN (SELECT oda.orderDetail.id as orderDetailId, SUM(oda.price * oda.quantity) as totalAmenityPrice " +
@@ -113,7 +113,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, String
     @Query("SELECT NEW com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueChartDto(" +
             "CONCAT(YEAR(:startTime), '-', LPAD(CAST(MONTH(:startTime) AS string), 2, '0'), '-', LPAD(CAST(DAY(:startTime) AS string), 2, '0')), " +
             "SUM((od.priceRoom + COALESCE(amenityTotal.totalAmenityPrice, 0)) * " +
-            "(1 - COALESCE(od.discountPercentage, 0) / 100.0) * (1 - COALESCE(sp.discountPercentage, 0) / 100.0))) " +
+            "(1 - COALESCE(od.discountPercentage, 0) / 100.0))) " +
             "FROM OrderDetail od " +
             "LEFT JOIN od.servicePackage sp " +
             "LEFT JOIN (SELECT oda.orderDetail.id as orderDetailId, SUM(oda.price * oda.quantity) as totalAmenityPrice " +
@@ -126,7 +126,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, String
     @Query("SELECT NEW com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueChartDto(" +
             "CONCAT(YEAR(od.startTime), '-', LPAD(CAST(MONTH(od.startTime) AS string), 2, '0'), '-', LPAD(CAST(DAY(od.startTime) AS string), 2, '0')), " +
             "SUM((od.priceRoom + COALESCE(amenityTotal.totalAmenityPrice, 0)) * " +
-            "(1 - COALESCE(od.discountPercentage, 0) / 100.0) * (1 - COALESCE(sp.discountPercentage, 0) / 100.0))) " +
+            "(1 - COALESCE(od.discountPercentage, 0) / 100.0))) " +
             "FROM OrderDetail od " +
             "LEFT JOIN od.servicePackage sp " +
             "LEFT JOIN (SELECT oda.orderDetail.id as orderDetailId, SUM(oda.price * oda.quantity) as totalAmenityPrice " +
@@ -142,8 +142,8 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, String
     @Query("SELECT NEW com.swp.PodBookingSystem.dto.respone.OrderDetail.RevenueChartDto(" +
             "CONCAT(YEAR(MIN(od.startTime)), '-', LPAD(CAST(MONTH(MIN(od.startTime)) AS string), 2, '0'), '-01'), " +
             "SUM((od.priceRoom + COALESCE(amenityTotal.totalAmenityPrice, 0)) * " +
-            "(1 - COALESCE(od.discountPercentage, 0) / 100.0) * " +
-            "(1 - COALESCE(sp.discountPercentage, 0) / 100.0))) " +
+            "(1 - COALESCE(od.discountPercentage, 0) / 100.0) " +
+            ")) " +
             "FROM OrderDetail od " +
             "LEFT JOIN od.servicePackage sp " +
             "LEFT JOIN (SELECT oda.orderDetail.id as orderDetailId, SUM(oda.price * oda.quantity) as totalAmenityPrice " +
@@ -172,7 +172,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, String
             "AND TIME(od.startTime) BETWEEN :slotStartTime AND :slotEndTime " +
             "AND od.building.id = :buildingNumber " +
             "AND od.startTime > CURRENT_TIMESTAMP " +
-            "AND (od.orderHandler.id != :staffId OR od.orderHandler IS NULL)")
+            "AND od.orderHandler IS NULL")
     void assignOrdersToStaff(@Param("staffId") String staffId,
                              @Param("weekDay") int weekDay,
                              @Param("slotStartTime") String slotStartTime,
