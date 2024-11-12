@@ -50,6 +50,7 @@ public class SecurityConfig {
                         request.requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                                 .anyRequest().permitAll())
                 .oauth2Login(oauth2login -> oauth2login.loginPage("http://localhost:3000/login")
+                        .loginPage("https://flexipod.site/login")
                         .successHandler(((request, response, authentication) ->
                                 response.sendRedirect("/auth/login/google"))))
         ;
