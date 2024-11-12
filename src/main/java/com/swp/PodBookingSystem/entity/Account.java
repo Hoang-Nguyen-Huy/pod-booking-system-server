@@ -55,6 +55,9 @@ public class Account {
     @OneToMany(mappedBy = "account")
     List<RefreshToken> refreshTokens;
 
+    @JsonIgnore
+    @OneToOne(mappedBy = "staff")
+    Assignment assignment;
 
     @PrePersist
     protected void onCreate() {

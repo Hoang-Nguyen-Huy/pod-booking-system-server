@@ -44,7 +44,7 @@ public class AssignmentService {
 
         String weekDate = newAssignment.getWeekDate();
         String slot = newAssignment.getSlot();
-        Account staff = accountRepository.getById(newAssignment.getStaffId());
+        Account staff = accountRepository.getById(newAssignment.getStaff().getId());
 
         DayOfWeek dayOfWeek = getDayOfWeekFromWeekDate(weekDate);
         int weekDay = dayOfWeek.getValue() -1 ;
@@ -52,7 +52,7 @@ public class AssignmentService {
         LocalTime[] slotTimes = getSlotTimes(slot);
         String slotStartTime = slotTimes[0].toString();
         String slotEndTime = slotTimes[1].toString();
-        orderDetailRepository.assignOrdersToStaff(newAssignment.getStaffId(), weekDay, slotStartTime, slotEndTime, staff.getBuildingNumber());
+        orderDetailRepository.assignOrdersToStaff(newAssignment.getStaff().getId(), weekDay, slotStartTime, slotEndTime, staff.getBuildingNumber());
 
         return assignmentMapper.toAssignmentResponse(assignmentRepository.save(newAssignment));
     }
@@ -94,7 +94,7 @@ public class AssignmentService {
             return assignments.stream()
                     .map(assignment -> {
                         AssignmentResponse response = assignmentMapper.toAssignmentResponse(assignment);
-                        String nameStaff = accountRepository.findById(assignment.getStaffId())
+                        String nameStaff = accountRepository.findById(assignment.getStaff().getId())
                                 .map(Account::getName)
                                 .orElse("Unknown");
                         response.setNameStaff(nameStaff);
@@ -122,7 +122,7 @@ public class AssignmentService {
         return assignments.stream()
                 .map(assignment -> {
                     AssignmentResponse response = assignmentMapper.toAssignmentResponse(assignment);
-                    String nameStaff = accountRepository.findById(assignment.getStaffId())
+                    String nameStaff = accountRepository.findById(assignment.getStaff().getId())
                             .map(Account::getName)
                             .orElse("Unknown");
                     response.setNameStaff(nameStaff); 

@@ -13,12 +13,12 @@ public interface AssignmentRepository extends JpaRepository<Assignment, String> 
     List<Assignment> findByStaffId(String staffId);
 
 
-    @Query("SELECT a.staffId FROM Assignment a WHERE a.weekDate = :weekDate AND a.slot = :slot")
+    @Query("SELECT a.staff.id FROM Assignment a WHERE a.weekDate = :weekDate AND a.slot = :slot")
     List<String> findStaffIdsByWeekDateAndSlot(@Param("weekDate") String weekDate, @Param("slot") String slot);
 
-    @Query("SELECT a.staffId " +
+    @Query("SELECT a.staff.id " +
             "FROM Assignment a " +
-            "JOIN Account ac ON ac.id = a.staffId " +
+            "JOIN Account ac ON ac.id = a.staff.id " +
             "WHERE a.slot = :slot " +
             "AND a.weekDate = :weekDate " +
             "AND ac.buildingNumber = :buildingId")
@@ -28,10 +28,10 @@ public interface AssignmentRepository extends JpaRepository<Assignment, String> 
 
 
     @Query("SELECT a FROM Assignment a " +
-            "JOIN Account acc ON a.staffId = acc.id " +
+            "JOIN Account acc ON a.staff.id = acc.id " +
             "WHERE (:role = 'Admin') OR " +
             "(:role = 'Manager' AND acc.buildingNumber = :buildingId) OR " +
-            "(:role = 'Staff' AND acc.buildingNumber = :buildingId AND a.staffId = :staffId)")
+            "(:role = 'Staff' AND acc.buildingNumber = :buildingId AND a.staff.id = :staffId)")
     List<Assignment> findAllByRoleAndBuildingAndStaff(
             @Param("role") String role,
             @Param("buildingId") Integer buildingId,
