@@ -39,21 +39,24 @@ public class AssignmentService {
 
 
     public AssignmentResponse createAssignment(AssignmentCreationRequest request) {
+        Account staff = accountRepository.findById(request.getStaffId())
+                .orElseThrow(() -> new EntityNotFoundException("Staff not found"));
+
         Assignment newAssignment = assignmentMapper.toAssignment(request);
         newAssignment.setId(UUID.randomUUID().toString());
 
         String weekDate = newAssignment.getWeekDate();
         String slot = newAssignment.getSlot();
-        Account staff = accountRepository.getById(newAssignment.getStaff().getId());
 
         DayOfWeek dayOfWeek = getDayOfWeekFromWeekDate(weekDate);
-        int weekDay = dayOfWeek.getValue() -1 ;
+        int weekDay = dayOfWeek.getValue() - 1;
 
         LocalTime[] slotTimes = getSlotTimes(slot);
         String slotStartTime = slotTimes[0].toString();
         String slotEndTime = slotTimes[1].toString();
-        orderDetailRepository.assignOrdersToStaff(newAssignment.getStaff().getId(), weekDay, slotStartTime, slotEndTime, staff.getBuildingNumber());
+        orderDetailRepository.assignOrdersToStaff(staff.getId(), weekDay, slotStartTime, slotEndTime, staff.getBuildingNumber());
 
+        newAssignment.setStaff(staff);
         return assignmentMapper.toAssignmentResponse(assignmentRepository.save(newAssignment));
     }
 
@@ -81,32 +84,37 @@ public class AssignmentService {
 
 
 
-        public List<AssignmentResponse> getAllAssignments(Account user){
-            List<Assignment> assignments = null;
-            Integer buildingId = user.getBuildingNumber();
-            if (user.getRole() == AccountRole.Admin) {
-                assignments = assignmentRepository.findAllByRoleAndBuildingAndStaff("Admin", null, null);
-            } else if(user.getRole() == AccountRole.Manager){
-                assignments = assignmentRepository.findAllByRoleAndBuildingAndStaff("Manager", buildingId, null);
-            } else if (user.getRole() == AccountRole.Staff){
-                assignments = assignmentRepository.findAllByRoleAndBuildingAndStaff("Staff", buildingId, user.getId());
-            }
-            return assignments.stream()
-                    .map(assignment -> {
-                        AssignmentResponse response = assignmentMapper.toAssignmentResponse(assignment);
-                        String nameStaff = accountRepository.findById(assignment.getStaff().getId())
-                                .map(Account::getName)
-                                .orElse("Unknown");
-                        response.setNameStaff(nameStaff);
-                        return response;
-                    })
-                    .collect(Collectors.toList());
+    public List<AssignmentResponse> getAllAssignments(Account user){
+        List<Assignment> assignments = null;
+        Integer buildingId = user.getBuildingNumber();
+        if (user.getRole() == AccountRole.Admin) {
+            assignments = assignmentRepository.findAllByRoleAndBuildingAndStaff("Admin", null, null);
+        } else if(user.getRole() == AccountRole.Manager){
+            assignments = assignmentRepository.findAllByRoleAndBuildingAndStaff("Manager", buildingId, null);
+        } else if (user.getRole() == AccountRole.Staff){
+            assignments = assignmentRepository.findAllByRoleAndBuildingAndStaff("Staff", buildingId, user.getId());
         }
+        return assignments.stream()
+                .map(assignment -> {
+                    AssignmentResponse response = assignmentMapper.toAssignmentResponse(assignment);
+                    String nameStaff = accountRepository.findById(assignment.getStaff().getId())
+                            .map(Account::getName)
+                            .orElse("Unknown");
+                    response.setNameStaff(nameStaff);
+                    return response;
+                })
+                .collect(Collectors.toList());
+    }
 
-    public AssignmentResponse updateAssignment(String id, AssignmentRequest request){
+    public AssignmentResponse updateAssignment(String id, AssignmentRequest request) {
         Assignment existingAssignment = assignmentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Assignment not found"));
+
+        Account staff = accountRepository.findById(request.getStaffId())
+                .orElseThrow(() -> new EntityNotFoundException("Staff not found"));
+
         Assignment updateAssignment = assignmentMapper.toUpdateAssignment(request, existingAssignment);
+        updateAssignment.setStaff(staff);
         return assignmentMapper.toAssignmentResponse(assignmentRepository.save(updateAssignment));
     }
 
