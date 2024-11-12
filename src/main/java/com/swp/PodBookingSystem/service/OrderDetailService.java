@@ -364,13 +364,10 @@ public class OrderDetailService {
 
             DayOfWeek dayOfWeek = startTime.getDayOfWeek();
             String weekDate = getDayLabel(dayOfWeek);
-            Account orderHandler;
-            String orderHandlerId = assignmentRepository.findStaffForMatchingOrder(slot, weekDate, building.getId());
-            if (orderHandlerId == null){
-                orderHandler = null;
-            } else {
-                orderHandler = accountRepository.getById(orderHandlerId);
-            }
+            List<String> staffIds = assignmentRepository.findStaffIdsForMatchingOrder(slot, weekDate, building.getId());
+            String orderHandlerId = staffIds.isEmpty() ? null : staffIds.get(0);
+
+            Account orderHandler = (orderHandlerId == null) ? null : accountRepository.getById(orderHandlerId);
             OrderDetail response = new OrderDetail();
 
             response.setCustomer(account);
