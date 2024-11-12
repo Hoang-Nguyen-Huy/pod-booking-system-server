@@ -14,4 +14,5 @@ public class RoomTypeCreationRequest {
     int quantity;
     int capacity;
     Integer buildingId;
+    String image;
 }

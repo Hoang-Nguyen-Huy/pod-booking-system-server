@@ -43,9 +43,6 @@ public class Account {
     @Column(name = "buildingNumber")
     int buildingNumber;
 
-    @Column(name = "rankingName")
-    String rankingName;
-
     @Column(name = "createdAt")
     LocalDate createdAt;
 
