@@ -78,7 +78,7 @@ public class AccountController {
     }
 
     @PatchMapping("/phoneNumber")
-    ApiResponse<Void> updateAccountPhoneNumber (@RequestBody AccountUpdatePhoneRequest request) {
+    ApiResponse<Void> updateAccountPhoneNumber(@RequestBody AccountUpdatePhoneRequest request) {
         accountService.updatePhoneNumber(request.getId(), request.getPhoneNumber());
         return ApiResponse.<Void>builder()
                 .message("Cập nhật số điện thoại thành công")
@@ -187,23 +187,20 @@ public class AccountController {
                     .data(availableStaff)
                     .message("Available staff retrieved successfully")
                     .build();
-        }
-        else {
+        } else {
             if (account.getRole().equals(AccountRole.Admin)) {
                 return ApiResponse.<List<AccountOrderResponse>>builder()
                         .message("Lấy danh sách nhân viên thành công")
                         .data(accountService.getAllStaffAccounts())
                         .build();
-            }
-            else if (account.getRole().equals(AccountRole.Manager)) {
+            } else if (account.getRole().equals(AccountRole.Manager)) {
                 return ApiResponse.<List<AccountOrderResponse>>builder()
                         .message("Lấy danh sách nhân viên thành công")
                         .data(accountService.getAllStaffAccountsByManager(buildingNumber))
                         .build();
-            }
-            else {
+            } else {
                 List<AccountOrderResponse> list = new ArrayList<>();
-                list.add(new AccountOrderResponse(account.getId(), account.getName(), account.getEmail(), account.getAvatar(), account.getRole(), account.getBuildingNumber(), account.getRankingName()));
+                list.add(new AccountOrderResponse(account.getId(), account.getName(), account.getEmail(), account.getAvatar(), account.getRole(), account.getBuildingNumber()));
                 return ApiResponse.<List<AccountOrderResponse>>builder()
                         .message("Không có quyền truy cập")
                         .data(list)
@@ -211,9 +208,6 @@ public class AccountController {
             }
         }
     }
-
-
-
 
 
     @GetMapping("/{keyword}/{role}")
