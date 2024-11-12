@@ -25,6 +25,7 @@ public class RoomType {
     int quantity;
     int capacity;
     @Column(nullable = true, length = 1000)
+
     String image;
 
     @JsonIgnore

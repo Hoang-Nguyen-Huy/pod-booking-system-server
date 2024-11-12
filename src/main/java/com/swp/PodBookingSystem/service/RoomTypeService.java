@@ -33,6 +33,7 @@ public class RoomTypeService {
     public RoomTypeResponse createRoomType(RoomTypeCreationRequest request) {
         Optional<Building> building = buildingRepository.findById(request.getBuildingId());
         RoomType newRoomType = roomTypeMapper.toRoomType(request);
+        newRoomType.setImage(request.getImage());
         newRoomType.setBuilding(building.orElse(null));
         return roomTypeMapper.toRoomTypeResponse(roomTypeRepository.save(newRoomType));
     }
