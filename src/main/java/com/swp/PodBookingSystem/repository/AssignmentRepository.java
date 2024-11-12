@@ -7,13 +7,14 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AssignmentRepository extends JpaRepository<Assignment, String> {
     List<Assignment> findByStaffId(String staffId);
 
 
-    @Query("SELECT a.staff.id FROM Assignment a WHERE a.weekDate = :weekDate AND a.slot = :slot")
+    @Query("SELECT a.staffId FROM Assignment a WHERE a.weekDate = :weekDate AND a.slot = :slot")
     List<String> findStaffIdsByWeekDateAndSlot(@Param("weekDate") String weekDate, @Param("slot") String slot);
 
     @Query("SELECT a.staffId " +
@@ -21,19 +22,19 @@ public interface AssignmentRepository extends JpaRepository<Assignment, String> 
             "JOIN Account ac ON ac.id = a.staffId " +
             "WHERE a.slot = :slot " +
             "AND a.weekDate = :weekDate " +
-            "AND ac.buildingNumber = :buildingId " +
-            "LIMIT 1")
-    String findStaffForMatchingOrder(@Param("slot") String slot,
-                                     @Param("weekDate") String weekDate,
-                                     @Param("buildingId") Integer buildingId);
+            "AND ac.buildingNumber = :buildingId")
+    List<String> findStaffIdsForMatchingOrder(@Param("slot") String slot,
+                                              @Param("weekDate") String weekDate,
+                                              @Param("buildingId") Integer buildingId);
+
 
 
 
     @Query("SELECT a FROM Assignment a " +
-            "JOIN Account acc ON a.staff.id = acc.id " +
+            "JOIN Account acc ON a.staffId = acc.id " +
             "WHERE (:role = 'Admin') OR " +
             "(:role = 'Manager' AND acc.buildingNumber = :buildingId) OR " +
-            "(:role = 'Staff' AND acc.buildingNumber = :buildingId AND a.staff.id = :staffId)")
+            "(:role = 'Staff' AND acc.buildingNumber = :buildingId AND a.staffId = :staffId)")
     List<Assignment> findAllByRoleAndBuildingAndStaff(
             @Param("role") String role,
             @Param("buildingId") Integer buildingId,
