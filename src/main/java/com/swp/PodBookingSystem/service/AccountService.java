@@ -50,7 +50,7 @@ public class AccountService {
 
     public AccountResponse createAccount(AccountCreationRequest request) {
         if (accountRepository.existsByEmail(request.getEmail())) {
-            throw new AppException(ErrorCode.EMAIL_EXISTED);
+            return null;
         }
         Account account = accountMapper.toAccount(request);
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);

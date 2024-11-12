@@ -4,6 +4,8 @@ import com.swp.PodBookingSystem.dto.request.Assignment.AssignmentCreationRequest
 import com.swp.PodBookingSystem.dto.request.Assignment.AssignmentRequest;
 import com.swp.PodBookingSystem.dto.respone.ApiResponse;
 import com.swp.PodBookingSystem.dto.respone.Assignment.AssignmentResponse;
+import com.swp.PodBookingSystem.entity.Account;
+import com.swp.PodBookingSystem.service.AccountService;
 import com.swp.PodBookingSystem.service.AssignmentService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -22,6 +24,7 @@ import java.util.List;
 public class AssignmentController {
 
     private final AssignmentService assignmentService;
+    private final AccountService accountService;
 
     @PostMapping
     ApiResponse<AssignmentResponse> createAssignment(@RequestBody @Valid AssignmentCreationRequest request){
@@ -32,8 +35,9 @@ public class AssignmentController {
     }
 
     @GetMapping("/all")
-    public ApiResponse<List<AssignmentResponse>> getAllAssignment(){
-        List<AssignmentResponse> assignments = assignmentService.getAllAssignments();
+    public ApiResponse<List<AssignmentResponse>> getAllAssignment(@RequestHeader("Authorization") String token){
+        Account account = accountService.getAccountById(accountService.extractAccountIdFromToken(token));
+        List<AssignmentResponse> assignments = assignmentService.getAllAssignments(account);
             return ApiResponse.<List<AssignmentResponse>>builder()
                     .data(assignments)
                     .build();
