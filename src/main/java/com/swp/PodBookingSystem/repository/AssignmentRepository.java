@@ -16,15 +16,17 @@ public interface AssignmentRepository extends JpaRepository<Assignment, String> 
     @Query("SELECT a.staff.id FROM Assignment a WHERE a.weekDate = :weekDate AND a.slot = :slot")
     List<String> findStaffIdsByWeekDateAndSlot(@Param("weekDate") String weekDate, @Param("slot") String slot);
 
-    @Query("SELECT a.staff.id " +
+    @Query("SELECT a.staffId " +
             "FROM Assignment a " +
-            "JOIN Account ac ON ac.id = a.staff.id " +
+            "JOIN Account ac ON ac.id = a.staffId " +
             "WHERE a.slot = :slot " +
             "AND a.weekDate = :weekDate " +
-            "AND ac.buildingNumber = :buildingId")
+            "AND ac.buildingNumber = :buildingId " +
+            "LIMIT 1")
     String findStaffForMatchingOrder(@Param("slot") String slot,
                                      @Param("weekDate") String weekDate,
                                      @Param("buildingId") Integer buildingId);
+
 
 
     @Query("SELECT a FROM Assignment a " +
