@@ -113,14 +113,18 @@ jobs:
 
     - name: Build application
       run: mvn clean package -DskipTests
-    
-    - name: Display surefire test report
-      run: cat target/surefire-reports/*.txt
+
+    - name: Save JAR artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: pod-booking-system-server
+        path: target/*.jar
 
 
   deploy:
     name: Deploy to Server
     runs-on: ubuntu-22.04
+    needs: build  # Job deploy depend on job build
 
     steps:
     - name: Check out code
