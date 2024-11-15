@@ -17,7 +17,7 @@ on:
 jobs:
   build:
     name: Build and analyze
-    runs-on: ubuntu-22.04.1
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v4
@@ -117,7 +117,7 @@ jobs:
 
   deploy:
     name: Deploy to Server
-    runs-on: ubuntu-22.04.1
+    runs-on: ubuntu-22.04
 
     steps:
     - name: Check out code
