@@ -117,8 +117,8 @@ jobs:
     - name: Save JAR artifact
       uses: actions/upload-artifact@v3
       with:
-        name: pod_booking_system_server_jar
-        path: out/artifacts/pod_booking_system_server_jar/*.jar
+        name: pod-booking-system-server
+        path: target/*.jar
 
 
   deploy:
