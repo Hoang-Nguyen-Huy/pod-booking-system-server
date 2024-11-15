@@ -130,6 +130,18 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v4
 
+    # Download the JAR artifact from the previous step
+    - name: Download build artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: pod-booking-system-server
+
+    # Ensure JAR is in the context of Docker build
+    - name: Prepare Docker context
+      run: |
+        mkdir -p target
+        mv pod-booking-system-server-0.0.1-SNAPSHOT.jar target/pod-booking-system-server.jar
+
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
       with:
