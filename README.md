@@ -5,13 +5,13 @@
     </a>
   <br />
 
-  <div>
-    <img src="https://img.shields.io/badge/-React-black?style=for-the-badge&logoColor=white&logo=react&color=61DAFB" alt="react" />
-    <img src="https://img.shields.io/badge/-MySQL-black?style=for-the-badge&logoColor=white&logo=mysql&color=4169E1" alt="mysql" />
-    <img src="https://img.shields.io/badge/-Tanstack Query-black?style=for-the-badge&logoColor=white&logo=reactquery&color=red" alt="react-query" />
-    <img src="https://img.shields.io/badge/-React Hook Form-black?style=for-the-badge&logoColor=white&logo=reacthookform&color=EC5990" alt="react-hook-form" />
-    <img src="https://img.shields.io/badge/-Zod-black?style=for-the-badge&logoColor=white&logo=zod&color=3E67B1" alt="zod" />
-  </div>
+<div align="center">
+  <img src="https://img.shields.io/badge/-Spring%20Boot-black?style=for-the-badge&logo=springboot&logoColor=white&color=6DB33F" alt="Spring Boot" />
+  <img src="https://img.shields.io/badge/-Firebase-black?style=for-the-badge&logo=firebase&logoColor=white&color=FFCA28" alt="Firebase" />
+  <img src="https://img.shields.io/badge/-MySQL-black?style=for-the-badge&logo=mysql&logoColor=white&color=4169E1" alt="MySQL" />
+  <img src="https://img.shields.io/badge/-Docker-black?style=for-the-badge&logo=docker&logoColor=white&color=2496ED" alt="Docker" />
+  <img src="https://img.shields.io/badge/-Nginx%20Proxy-black?style=for-the-badge&logo=nginx&logoColor=white&color=009639" alt="Nginx Proxy" />
+</div>
 
 
 <h3 align="center">FlexiPod</h3>
@@ -83,6 +83,8 @@ FlexiPod was developed by a talented team of five passionate individuals:
 - Spring Boot 
 - Firebase
 - MySQL
+- Docker
+- Nginx Proxy
 
 ## <a name="features">🔋 Features</a>
 
