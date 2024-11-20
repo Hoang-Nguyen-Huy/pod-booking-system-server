@@ -1,7 +1,7 @@
 <div align="center">
   <br />
     <a href="https://flexipod.site/" target="_blank">
-      <img src="[https://lh3.google.com/u/0/d/1Xpl-rU2eUZ9LfH7XCJjokRUs1JX_6Izu=w2848-h1476-iv1" alt="Project Banner">
+      <img src="https://flexipod.site/assets/homePageBanner-BtHd3PD-.png" alt="Project Banner">
     </a>
   <br />
 
