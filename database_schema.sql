@@ -316,6 +316,137 @@ DELIMITER ;
 -- =============================================
 -- Final Setup Messages
 -- =============================================
-SELECT 'Database schema created successfully!' as Status;
-SELECT 'Sample data inserted!' as Status;
-SELECT 'Views and triggers created!' as Status;
+USE `podDatabase`;
+
+-- =============================================
+-- Fake Data: building
+-- =============================================
+    INSERT INTO `building` (`address`, `description`, `hotlineNumber`, `createdAt`, `updatedAt`) VALUES
+                                                                                                     ('12 Pham Ngu Lao, District 1, HCMC', 'Co-working building near Ben Thanh Market', '0909111222', CURDATE(), CURDATE()),
+                                                                                                     ('88 Vo Van Tan, District 3, HCMC', 'New branch with meeting rooms', '0909777333', CURDATE(), CURDATE()),
+                                                                                                     ('45 Tran Hung Dao, District 5, HCMC', 'Affordable pods for students', '0909333444', CURDATE(), CURDATE());
+
+    -- =============================================
+-- Fake Data: account
+-- =============================================
+    INSERT INTO `account` (`id`, `name`, `email`, `password`, `role`, `balance`, `buildingNumber`, `createdAt`, `status`)
+    VALUES
+        (UUID(), 'Nguyen Van A', 'a@flexipod.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', 'Customer', 200000, 1, CURDATE(), 1),
+        (UUID(), 'Tran Thi B', 'b@flexipod.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', 'Staff', 500000, 2, CURDATE(), 1),
+        (UUID(), 'Le Van C', 'c@flexipod.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', 'Manager', 1000000, 1, CURDATE(), 1);
+
+    -- =============================================
+-- Fake Data: servicePackage
+-- =============================================
+    INSERT INTO `servicePackage` (`name`, `description`, `price`, `discountPercentage`, `createdAt`, `updatedAt`) VALUES
+                                                                                                                      ('Starter Package', 'Includes 1 hour pod use', 50000, 0, NOW(), NOW()),
+                                                                                                                      ('Business Package', 'Includes 4-hour pod use with amenities', 150000, 10, NOW(), NOW()),
+                                                                                                                      ('Premium Office', '8-hour use, free coffee, and printer access', 300000, 15, NOW(), NOW());
+
+    -- =============================================
+-- Fake Data: roomtype
+-- =============================================
+    INSERT INTO `roomtype` (`name`, `price`, `quantity`, `capacity`, `buildingId`, `createdAt`, `updatedAt`) VALUES
+                                                                                                                 ('Single Pod', 60000, 10, 1, 1, CURDATE(), CURDATE()),
+                                                                                                                 ('Double Pod', 90000, 6, 2, 1, CURDATE(), CURDATE()),
+                                                                                                                 ('Meeting Room', 250000, 2, 8, 2, CURDATE(), CURDATE());
+
+    -- =============================================
+-- Fake Data: room
+-- =============================================
+    INSERT INTO `room` (`name`, `description`, `image`, `status`, `createdAt`, `updatedAt`, `typeId`) VALUES
+                                                                                                          ('Pod A01', 'Single pod, comfortable seat and air ventilation', 'img/podA01.jpg', 'Available', CURDATE(), CURDATE(), 1),
+                                                                                                          ('Pod A02', 'Single pod with desk lamp and AC', 'img/podA02.jpg', 'Occupied', CURDATE(), CURDATE(), 1),
+                                                                                                          ('Meeting Room B01', 'Room with large table and projector', 'img/meetingB01.jpg', 'Available', CURDATE(), CURDATE(), 3);
+
+    -- =============================================
+-- Fake Data: amenity
+-- =============================================
+    INSERT INTO `amenity` (`name`, `price`, `quantity`, `type`, `building_id`, `createdAt`, `updatedAt`) VALUES
+                                                                                                             ('Espresso', 30000, 50, 'Food', 1, NOW(), NOW()),
+                                                                                                             ('Printer Access', 10000, 10, 'Office', 1, NOW(), NOW()),
+                                                                                                             ('Projector Rental', 40000, 3, 'Office', 2, NOW(), NOW());
+
+    -- =============================================
+-- Fake Data: order
+-- =============================================
+    INSERT INTO `order` (`id`, `accountId`, `createdAt`, `updatedAt`) VALUES
+                                                                          (UUID(), (SELECT id FROM account WHERE email='a@flexipod.com' LIMIT 1), NOW(), NOW()),
+(UUID(), (SELECT id FROM account WHERE email='b@flexipod.com' LIMIT 1), NOW(), NOW());
+
+    -- =============================================
+-- Fake Data: orderDetail
+-- =============================================
+    INSERT INTO `orderDetail` (`id`, `customerId`, `buildingNumber`, `roomId`, `orderId`, `servicePackageId`, `orderHandlerId`, `priceRoom`, `discountPercentage`, `startTime`, `endTime`, `status`, `createdAt`, `updatedAt`)
+    VALUES
+        (UUID(),
+         (SELECT id FROM account WHERE email='a@flexipod.com' LIMIT 1),
+        1,
+        1,
+        (SELECT id FROM `order` LIMIT 1 OFFSET 0),
+        1,
+        (SELECT id FROM account WHERE email='b@flexipod.com' LIMIT 1),
+        60000,
+        0,
+        NOW(),
+        DATE_ADD(NOW(), INTERVAL 1 HOUR),
+        'Completed',
+        NOW(),
+        NOW()
+        ),
+(UUID(),
+ (SELECT id FROM account WHERE email='a@flexipod.com' LIMIT 1),
+ 1,
+ 2,
+ (SELECT id FROM `order` LIMIT 1 OFFSET 1),
+ 2,
+ (SELECT id FROM account WHERE email='c@flexipod.com' LIMIT 1),
+ 90000,
+ 10,
+ NOW(),
+ DATE_ADD(NOW(), INTERVAL 2 HOUR),
+ 'Pending',
+ NOW(),
+ NOW()
+);
+
+    -- =============================================
+-- Fake Data: orderDetailAmenity
+-- =============================================
+    INSERT INTO `orderDetailAmenity` (`id`, `orderDetailId`, `amenityId`, `quantity`, `price`, `createdAt`, `updatedAt`)
+    VALUES
+        (UUID(),
+         (SELECT id FROM orderDetail LIMIT 1 OFFSET 0),
+        1,
+        1,
+        30000,
+        NOW(),
+        NOW()
+        ),
+(UUID(),
+ (SELECT id FROM orderDetail LIMIT 1 OFFSET 1),
+ 2,
+ 2,
+ 20000,
+ NOW(),
+ NOW()
+);
+
+    -- =============================================
+-- Fake Data: assignment
+-- =============================================
+    INSERT INTO `assignment` (`id`, `staffId`, `slot`, `weekDate`) VALUES
+                                                                       (UUID(), (SELECT id FROM account WHERE email='b@flexipod.com' LIMIT 1), 'Morning', '2025-10-20'),
+(UUID(), (SELECT id FROM account WHERE email='b@flexipod.com' LIMIT 1), 'Afternoon', '2025-10-21'),
+(UUID(), (SELECT id FROM account WHERE email='c@flexipod.com' LIMIT 1), 'Evening', '2025-10-21');
+
+    -- =============================================
+-- Fake Data: roomImage
+-- =============================================
+    INSERT INTO `roomImage` (`roomId`, `imageUrl`, `createdAt`, `updatedAt`) VALUES
+                                                                                 (1, 'img/podA01_1.jpg', NOW(), NOW()),
+                                                                                 (1, 'img/podA01_2.jpg', NOW(), NOW()),
+                                                                                 (3, 'img/meetingB01_1.jpg', NOW(), NOW());
+
+    SELECT '✅ Fake data inserted successfully!' AS Status;
+-- =============================================
