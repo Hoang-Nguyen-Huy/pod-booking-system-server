@@ -10,7 +10,7 @@ name: POD Booking System Server CI with Maven and SonarCloud
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: [ "main", "develop", "feature/update-project" ]
   pull_request:
     branches: [ "main", "develop" ]
 
@@ -29,13 +29,6 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
-
-    - name: Cache SonarCloud packages
-      uses: actions/cache@v4
-      with:
-        path: ~/.sonar/cache
-        key: ${{ runner.os }}-sonar
-        restore-keys: ${{ runner.os }}-sonar
 
     - name: Cache Maven packages
       uses: actions/cache@v4
@@ -115,7 +108,7 @@ jobs:
       run: mvn clean package -DskipTests
 
     - name: Save JAR artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4.0.0
       with:
         name: pod-booking-system-server
         path: target/*.jar
@@ -132,7 +125,7 @@ jobs:
 
     # Download the JAR artifact from the previous step
     - name: Download build artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4.0.0
       with:
         name: pod-booking-system-server
 
@@ -143,7 +136,7 @@ jobs:
         mv pod-booking-system-server-0.0.1-SNAPSHOT.jar target/pod-booking-system-server.jar
 
     - name: Log in to Docker Hub
-      uses: docker/login-action@v2
+      uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
@@ -155,17 +148,6 @@ jobs:
     - name: Push Docker image to Docker Hub
       run: |
         docker push hoanghuynguyen/pod-booking-system-server:latest
-
-    - name: Deploy to server
-      uses: appleboy/ssh-action@v0.1.8
-      with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SERVER_SSH_KEY }}
-        script: |
-          cd swp
-          docker pull hoanghuynguyen/pod-booking-system-server:latest
-          docker compose up -d
 
     # # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     # - name: Update dependency graph
