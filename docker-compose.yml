@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:9.1.0
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345
+      MYSQL_DATABASE: podDatabase
+    ports:
+      - "3306:3306"
+    volumes:
+      # Persist MySQL data
+      - mysql_data:/var/lib/mysql
+      # Auto-run your SQL schema at container startup
+      - ./database_schema.sql:/docker-entrypoint-initdb.d/database_schema.sql:ro
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pod_app
+    restart: always
+    depends_on:
+      - mysql
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/podDatabase?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 12345
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    # Wait for DB startup before running app
+    command: [ "sh", "-c", "sleep 10 && java -jar app.jar" ]
+
+volumes:
+  mysql_data:

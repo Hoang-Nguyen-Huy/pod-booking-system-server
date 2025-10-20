@@ -1,5 +1,5 @@
 FROM openjdk:21
 WORKDIR /app
-COPY target/pod-booking-system-server.jar .
+COPY target/*.jar app.jar
 EXPOSE 8080
-CMD ["java", "-jar", "pod-booking-system-server.jar"]
+CMD ["java", "-jar", "app.jar"]
