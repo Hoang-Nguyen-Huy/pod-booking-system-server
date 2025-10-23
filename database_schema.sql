@@ -101,7 +101,7 @@ CREATE TABLE `room`
     `name`        VARCHAR(255) NOT NULL,
     `description` TEXT,
     `image`       VARCHAR(1000),
-    `status`      ENUM('Available', 'Occupied', 'Maintenance', 'Unavailable') NOT NULL DEFAULT 'Available',
+    `status`      ENUM('Available', 'Unavailable') NOT NULL DEFAULT 'Available',
     `createdAt`   DATE         NOT NULL,
     `updatedAt`   DATE         NOT NULL,
     `typeId`      INT,
@@ -369,7 +369,7 @@ USE `podDatabase`;
     INSERT INTO `room` (`name`, `description`, `image`, `status`, `createdAt`, `updatedAt`, `typeId`)
     VALUES ('Pod A01', 'Single pod, comfortable seat and air ventilation', 'img/podA01.jpg', 'Available', CURDATE(),
             CURDATE(), 1),
-           ('Pod A02', 'Single pod with desk lamp and AC', 'img/podA02.jpg', 'Occupied', CURDATE(), CURDATE(), 1),
+           ('Pod A02', 'Single pod with desk lamp and AC', 'img/podA02.jpg', 'Available', CURDATE(), CURDATE(), 1),
            ('Meeting Room B01', 'Room with large table and projector', 'img/meetingB01.jpg', 'Available', CURDATE(),
             CURDATE(), 3);
 
