@@ -8,8 +8,7 @@ CREATE
 DATABASE IF NOT EXISTS `podDatabase`
 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-USE
-`podDatabase`;
+USE `podDatabase`;
 
 -- =============================================
 -- Table: building
@@ -301,8 +300,7 @@ GROUP BY o.id;
 -- =============================================
 -- Triggers
 -- =============================================
-DELIMITER
-$$
+DELIMITER $$
 CREATE TRIGGER `building_update_timestamp`
     BEFORE UPDATE
     ON `building`
@@ -322,7 +320,7 @@ END$$
         WHERE id = NEW.customerId;
     END IF;
     END$$
-    DELIMITER ;
+DELIMITER ;
 -- =============================================
 -- Final Setup Messages
 -- =============================================
