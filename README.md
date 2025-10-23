@@ -147,57 +147,61 @@ Create a new file named `application.yaml` in the resources folder of your proje
 
 ```env
 server:
- port: 8080
+  port: 8080
 openapi:
- service:
-   api-docs: api-service
-   server: http://localhost:8080
-   title: API Service
-   version: 1.0.0
+  service:
+    api-docs: api-service
+    server: http://localhost:8080
+    title: API Service
+    version: 1.0.0
 spring:
- datasource:
-   url: "YOUR_DATABASE_URL"
-   username: YOUR_DATABASE_USERNAME
-   password: YOUR_DATABASE_PASSWORD
- jpa:
-   hibernate:
-     ddl-auto: update
-     naming:
-       implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
-       physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-   show-sql: true
- mail:
-   host: "smtp.gmail.com"
-   port: 587
-   username: "flexipod.system@gmail.com"
-   password: "tbzi kxxk wtqk dztk"
-   properties:
-     mail:
-       smtp:
-         auth: true
-         starttls:
-           enable: true
- security:
-   oauth2:
-     client:
-       registration:
-         google:
-           client-id: "YOUR_CLIENT_ID"
-           client-secret: "YOUR_CLIENT_SECRET"
-           scope:
-             - email
-             - profile
+  datasource:
+    url: "jdbc:mysql://localhost:3306/podDatabase?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
+    username: root
+    password: 12345
+  jpa:
+    hibernate:
+      ddl-auto: update
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+  mail:
+    host: "smtp.gmail.com"
+    port: 587
+    username: "yugivip277@gmail.com"
+    password: "laoo uvqo smdo homp"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: "YOUR_CLIENT_ID"
+            client-secret: "YOUR_CLIENT_SECRET"
+            scope:
+              - email
+              - profile
 jwt:
- JWT_SECRET_ACCESS_TOKEN: "YOUR_JWT_SECRET_ACCESS_TOKEN"
- JWT_SECRET_REFRESH_TOKEN: "YOUR_JWT_SECRET_REFRESH_TOKEN"
+  JWT_SECRET_ACCESS_TOKEN: "1TjXchw5FloESb63Kc+DFhTARvpWL4jUGCwfGWxuG5SIf/1y/LgJxHnMqaF6A/ij"
+  JWT_SECRET_REFRESH_TOKEN: "gtg4iEntJvIJyGwAPAtXOjldMKr22N282r45QuvT6CCKLIgCI5ObnlYagT/VFE2K"
 google:
- success: "http://localhost:3000/login/oauth?accessToken="
- failure: "http://localhost:3000/login/oauth?message="
+  success: "http://localhost:3000/login/oauth?accessToken="
+  failure: "http://localhost:3000/login/oauth?message="
 vnpay:
- tmn-code: "YOUR_TMN_CODE"
- hash-secret: "YOUR_HASH_SECRET"
- return-url: "http://localhost:3000/order-detail"
- url: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
+  tmn-code: "P5IZ4AXX"
+  hash-secret: "1LTYQVYIN4PKUOSX81JTLDDBJ6Z4Y3C1"
+  return-url: "http://localhost:3000/order-detail"
+  url: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
 ```
 
 Replace the placeholder values with your actual credentials. You can send mail for me to get application.yaml for testing.
