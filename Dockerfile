@@ -11,7 +11,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # ===== Stage 2: Runtime =====
-FROM openjdk:21
+FROM eclipse-temurin:21-jre
 WORKDIR /app
 
 # Copy only the built jar from previous stage

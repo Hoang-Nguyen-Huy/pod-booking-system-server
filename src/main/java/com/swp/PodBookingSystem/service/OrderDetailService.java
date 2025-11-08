@@ -328,7 +328,7 @@ public class OrderDetailService {
             OrderDetail orderDetail = createOrderDetail(
                     request, order, room, status, account, startTime, endTime);
 
-            createOrderDetailAmenities(orderDetail, roomWithAmenities.getAmenities());
+//            createOrderDetailAmenities(orderDetail, roomWithAmenities.getAmenities());
         }
         return isSomeRoomWasBook;
     }
